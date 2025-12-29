@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Admin Panel - CodeCloud</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.8); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
+      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+      --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
+      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
+      --success: #34d399; --success-soft: rgba(52,211,153,0.12);
+      --error: #f87171; --error-soft: rgba(248,113,113,0.12);
+      --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
+      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);
+      --gradient-accent: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+      --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    .hidden{display:none!important}
+    
+    .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,var(--accent-soft) 60deg,transparent 120deg,rgba(34,211,238,0.08) 180deg,transparent 240deg,var(--accent-glow) 300deg,transparent 360deg);animation:auroraRotate 60s linear infinite}
+    @keyframes auroraRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    
+    .app-container{min-height:100vh;position:relative;z-index:1;padding:20px}
+    
+    .header{max-width:1400px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:56px;height:56px;border-radius:16px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-glow);animation:float 4s ease-in-out infinite}
+    .logo svg{width:32px;height:32px;color:white}
+    .brand-text h1{font-size:1.5rem;font-weight:900;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .brand-text p{font-size:0.8rem;color:var(--text-muted)}
+    
+    .header-actions{display:flex;gap:12px;align-items:center}
+    .admin-badge{padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-weight:700;font-size:0.8rem;display:flex;align-items:center;gap:6px}
+    .btn-back{padding:10px 20px;border-radius:999px;border:2px solid var(--border-light);background:var(--bg-card);color:var(--text-primary);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);text-decoration:none;display:flex;align-items:center;gap:6px}
+    .btn-back:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
+    
+    .container{max-width:1400px;margin:0 auto}
+    
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+    @media(max-width:1024px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.stats-grid{grid-template-columns:1fr}}
+    
+    .stat-card{background:var(--bg-surface);backdrop-filter:blur(20px);border-radius:var(--radius-lg);padding:20px;border:1px solid var(--border-light);transition:var(--transition);animation:slideUp 0.5s ease-out backwards}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+    .stat-icon{width:48px;height:48px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;margin-bottom:12px;font-size:1.5rem}
+    .stat-icon.users{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+    .stat-icon.time{background:linear-gradient(135deg,#10b981,#14b8a6)}
+    .stat-icon.active{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+    .stat-icon.banned{background:linear-gradient(135deg,#ef4444,#dc2626)}
+    .stat-label{font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+    .stat-value{font-size:2rem;font-weight:900;color:var(--text-primary)}
+    
+    .panel{background:var(--bg-surface);backdrop-filter:blur(30px);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
+    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-light),transparent);opacity:0.5}
+    .panel-header{margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .panel-title{font-size:1.1rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:10px}
+    .panel-title::before{content:'';width:4px;height:24px;background:var(--gradient-accent);border-radius:2px}
+    .panel-desc{color:var(--text-muted);font-size:0.8rem;margin-top:4px}
+    
+    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .tab{padding:10px 18px;border-radius:999px;border:none;background:var(--bg-card);color:var(--text-muted);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition)}
+    .tab:hover{color:var(--text-primary);background:var(--accent-soft)}
+    .tab.active{background:var(--gradient-accent);color:white}
+    
+    .tab-content{display:none}
+    .tab-content.active{display:block;animation:fadeIn 0.3s ease-out}
+    
+    .form-group{margin-bottom:16px}
+    .form-row{display:grid;grid-template-columns:1fr 100px auto;gap:10px;align-items:end;margin-bottom:16px}
+    @media(max-width:600px){.form-row{grid-template-columns:1fr}}
+    .label{font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px}
+    .input{width:100%;background:var(--bg-card);border-radius:var(--radius-md);border:2px solid var(--border-light);padding:12px 14px;font-size:0.9rem;color:var(--text-primary);transition:var(--transition);font-family:inherit}
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+    select.input{cursor:pointer}
+    
+    .btn{padding:12px 20px;border-radius:999px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn:hover:not(:disabled){transform:translateY(-2px)}
+    .btn:disabled{opacity:0.6;cursor:not-allowed}
+    .btn-primary{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md)}
+    .btn-success{background:linear-gradient(135deg,var(--success),#14b8a6);color:white}
+    .btn-danger{background:linear-gradient(135deg,var(--error),#dc2626);color:white}
+    .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:2px solid var(--border-light)}
+    .btn-sm{padding:8px 14px;font-size:0.78rem}
+    .btn-full{width:100%}
+    
+    .user-table{width:100%;border-collapse:collapse}
+    .user-table th,.user-table td{padding:12px;text-align:left;border-bottom:1px solid var(--border-light);font-size:0.82rem}
+    .user-table th{background:var(--bg-card);font-weight:700;color:var(--text-primary);position:sticky;top:0}
+    .user-table tr:hover{background:var(--accent-soft)}
+    .user-table-wrapper{max-height:500px;overflow-y:auto;border-radius:var(--radius-md);border:1px solid var(--border-light)}
+    
+    .badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700}
+    .badge-success{background:var(--success-soft);color:var(--success)}
+    .badge-warning{background:var(--warning-soft);color:var(--warning)}
+    .badge-error{background:var(--error-soft);color:var(--error)}
+    .badge-info{background:var(--accent-soft);color:var(--accent)}
+    
+    .search-box{display:flex;gap:10px;margin-bottom:16px}
+    .search-box .input{flex:1}
+    
+    .toast{position:fixed;bottom:20px;right:20px;z-index:300;animation:slideUp 0.3s ease-out}
+    .toast.hidden{display:none}
+    .toast-inner{min-width:260px;max-width:400px;padding:14px 20px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:10px;font-size:0.9rem;font-weight:600;box-shadow:var(--shadow-lg)}
+    .toast.toast-success .toast-inner{background:linear-gradient(135deg,#16a34a,#15803d);color:white}
+    .toast.toast-error .toast-inner{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white}
+    .toast.toast-info .toast-inner{background:var(--gradient-accent);color:white}
+    
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
+    
+    .ip-text{font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-muted)}
+    
+    .modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center}
+    .modal.hidden{display:none}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px)}
+    .modal-dialog{position:relative;z-index:1;width:100%;max-width:450px;margin:16px;background:var(--bg-elevated);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-lg)}
+    .modal-title{font-size:1.1rem;font-weight:800;margin-bottom:16px}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center}
+    .modal-close:hover{background:var(--error-soft);color:var(--error)}
+    
+    .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    @media(max-width:600px){.settings-grid{grid-template-columns:1fr}}
+    .setting-item{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;border:1px solid var(--border-light)}
+    .setting-item h4{font-size:0.9rem;font-weight:700;margin-bottom:8px}
+    .setting-item p{font-size:0.75rem;color:var(--text-muted);margin-bottom:12px}
+  </style>
+</head>
+<body>
+
+<div class="bg-effects"><div class="aurora"></div></div>
+
+<div class="app-container">
+  <header class="header">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>Admin Panel</h1>
+        <p>CodeCloud Management System</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="admin-badge">🛡️ <span id="admin-name">Admin</span></div>
+      <a href="index.html" class="btn-back">← Quay lại Dashboard</a>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon users">👥</div><div class="stat-label">Tổng Users</div><div class="stat-value" id="stat-total-users">0</div></div>
+      <div class="stat-card"><div class="stat-icon time">⏱️</div><div class="stat-label">Tổng Thời Gian</div><div class="stat-value" id="stat-total-time">0h</div></div>
+      <div class="stat-card"><div class="stat-icon active">🟢</div><div class="stat-label">Đang Hoạt Động</div><div class="stat-value" id="stat-active-users">0</div></div>
+      <div class="stat-card"><div class="stat-icon banned">🚫</div><div class="stat-label">Đã Bị Ban</div><div class="stat-value" id="stat-banned-users">0</div></div>
+    </div>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="users">👥 Quản Lý Users</button>
+      <button class="tab" data-tab="time">⏱️ Cộng Thời Gian</button>
+      <button class="tab" data-tab="settings">⚙️ Cài Đặt</button>
+    </div>
+    
+    <!-- Tab: Users -->
+    <div class="tab-content active" id="tab-users">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">👥 Danh Sách Users</h2>
+            <p class="panel-desc">Quản lý tài khoản và ban user</p>
+          </div>
+          <button id="btn-refresh" class="btn btn-secondary btn-sm">🔄 Làm mới</button>
+        </div>
+        
+        <div class="search-box">
+          <input type="text" id="user-search" class="input" placeholder="🔍 Tìm kiếm username hoặc IP..." />
+          <select id="user-filter" class="input" style="width:150px">
+            <option value="all">Tất cả</option>
+            <option value="active">Hoạt động</option>
+            <option value="banned">Đã ban</option>
+          </select>
+        </div>
+        
+        <div class="user-table-wrapper">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Thời Gian</th>
+                <th>IP Đăng Ký</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="user-table-body">
+              <tr><td colspan="5" style="text-align:center;padding:40px">Đang tải...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab: Time -->
+    <div class="tab-content" id="tab-time">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">⏱️ Cộng/Trừ Thời Gian</h2>
+        </div>
+        
+        <div class="form-group">
+          <label class="label">Tên User</label>
+          <input type="text" id="time-username" class="input" placeholder="Nhập username" />
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label">Số Phút</label>
+            <input type="number" id="time-minutes" class="input" placeholder="60" min="1" max="6000" value="60" />
+          </div>
+          <div class="form-group">
+            <label class="label">Thao Tác</label>
+            <select id="time-operation" class="input">
+              <option value="add">Cộng</option>
+              <option value="deduct">Trừ</option>
+              <option value="set">Đặt cố định</option>
+            </select>
+          </div>
+          <button id="btn-apply-time" class="btn btn-primary">Áp dụng</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab: Settings -->
+    <div class="tab-content" id="tab-settings">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">⚙️ Cài Đặt Hệ Thống</h2>
+        </div>
+        
+        <div class="settings-grid">
+          <div class="setting-item">
+            <h4>🔑 GitHub Token (Admin)</h4>
+            <p>Token dùng chung cho tất cả users tạo VPS</p>
+            <div class="form-group">
+              <input type="password" id="admin-github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
+            </div>
+            <button id="btn-save-token" class="btn btn-primary btn-sm">💾 Lưu Token</button>
+          </div>
+          
+          <div class="setting-item">
+            <h4>📊 Trạng Thái Token</h4>
+            <p>Kiểm tra token đã được cấu hình chưa</p>
+            <div id="token-status" style="margin-top:12px;padding:10px;background:var(--bg-elevated);border-radius:var(--radius-sm);font-size:0.85rem">
+              Đang kiểm tra...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ban Modal -->
+<div id="ban-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog">
+    <button class="modal-close" id="ban-modal-close">&times;</button>
+    <h3 class="modal-title">🚫 Ban User: <span id="ban-username"></span></h3>
+    
+    <div class="form-group">
+      <label class="label">Thời gian ban</label>
+      <select id="ban-duration" class="input">
+        <option value="1-hours">1 giờ</option>
+        <option value="6-hours">6 giờ</option>
+        <option value="12-hours">12 giờ</option>
+        <option value="24-hours">24 giờ</option>
+        <option value="1-days">1 ngày</option>
+        <option value="3-days">3 ngày</option>
+        <option value="7-days">7 ngày</option>
+        <option value="14-days">14 ngày</option>
+        <option value="30-days">30 ngày</option>
+        <option value="1-months">1 tháng</option>
+        <option value="3-months">3 tháng</option>
+        <option value="6-months">6 tháng</option>
+        <option value="12-months">12 tháng</option>
+        <option value="0-permanent">Vĩnh viễn</option>
+      </select>
+    </div>
+    
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button id="btn-confirm-ban" class="btn btn-danger btn-full">🚫 Xác nhận Ban</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-message"></span></div></div>
+
+<script>
+(function() {
+  'use strict';
+  
+  const CURRENT_USER_KEY = 'cc_current_user';
+  const ADMIN_USERS = ['vanmanh', 'depchai'];
+  const API_URL = '/api/auth';
+  
+  let currentUser = null;
+  let allUsers = [];
+  let banTargetUser = null;
+  
+  function checkAdmin() {
+    try {
+      const saved = localStorage.getItem(CURRENT_USER_KEY);
+      if (!saved) { window.location.href = 'login.html'; return false; }
+      currentUser = JSON.parse(saved);
+      if (!ADMIN_USERS.includes(currentUser.username?.toLowerCase())) {
+        alert('Không có quyền truy cập!');
+        window.location.href = 'index.html';
+        return false;
+      }
+      return true;
+    } catch(e) { window.location.href = 'login.html'; return false; }
+  }
+  
+  if (!checkAdmin()) return;
+  
+  document.getElementById('admin-name').textContent = currentUser.username;
+  
+  const $ = id => document.getElementById(id);
+  const $$ = sel => document.querySelectorAll(sel);
+  
+  let toastTimer = null;
+  function showToast(msg, type = 'info') {
+    const toast = $('toast');
+    toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
+    toast.classList.add('toast-' + type);
+    $('toast-message').textContent = (type === 'success' ? '✅ ' : type === 'error' ? '❌ ' : 'ℹ️ ') + msg;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
+  }
+  
+  function formatTime(minutes) {
+    if (minutes < 60) return `${minutes}m`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  
+  async function callAPI(data) {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      return await res.json();
+    } catch(e) {
+      console.error('API error:', e);
+      return { success: false, message: e.message };
+    }
+  }
+  
+  async function fetchAllUsers() {
+    const data = await callAPI({ action: 'getAllUsers' });
+    if (data.success) {
+      allUsers = data.users || [];
+      updateStats();
+      renderUserTable();
+    }
+  }
+  
+  function updateStats() {
+    let totalTime = 0, activeUsers = 0, bannedUsers = 0;
+    allUsers.forEach(u => {
+      totalTime += u.timeMinutes || 0;
+      if (u.timeMinutes > 0 && !u.isBanned) activeUsers++;
+      if (u.isBanned) bannedUsers++;
+    });
+    $('stat-total-users').textContent = allUsers.length;
+    $('stat-total-time').textContent = formatTime(totalTime);
+    $('stat-active-users').textContent = activeUsers;
+    $('stat-banned-users').textContent = bannedUsers;
+  }
+  
+  function renderUserTable() {
+    const tbody = $('user-table-body');
+    const search = $('user-search').value.toLowerCase();
+    const filter = $('user-filter').value;
+    
+    let filtered = allUsers.filter(u => {
+      const matchSearch = u.username.toLowerCase().includes(search) || 
+                         (u.registerIP && u.registerIP.includes(search));
+      if (!matchSearch) return false;
+      if (filter === 'active') return !u.isBanned;
+      if (filter === 'banned') return u.isBanned;
+      return true;
+    });
+    
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px">Không tìm thấy user</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = filtered.map(u => {
+      const time = u.timeMinutes || 0;
+      let statusBadge = '';
+      if (u.isBanned) {
+        if (u.banType === 'permanent') {
+          statusBadge = '<span class="badge badge-error">🚫 Vĩnh viễn</span>';
+        } else if (u.banUntil) {
+          const remaining = new Date(u.banUntil) - new Date();
+          if (remaining > 0) {
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            statusBadge = `<span class="badge badge-warning">⏰ Còn ${hours}h</span>`;
+          } else {
+            statusBadge = '<span class="badge badge-info">Hết hạn ban</span>';
+          }
+        } else {
+          statusBadge = '<span class="badge badge-error">🚫 Đã ban</span>';
+        }
+      } else {
+        statusBadge = '<span class="badge badge-success">✅ Hoạt động</span>';
+      }
+      
+      return `
+        <tr>
+          <td><strong>${u.username}</strong></td>
+          <td><span class="badge ${time > 60 ? 'badge-success' : time > 0 ? 'badge-warning' : 'badge-error'}">${formatTime(time)}</span></td>
+          <td><span class="ip-text">${u.registerIP || 'N/A'}</span></td>
+          <td>${statusBadge}</td>
+          <td>
+            ${u.isBanned 
+              ? `<button class="btn btn-success btn-sm" onclick="unbanUser('${u.username}')">Unban</button>`
+              : `<button class="btn btn-danger btn-sm" onclick="openBanModal('${u.username}')">Ban</button>`
+            }
+            <button class="btn btn-primary btn-sm" onclick="quickAddTime('${u.username}')">+1h</button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+  
+  window.openBanModal = function(username) {
+    banTargetUser = username;
+    $('ban-username').textContent = username;
+    $('ban-modal').classList.remove('hidden');
+  };
+  
+  function closeBanModal() {
+    $('ban-modal').classList.add('hidden');
+    banTargetUser = null;
+  }
+  
+  $('ban-modal-close').onclick = closeBanModal;
+  $('ban-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) closeBanModal(); };
+  
+  $('btn-confirm-ban').onclick = async () => {
+    if (!banTargetUser) return;
+    
+    const durationValue = $('ban-duration').value;
+    const [duration, unit] = durationValue.split('-');
+    
+    const btn = $('btn-confirm-ban');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    
+    const result = await callAPI({
+      action: 'banUser',
+      targetUsername: banTargetUser,
+      banDuration: parseInt(duration),
+      banUnit: unit
+    });
+    
+    btn.disabled = false;
+    btn.textContent = '🚫 Xác nhận Ban';
+    
+    if (result.success) {
+      showToast(`Đã ban ${banTargetUser}`, 'success');
+      closeBanModal();
+      await fetchAllUsers();
+    } else {
+      showToast(result.message || 'Lỗi!', 'error');
+    }
+  };
+  
+  window.unbanUser = async function(username) {
+    if (!confirm(`Unban ${username}?`)) return;
+    
+    const result = await callAPI({ action: 'unbanUser', targetUsername: username });
+    
+    if (result.success) {
+      showToast(`Đã unban ${username}`, 'success');
+      await fetchAllUsers();
+    } else {
+      showToast(result.message || 'Lỗi!', 'error');
+    }
+  };
+  
+  window.quickAddTime = async function(username) {
+    const result = await callAPI({ action: 'updateTime', username, minutes: 60, operation: 'add' });
+    if (result.success) {
+      showToast(`+1h cho ${username}`, 'success');
+      await fetchAllUsers();
+    } else {
+      showToast(result.message || 'Lỗi!', 'error');
+    }
+  };
+  
+  // Tab switching
+  $$('.tab').forEach(tab => {
+    tab.onclick = () => {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      $$('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      $('tab-' + tab.dataset.tab).classList.add('active');
+    };
+  });
+  
+  // Search & Filter
+  $('user-search').oninput = renderUserTable;
+  $('user-filter').onchange = renderUserTable;
+  $('btn-refresh').onclick = fetchAllUsers;
+  
+  // Apply time
+  $('btn-apply-time').onclick = async () => {
+    const username = $('time-username').value.trim();
+    const minutes = parseInt($('time-minutes').value) || 0;
+    const operation = $('time-operation').value;
+    
+    if (!username) { showToast('Nhập tên user!', 'error'); return; }
+    if (minutes < 1 || minutes > 6000) { showToast('Số phút từ 1-6000!', 'error'); return; }
+    
+    const btn = $('btn-apply-time');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    
+    const result = await callAPI({ action: 'updateTime', username, minutes, operation });
+    
+    btn.disabled = false;
+    btn.textContent = 'Áp dụng';
+    
+    if (result.success) {
+      const opText = { add: 'Cộng', deduct: 'Trừ', set: 'Đặt' }[operation];
+      showToast(`${opText} ${formatTime(minutes)} cho ${username}`, 'success');
+      $('time-username').value = '';
+      await fetchAllUsers();
+    } else {
+      showToast(result.message || 'Lỗi!', 'error');
+    }
+  };
+  
+  // GitHub Token
+  async function checkTokenStatus() {
+    const result = await callAPI({ action: 'getConfig' });
+    const statusEl = $('token-status');
+    
+    if (result.success && result.hasGithubToken) {
+      statusEl.innerHTML = '<span style="color:var(--success)">✅ Token đã được cấu hình</span>';
+      if (result.githubToken) {
+        $('admin-github-token').value = result.githubToken;
+      }
+    } else {
+      statusEl.innerHTML = '<span style="color:var(--error)">❌ Chưa có token</span>';
+    }
+  }
+  
+  $('btn-save-token').onclick = async () => {
+    const token = $('admin-github-token').value.trim();
+    
+    if (!token) { showToast('Nhập token!', 'error'); return; }
+    
+    const btn = $('btn-save-token');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>';
+    
+    const result = await callAPI({ action: 'setConfig', githubToken: token });
+    
+    btn.disabled = false;
+    btn.textContent = '💾 Lưu Token';
+    
+    if (result.success) {
+      showToast('Đã lưu token!', 'success');
+      checkTokenStatus();
+    } else {
+      showToast(result.message || 'Lỗi!', 'error');
+    }
+  };
+  
+  // Init
+  fetchAllUsers();
+  checkTokenStatus();
+})();
+</script>
+</body>
+</html>

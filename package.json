@@ -1,0 +1,26 @@
+{
+  "name": "codecloud-vps",
+  "version": "2.0.0",
+  "private": true,
+  "description": "CodeCloud VPS - Free VPS using GitHub Actions",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "adm-zip": "^0.5.10",
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "vps",
+    "github-actions",
+    "free-vps",
+    "cloud"
+  ],
+  "author": "_Justalazydev",
+  "license": "MIT"
+}
