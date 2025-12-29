@@ -260,6 +260,16 @@
     .time-badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;background:var(--success-soft);color:var(--success)}
     .time-badge.low{background:var(--warning-soft);color:var(--warning)}
     .time-badge.empty{background:var(--error-soft);color:var(--error)}
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Custom Select & Button Fixes */
+    select.input { appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+    .btn-sm { width: auto; padding: 8px 16px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
