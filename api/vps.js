@@ -1,6 +1,23 @@
-// VPS API - With 60s timeout and database integration
+// VPS API - With 60s timeout - NO DATABASE
 
-const db = require('./db');
+const fs = require('fs');
+const path = require('path');
+
+// Config file path (same as auth.js)
+const CONFIG_FILE = '/tmp/config.json';
+
+// Read config from JSON file
+function getConfig() {
+  try {
+    if (fs.existsSync(CONFIG_FILE)) {
+      const data = fs.readFileSync(CONFIG_FILE, 'utf8');
+      return JSON.parse(data);
+    }
+  } catch (e) {
+    console.error('Error reading config:', e.message);
+  }
+  return { githubToken: '' };
+}
 
 const YAML_TEMPLATES = {
   ubuntu_web: `name: Linux NoVNC
@@ -371,14 +388,14 @@ module.exports = async function handler(req, res) {
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility, useAdminToken });
 
-    // Get token - prefer admin token from database
+    // Get token - prefer admin token from config file
     let githubToken = userToken;
     
     if (!githubToken || useAdminToken) {
-      const tokenData = await db.getActiveGithubToken();
-      if (tokenData?.token) {
-        githubToken = tokenData.token;
-        console.log("[VPS] Using admin token from:", tokenData.github_user);
+      const config = getConfig();
+      if (config.githubToken) {
+        githubToken = config.githubToken;
+        console.log("[VPS] Using admin token from config");
       }
     }
 
@@ -552,23 +569,6 @@ module.exports = async function handler(req, res) {
 
     const repoUrl = `https://github.com/${login}/${repoName}`;
     const actionsUrl = `${repoUrl}/actions`;
-
-    // Save VPS session to database (optional)
-    try {
-      await db.createVpsSession({
-        username: username || 'unknown',
-        repoName,
-        planId,
-        duration,
-        specs: specs.label.toLowerCase(),
-        vpsPassword: password,
-        repoUrl,
-        actionsUrl,
-        clientIp: clientIP
-      });
-    } catch (e) {
-      console.log("[VPS] Failed to save session:", e.message);
-    }
 
     console.log("[VPS] Complete! dispatched=", dispatched);
 

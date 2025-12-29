@@ -9,8 +9,7 @@
     "start": "vercel dev"
   },
   "dependencies": {
-    "adm-zip": "^0.5.10",
-    "pg": "^8.11.3"
+    "adm-zip": "^0.5.10"
   },
   "engines": {
     "node": ">=18.0.0"

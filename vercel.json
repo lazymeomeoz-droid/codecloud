@@ -9,10 +9,6 @@
     { "source": "/api/auth", "destination": "/api/auth.js" },
     { "source": "/api/vps", "destination": "/api/vps.js" },
     { "source": "/api/find-link", "destination": "/api/find-link.js" },
-    { "source": "/api/delete-vps", "destination": "/api/delete-vps.js" },
-    { "source": "/api/db", "destination": "/api/db.js" }
-  ],
-  "env": {
-    "DATABASE_URL": "@database_url"
-  }
+    { "source": "/api/delete-vps", "destination": "/api/delete-vps.js" }
+  ]
 }
