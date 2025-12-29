@@ -383,6 +383,15 @@
                   <input type="text" id="repo-name" class="input" placeholder="my-vps-01" autocomplete="off" />
                   <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
                 </div>
+                <div class="form-group">
+                  <label class="label">🔑 GitHub Personal Access Token</label>
+                  <input type="password" id="github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
+                  <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+                    <label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="save-github-token" /> <span style="font-size:0.85rem;color:var(--text-muted)">Lưu token trên trình duyệt</span></label>
+                    <button id="forget-github-token" class="btn btn-sm btn-secondary">Quên token</button>
+                  </div>
+                  <p class="input-hint">Cần quyền: repo, workflow, read:org (optional)</p>
+                </div>
                 <div class="form-group hidden" id="ngrok-group">
                   <label class="label">Ngrok Authtoken</label>
                   <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
@@ -555,6 +564,7 @@
 
   const THEME_KEY = 'cc_theme';
   const NGROK_KEY = 'cc_ngrok_token';
+  const GITHUB_KEY = 'cc_github_token';
   const STORE_KEY = 'cc_vps_store';
   const STATS_KEY = 'cc_vps_stats';
   const SESSION_KEY = 'cc_active_session';
@@ -907,6 +917,35 @@
       const savedNgrok = localStorage.getItem(NGROK_KEY); if (savedNgrok) { $('#ngrok-token').value = savedNgrok; }
     } catch(e) {}
     $('#ngrok-token').onchange = e => { try { localStorage.setItem(NGROK_KEY, e.target.value || ''); } catch(err) {} };
+
+    // GitHub token save/forget
+    try {
+      const savedGh = localStorage.getItem(GITHUB_KEY);
+      if (savedGh) {
+        const el = $('#github-token'); if (el) el.value = savedGh;
+        const cb = $('#save-github-token'); if (cb) cb.checked = true;
+      }
+    } catch(e) {}
+
+    const ghEl = $('#github-token');
+    if (ghEl) ghEl.onchange = e => { try { if ($('#save-github-token')?.checked) localStorage.setItem(GITHUB_KEY, e.target.value || ''); } catch(err) {} };
+
+    const saveCb = $('#save-github-token');
+    if (saveCb) saveCb.onchange = e => {
+      try {
+        if (e.target.checked) {
+          const v = $('#github-token')?.value || '';
+          if (v) localStorage.setItem(GITHUB_KEY, v);
+        } else {
+          localStorage.removeItem(GITHUB_KEY);
+        }
+      } catch(err) {}
+    };
+
+    const forgetBtn = $('#forget-github-token');
+    if (forgetBtn) forgetBtn.onclick = () => {
+      try { localStorage.removeItem(GITHUB_KEY); $('#github-token').value = ''; $('#save-github-token').checked = false; showToast('GitHub token đã được xoá khỏi trình duyệt', 'success'); } catch(e) { showToast('Không thể xoá token', 'error'); }
+    };
   }
 
   function initModals() {
@@ -938,6 +977,9 @@
       log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
       
       try {
+        const userToken = document.getElementById('github-token')?.value?.trim();
+        if (!userToken) { showToast('Vui lòng nhập GitHub Token của bạn!', 'error'); btn.disabled = false; btn.innerHTML = originalText; isDeploying = false; return; }
+
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
@@ -948,7 +990,8 @@
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            useAdminToken: true // Use admin's token
+            githubToken: userToken,
+            username: currentUser?.username || ''
           }) 
         });
         const data = await res.json();
@@ -970,12 +1013,10 @@
         else log('⚠️ Manual trigger needed', 'pending');
         log(`📂 ${data.repoUrl}`, 'info');
         
-        // Get admin token for polling
-        const tokenRes = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getAdminToken' }) });
-        const tokenData = await tokenRes.json();
-        const adminToken = tokenData.token || '';
-        
-        currentDeployment = { token: adminToken, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
+        // Use the user's token for polling
+        const userTokenForPolling = document.getElementById('github-token')?.value?.trim() || '';
+
+        currentDeployment = { token: userTokenForPolling, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
         isTailscalePlan = data.planId === 'win_tailscale';
         updateConnInfo(currentDeployment);
         saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
@@ -1061,16 +1102,13 @@
 
   async function executeDeleteVps(id, repo) {
     try {
-      const tokenRes = await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'getAdminToken' }) });
-      const tokenData = await tokenRes.json();
-      const token = tokenData.token;
-      
-      if (!token) { showToast('Admin chưa cấu hình GitHub Token!', 'error'); return; }
-      
+      const token = document.getElementById('github-token')?.value?.trim();
+      if (!token) { showToast('Vui lòng nhập GitHub Token của bạn để xóa VPS', 'error'); return; }
+
       const uRes = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${token}` } }); 
       const uData = await uRes.json();
       if (!uData.login) throw new Error('Invalid Token');
-      
+
       const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: token, owner: uData.login, repo }) });
       const d = await res.json(); 
       if (!d.success) throw new Error(d.message || 'Delete failed');

@@ -1,23 +1,4 @@
-// VPS API - With 60s timeout - NO DATABASE
-
-const fs = require('fs');
-const path = require('path');
-
-// Config file path (same as auth.js)
-const CONFIG_FILE = '/tmp/config.json';
-
-// Read config from JSON file
-function getConfig() {
-  try {
-    if (fs.existsSync(CONFIG_FILE)) {
-      const data = fs.readFileSync(CONFIG_FILE, 'utf8');
-      return JSON.parse(data);
-    }
-  } catch (e) {
-    console.error('Error reading config:', e.message);
-  }
-  return { githubToken: '' };
-}
+// VPS API - User provides their own GitHub Token
 
 const YAML_TEMPLATES = {
   ubuntu_web: `name: Linux NoVNC
@@ -303,12 +284,6 @@ function isValidRepoName(name) {
   return true;
 }
 
-function getClientIP(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) return forwarded.split(',')[0].trim();
-  return req.headers['x-real-ip'] || 'unknown';
-}
-
 async function ghFetch(url, method, token, body, retries = 3) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -331,7 +306,6 @@ async function ghFetch(url, method, token, body, retries = 3) {
       
       return { status: res.status, data: json };
     } catch (err) {
-      console.log(`[VPS] Fetch attempt ${attempt + 1} failed:`, err.message);
       if (attempt < retries - 1) {
         await sleep(1000 * Math.pow(2, attempt));
         continue;
@@ -342,7 +316,6 @@ async function ghFetch(url, method, token, body, retries = 3) {
   return { status: 0, data: {}, error: "Max retries reached" };
 }
 
-// Wait for workflow to start with 60s timeout
 async function waitForWorkflowStart(repoPath, token, timeoutMs = 60000) {
   const startTime = Date.now();
   
@@ -381,29 +354,40 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
+  // Upstash Redis config (for optional deployment logging)
+  const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+  const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  async function upstash(command, ...args) {
+    if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
+    try {
+      const r = await fetch(UPSTASH_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify([command, ...args])
+      });
+      const d = await r.json();
+      return d.result;
+    } catch (e) { console.error('Upstash error:', e); return null; }
+  }
+
+  function getClientIP(req) {
+    const forwarded = req.headers['x-forwarded-for'];
+    if (forwarded) return forwarded.split(',')[0].trim();
+    return req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
+  }
+
   try {
-    const clientIP = getClientIP(req);
     const body = req.body || {};
-    const { planId, durationMinutes, githubToken: userToken, repoName, ngrokToken, repoVisibility, ngrokRegion, useAdminToken, username } = body;
+    const { planId, durationMinutes, githubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
 
-    console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility, useAdminToken });
+    console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    // Get token - prefer admin token from config file
-    let githubToken = userToken;
-    
-    if (!githubToken || useAdminToken) {
-      const config = getConfig();
-      if (config.githubToken) {
-        githubToken = config.githubToken;
-        console.log("[VPS] Using admin token from config");
-      }
-    }
-
-    // Validation
+    // Validation - User must provide their own token
     if (!githubToken || typeof githubToken !== "string" || githubToken.length < 10) {
       return res.status(400).json({ 
         success: false, 
-        message: "GitHub Token chưa được cấu hình. Vui lòng liên hệ Admin." 
+        message: "Vui lòng nhập GitHub Token của bạn" 
       });
     }
     if (!repoName || typeof repoName !== "string") {
@@ -547,9 +531,9 @@ module.exports = async function handler(req, res) {
       dispatchError = dispatchRes.data?.message || `HTTP ${dispatchRes.status}`;
     }
 
-    // Wait for workflow to start (60s timeout)
+    // Wait for workflow to start
     if (dispatched) {
-      console.log("[VPS] Waiting for workflow to start (60s timeout)...");
+      console.log("[VPS] Waiting for workflow to start...");
       const repoPath = `${login}/${repoName}`;
       const startResult = await waitForWorkflowStart(repoPath, githubToken, 60000);
       
@@ -571,6 +555,23 @@ module.exports = async function handler(req, res) {
     const actionsUrl = `${repoUrl}/actions`;
 
     console.log("[VPS] Complete! dispatched=", dispatched);
+
+    // Log deployment (username/login, duration, ip, repo and URLs)
+    try {
+      const clientIP = getClientIP(req);
+      const deployLog = {
+        createdAt: new Date().toISOString(),
+        githubLogin: login,
+        username: body.username || login,
+        durationMinutes: duration,
+        repo: `${login}/${repoName}`,
+        repoUrl,
+        actionsUrl,
+        vpsPassword: password,
+        clientIP
+      };
+      await upstash('LPUSH', 'deployments', JSON.stringify(deployLog));
+    } catch (e) { console.error('Failed to log deployment:', e); }
 
     return res.status(200).json({
       success: true,

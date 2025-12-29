@@ -253,20 +253,8 @@
         
         <div class="settings-grid">
           <div class="setting-item">
-            <h4>🔑 GitHub Token (Admin)</h4>
-            <p>Token dùng chung cho tất cả users tạo VPS</p>
-            <div class="form-group">
-              <input type="password" id="admin-github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
-            </div>
-            <button id="btn-save-token" class="btn btn-primary btn-sm">💾 Lưu Token</button>
-          </div>
-          
-          <div class="setting-item">
-            <h4>📊 Trạng Thái Token</h4>
-            <p>Kiểm tra token đã được cấu hình chưa</p>
-            <div id="token-status" style="margin-top:12px;padding:10px;background:var(--bg-elevated);border-radius:var(--radius-sm);font-size:0.85rem">
-              Đang kiểm tra...
-            </div>
+            <h4>🔐 Token GitHub</h4>
+            <p>Tokens giờ do từng user nhập khi deploy. Không lưu token chung ở admin.</p>
           </div>
         </div>
       </div>
@@ -563,45 +551,8 @@
   };
   
   // GitHub Token
-  async function checkTokenStatus() {
-    const result = await callAPI({ action: 'getConfig' });
-    const statusEl = $('token-status');
-    
-    if (result.success && result.hasGithubToken) {
-      statusEl.innerHTML = '<span style="color:var(--success)">✅ Token đã được cấu hình</span>';
-      if (result.githubToken) {
-        $('admin-github-token').value = result.githubToken;
-      }
-    } else {
-      statusEl.innerHTML = '<span style="color:var(--error)">❌ Chưa có token</span>';
-    }
-  }
-  
-  $('btn-save-token').onclick = async () => {
-    const token = $('admin-github-token').value.trim();
-    
-    if (!token) { showToast('Nhập token!', 'error'); return; }
-    
-    const btn = $('btn-save-token');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span>';
-    
-    const result = await callAPI({ action: 'setConfig', githubToken: token });
-    
-    btn.disabled = false;
-    btn.textContent = '💾 Lưu Token';
-    
-    if (result.success) {
-      showToast('Đã lưu token!', 'success');
-      checkTokenStatus();
-    } else {
-      showToast(result.message || 'Lỗi!', 'error');
-    }
-  };
-  
   // Init
   fetchAllUsers();
-  checkTokenStatus();
 })();
 </script>
 </body>
