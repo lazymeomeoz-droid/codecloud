@@ -425,6 +425,12 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Invalid minutes' });
       }
 
+      // verify user exists
+      const targetUser = await getUser(usernameLower);
+      if (!targetUser) {
+        return res.status(404).json({ success: false, message: 'User không tồn tại' });
+      }
+
       const previousMinutes = await getTime(usernameLower);
       let newMinutes;
 

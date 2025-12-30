@@ -621,6 +621,9 @@
     const operation = $('time-operation').value;
     
     if (!username) { showToast('Nhập tên user!', 'error'); return; }
+    // verify user exists in local list
+    const found = allUsers.find(u => (u.username || '').toLowerCase() === username.toLowerCase());
+    if (!found) { showToast('User không tồn tại!', 'error'); return; }
     if (minutes < 1 || minutes > 6000) { showToast('Số phút từ 1-6000!', 'error'); return; }
     
     const btn = $('btn-apply-time');
