@@ -193,53 +193,117 @@ jobs:
     timeout-minutes: 395
     steps:
     - uses: actions/checkout@v4
-    - name: Setup
+    - name: Setup RDP
       shell: pwsh
       run: |
-        \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-        Set-LocalUser runneradmin -Password \$pw
+        try {
+          \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
+          Set-LocalUser -Name "runneradmin" -Password \$pw
+          Write-Host "Password set successfully"
+        } catch {
+          Write-Host "Warning: Failed to set password - \$_"
+        }
         Set-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        Write-Host "RDP enabled"
     - name: Install Tailscale
       shell: pwsh
       run: |
-        Invoke-WebRequest https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi -OutFile ts.msi
-        Start-Process msiexec -ArgumentList '/i','ts.msi','/quiet' -Wait
-        Start-Sleep 20
-        \$ts = "\$env:ProgramFiles\\Tailscale\\tailscale.exe"
-        Start-Process \$ts -ArgumentList "up","--hostname=gh-rdp" -WindowStyle Hidden
-        for (\$i = 0; \$i -lt 60; \$i++) {
-          Start-Sleep 3
-          \$ip = & \$ts ip -4 2>&1 | Out-String
-          if (\$ip -match '^100\\.') { 
-            "\$(\$ip.Trim()):3389|__PASSWORD__" | Out-File info.txt -NoNewline
-            break 
+        Write-Host "Downloading Tailscale..."
+        Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile "tailscale.msi" -UseBasicParsing
+        Write-Host "Installing Tailscale..."
+        \$process = Start-Process msiexec.exe -ArgumentList '/i', 'tailscale.msi', '/quiet', '/norestart' -Wait -PassThru
+        Write-Host "Installer exit code: \$($process.ExitCode)"
+        Start-Sleep -Seconds 15
+        \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        if (Test-Path \$tsPath) {
+          Write-Host "Tailscale installed at: \$tsPath"
+        } else {
+          Write-Host "ERROR: Tailscale not found at expected path"
+          Get-ChildItem "C:\\Program Files\\" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host \$_.Name }
+          "ERROR|Tailscale installation failed" | Out-File info.txt -NoNewline -Encoding UTF8
+          exit 0
+        }
+    - name: Start Tailscale
+      shell: pwsh
+      run: |
+        \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        if (!(Test-Path \$tsPath)) {
+          Write-Host "Tailscale not found, skipping..."
+          if (!(Test-Path info.txt)) {
+            "ERROR|Tailscale not installed" | Out-File info.txt -NoNewline -Encoding UTF8
           }
-          \$st = & \$ts status 2>&1 | Out-String
-          if (\$st -match 'https://login.tailscale.com/a/[a-zA-Z0-9]+') {
-            "WAITING_AUTH|\$(\$Matches[0])" | Out-File info.txt -NoNewline
-            break
+          exit 0
+        }
+        Write-Host "Starting Tailscale..."
+        Start-Process \$tsPath -ArgumentList "up", "--hostname=gh-rdp", "--accept-routes" -WindowStyle Hidden
+        Start-Sleep -Seconds 10
+        \$found = \$false
+        for (\$i = 0; \$i -lt 60; \$i++) {
+          Start-Sleep -Seconds 3
+          try {
+            \$ipResult = & \$tsPath ip -4 2>&1
+            \$ipStr = \$ipResult | Out-String
+            Write-Host "Attempt \$i - IP result: \$ipStr"
+            if (\$ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
+              \$ip = \$Matches[0]
+              Write-Host "Got Tailscale IP: \$ip"
+              "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
+              \$found = \$true
+              break
+            }
+            \$statusResult = & \$tsPath status 2>&1 | Out-String
+            Write-Host "Status: \$statusResult"
+            if (\$statusResult -match 'https://login\\.tailscale\\.com/a/[a-zA-Z0-9]+') {
+              \$authUrl = \$Matches[0]
+              Write-Host "Auth URL found: \$authUrl"
+              "WAITING_AUTH|\$authUrl" | Out-File info.txt -NoNewline -Encoding UTF8
+              \$found = \$true
+              break
+            }
+          } catch {
+            Write-Host "Error checking status: \$_"
           }
         }
-        if (!(Test-Path info.txt)) { "PENDING|Starting..." | Out-File info.txt -NoNewline }
-    - uses: actions/upload-artifact@v4
+        if (!\$found) {
+          Write-Host "Timeout waiting for Tailscale"
+          "PENDING|Waiting for Tailscale..." | Out-File info.txt -NoNewline -Encoding UTF8
+        }
+    - name: Upload Initial Result
+      uses: actions/upload-artifact@v4
       with:
         name: result
         path: info.txt
         overwrite: true
-    - name: Wait for Auth
+    - name: Wait for Auth and Update
       shell: pwsh
       run: |
-        \$ts = "\$env:ProgramFiles\\Tailscale\\tailscale.exe"
-        for (\$i = 0; \$i -lt 120; \$i++) {
-          \$ip = & \$ts ip -4 2>&1 | Out-String
-          if (\$ip -match '^100\\.') { 
-            "\$(\$ip.Trim()):3389|__PASSWORD__" | Out-File info.txt -NoNewline
-            break 
-          }
-          Start-Sleep 5
+        \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        if (!(Test-Path \$tsPath)) {
+          Write-Host "Tailscale not installed, exiting..."
+          exit 0
         }
-    - uses: actions/upload-artifact@v4
+        Write-Host "Waiting for Tailscale authentication..."
+        for (\$i = 0; \$i -lt 120; \$i++) {
+          Start-Sleep -Seconds 5
+          try {
+            \$ipResult = & \$tsPath ip -4 2>&1
+            \$ipStr = \$ipResult | Out-String
+            if (\$ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
+              \$ip = \$Matches[0]
+              Write-Host "Authenticated! IP: \$ip"
+              "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
+              break
+            }
+          } catch {
+            Write-Host "Check error: \$_"
+          }
+          if (\$i % 12 -eq 0) {
+            Write-Host "Still waiting... (\$i iterations)"
+          }
+        }
+    - name: Upload Final Result
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: result
@@ -248,7 +312,9 @@ jobs:
     - name: Keep Alive
       if: always()
       shell: pwsh
-      run: Start-Sleep 21600`
+      run: |
+        Write-Host "Keeping session alive for 6 hours..."
+        Start-Sleep -Seconds 21600`
 };
 
 const PLAN_NAMES = {
@@ -354,7 +420,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  // Upstash Redis config (for optional deployment logging)
   const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
   const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
@@ -383,7 +448,6 @@ module.exports = async function handler(req, res) {
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    // Validation - User must provide their own token
     if (!githubToken || typeof githubToken !== "string" || githubToken.length < 10) {
       return res.status(400).json({ 
         success: false, 
@@ -406,7 +470,6 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ success: false, message: "Windows RDP cần Ngrok Token" });
     }
 
-    // Verify token
     console.log("[VPS] Verifying token...");
     const userRes = await ghFetch("https://api.github.com/user", "GET", githubToken);
     if (userRes.status !== 200 || !userRes.data?.login) {
@@ -425,7 +488,6 @@ module.exports = async function handler(req, res) {
     const isPrivate = repoVisibility === "private";
     const specs = isPrivate ? SPECS.private : SPECS.public;
 
-    // Check if repo exists and delete
     console.log("[VPS] Checking existing repo...");
     const checkRes = await ghFetch(`https://api.github.com/repos/${login}/${repoName}`, "GET", githubToken);
     if (checkRes.status === 200) {
@@ -434,7 +496,6 @@ module.exports = async function handler(req, res) {
       await sleep(3000);
     }
 
-    // Create repo
     console.log("[VPS] Creating repo...");
     const createRes = await ghFetch("https://api.github.com/user/repos", "POST", githubToken, {
       name: repoName,
@@ -458,13 +519,11 @@ module.exports = async function handler(req, res) {
 
     await sleep(3000);
 
-    // Enable actions
     await ghFetch(`https://api.github.com/repos/${login}/${repoName}/actions/permissions`, "PUT", githubToken, {
       enabled: true,
       allowed_actions: "all"
     });
 
-    // Prepare YAML
     let yml = YAML_TEMPLATES[planId]
       .replace(/__PASSWORD__/g, password)
       .replace(/__DURATION__/g, String(duration))
@@ -477,7 +536,6 @@ module.exports = async function handler(req, res) {
 
     const content = Buffer.from(yml, "utf8").toString("base64");
 
-    // Push workflow
     console.log("[VPS] Pushing workflow...");
     let pushOk = false;
     let pushError = null;
@@ -507,7 +565,6 @@ module.exports = async function handler(req, res) {
 
     await sleep(3000);
 
-    // Dispatch workflow
     console.log("[VPS] Dispatching workflow...");
     let dispatched = false;
     let dispatchError = null;
@@ -531,7 +588,6 @@ module.exports = async function handler(req, res) {
       dispatchError = dispatchRes.data?.message || `HTTP ${dispatchRes.status}`;
     }
 
-    // Wait for workflow to start
     if (dispatched) {
       console.log("[VPS] Waiting for workflow to start...");
       const repoPath = `${login}/${repoName}`;
@@ -556,7 +612,6 @@ module.exports = async function handler(req, res) {
 
     console.log("[VPS] Complete! dispatched=", dispatched);
 
-    // Log deployment (username/login, duration, ip, repo and URLs)
     try {
       const clientIP = getClientIP(req);
       const deployLog = {
