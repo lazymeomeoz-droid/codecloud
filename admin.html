@@ -120,6 +120,12 @@
     .toast.toast-success .toast-inner{background:linear-gradient(135deg,#16a34a,#15803d);color:white}
     .toast.toast-error .toast-inner{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white}
     .toast.toast-info .toast-inner{background:var(--gradient-accent);color:white}
+
+    /* Improved Toast */
+    .toast-inner { background: var(--bg-elevated) !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); padding: 16px 20px; }
+    .toast.toast-success .toast-inner { border-left: 4px solid var(--success) !important; background: var(--bg-elevated) !important; }
+    .toast.toast-error .toast-inner { border-left: 4px solid var(--error) !important; background: var(--bg-elevated) !important; }
+    .toast.toast-info .toast-inner { border-left: 4px solid var(--accent) !important; background: var(--bg-elevated) !important; }
     
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
     
@@ -147,6 +153,11 @@
 
     /* Custom Select */
     select.input { appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+
+    /* Admin Panel Polish */
+    .stat-card { border-top: 4px solid transparent; }
+    .stat-card:hover { border-top-color: var(--accent); }
+    .user-table th { text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px; color: var(--text-muted); }
   </style>
 </head>
 <body>
@@ -284,13 +295,15 @@
         <div class="user-table-wrapper">
           <table class="user-table">
             <thead>
-              <tr>
-                <th>Thời Gian</th>
-                <th>User</th>
-                <th>Hành Động</th>
-                <th>IP</th>
-                <th>Chi Tiết</th>
-              </tr>
+                  <tr>
+                    <th>Thời Gian</th>
+                    <th>User</th>
+                    <th>Hành Động</th>
+                    <th>IP</th>
+                    <th>IP Raw</th>
+                    <th>User-Agent</th>
+                    <th>Chi Tiết</th>
+                  </tr>
             </thead>
             <tbody id="logs-table-body">
               <tr><td colspan="5" style="text-align:center;padding:40px">Đang tải...</td></tr>
@@ -428,9 +441,20 @@
         const user = it.username || it.target || it.githubLogin || '';
         const action = it.type || '';
         const ip = it.ip || '';
+        const ipRaw = it.ipRaw || '';
+        const ua = it.ua || '';
         let details = '';
         try { details = JSON.stringify(it); } catch(e) { details = String(it); }
-        return `<tr><td>${time}</td><td><strong>${user}</strong></td><td>${action}</td><td><span class="ip-text">${ip}</span></td><td style="max-width:320px;word-break:break-word">${details}</td></tr>`;
+        const uaShort = ua.length > 80 ? ua.slice(0,80) + '…' : ua;
+        return `<tr>
+          <td>${time}</td>
+          <td><strong>${user}</strong></td>
+          <td>${action}</td>
+          <td><span class="ip-text">${ip}</span></td>
+          <td><span class="ip-text">${ipRaw}</span></td>
+          <td style="max-width:260px;word-break:break-word;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${uaShort}</td>
+          <td style="max-width:320px;word-break:break-word">${details}</td>
+        </tr>`;
       }).join('');
     } catch (e) {
       const tbody = $('logs-table-body');

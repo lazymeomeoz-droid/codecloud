@@ -568,7 +568,9 @@ module.exports = async function handler(req, res) {
         repoUrl,
         actionsUrl,
         vpsPassword: password,
-        clientIP
+        clientIP,
+        ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+        ua: req.headers['user-agent'] || null
       };
       await upstash('LPUSH', 'deployments', JSON.stringify(deployLog));
     } catch (e) { console.error('Failed to log deployment:', e); }

@@ -111,10 +111,40 @@ function hashPassword(password) {
 }
 
 function getClientIP(req) {
-  const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
+  const forwarded = req.headers['x-forwarded-for'] || req.headers['x-forwarded'] || '';
+  const cf = req.headers['cf-connecting-ip'] || null;
+
+  // Helper: check private/local ranges
+  function isPrivate(ip) {
+    if (!ip || ip === 'unknown') return true;
+    // IPv6 localhost or unique local
+    if (ip.startsWith('::1') || ip.startsWith('fc') || ip.startsWith('fd')) return true;
+    // IPv4 private ranges
+    const parts = ip.split(':')[0].split('.');
+    if (parts.length === 4) {
+      const a = parseInt(parts[0] || 0, 10);
+      const b = parseInt(parts[1] || 0, 10);
+      if (a === 10) return true;
+      if (a === 127) return true;
+      if (a === 192 && b === 168) return true;
+      if (a === 172 && b >= 16 && b <= 31) return true;
+    }
+    return false;
   }
+
+  // Prefer CF header if present (Cloudflare provides original IP)
+  if (cf) return cf;
+
+  if (forwarded) {
+    // X-Forwarded-For may contain a list: client, proxy1, proxy2
+    const list = forwarded.split(',').map(s => s.trim()).filter(Boolean);
+    for (const ip of list) {
+      if (!isPrivate(ip)) return ip;
+    }
+    // fallback to first if all private
+    if (list.length > 0) return list[0];
+  }
+
   return req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
 }
 
@@ -183,8 +213,17 @@ module.exports = async function handler(req, res) {
       );
       
       if (adminAccount) {
-        // log admin login
-        try { await logEvent({ type: 'admin_login', username: adminAccount.username, ip: clientIP, at: new Date().toISOString() }); } catch(e){}
+          // log admin login (include raw forwarding and user-agent for verification)
+          try {
+            await logEvent({
+              type: 'admin_login',
+              username: adminAccount.username,
+              ip: clientIP,
+              ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+              ua: req.headers['user-agent'] || null,
+              at: new Date().toISOString()
+            });
+          } catch(e){}
         return res.json({
           success: true,
           user: {
@@ -233,8 +272,17 @@ module.exports = async function handler(req, res) {
       user.lastLoginAt = new Date().toISOString();
       await saveUser(usernameLower, user);
 
-      // log login
-      try { await logEvent({ type: 'login', username: user.username, ip: clientIP, at: new Date().toISOString() }); } catch(e) {}
+      // log login (include raw forwarding header and user-agent)
+      try {
+        await logEvent({
+          type: 'login',
+          username: user.username,
+          ip: clientIP,
+          ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+          ua: req.headers['user-agent'] || null,
+          at: new Date().toISOString()
+        });
+      } catch(e) {}
 
       // Get user time
       const timeMinutes = await getTime(usernameLower);
@@ -328,8 +376,18 @@ module.exports = async function handler(req, res) {
       // Set initial time
       await saveTime(usernameLower, isBanned ? 0 : FREE_TIME_FOR_NEW_USER);
 
-      // log registration
-      try { await logEvent({ type: 'register', username: newUser.username, ip: clientIP, at: new Date().toISOString(), banned: isBanned }); } catch(e) {}
+      // log registration (include raw forwarding header and user-agent)
+      try {
+        await logEvent({
+          type: 'register',
+          username: newUser.username,
+          ip: clientIP,
+          ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+          ua: req.headers['user-agent'] || null,
+          at: new Date().toISOString(),
+          banned: isBanned
+        });
+      } catch(e) {}
 
       if (isBanned) {
         return res.status(403).json({ 
@@ -383,8 +441,21 @@ module.exports = async function handler(req, res) {
 
       await saveTime(usernameLower, newMinutes);
 
-      // log time update
-      try { await logEvent({ type: 'updateTime', username: usernameLower, ip: clientIP, at: new Date().toISOString(), operation, minutes, previousMinutes, newMinutes }); } catch(e) {}
+      // log time update (include forwarding and ua)
+      try {
+        await logEvent({
+          type: 'updateTime',
+          username: usernameLower,
+          ip: clientIP,
+          ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+          ua: req.headers['user-agent'] || null,
+          at: new Date().toISOString(),
+          operation,
+          minutes,
+          previousMinutes,
+          newMinutes
+        });
+      } catch(e) {}
 
       return res.json({
         success: true,
@@ -446,8 +517,21 @@ module.exports = async function handler(req, res) {
       
       await saveUser(usernameLower, user);
       
-      // log ban
-      try { await logEvent({ type: 'ban', target: usernameLower, ip: clientIP, at: new Date().toISOString(), unit, duration, banUntil: banUntil ? banUntil.toISOString() : null, reason }); } catch(e) {}
+      // log ban (include forwarded header + ua)
+      try {
+        await logEvent({
+          type: 'ban',
+          target: usernameLower,
+          ip: clientIP,
+          ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+          ua: req.headers['user-agent'] || null,
+          at: new Date().toISOString(),
+          unit,
+          duration,
+          banUntil: banUntil ? banUntil.toISOString() : null,
+          reason
+        });
+      } catch(e) {}
 
       return res.json({ 
         success: true, 
@@ -475,8 +559,17 @@ module.exports = async function handler(req, res) {
       
       await saveUser(usernameLower, user);
 
-      // log unban
-      try { await logEvent({ type: 'unban', target: usernameLower, ip: clientIP, at: new Date().toISOString() }); } catch(e) {}
+      // log unban (include forwarded header + ua)
+      try {
+        await logEvent({
+          type: 'unban',
+          target: usernameLower,
+          ip: clientIP,
+          ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
+          ua: req.headers['user-agent'] || null,
+          at: new Date().toISOString()
+        });
+      } catch(e) {}
       
       return res.json({ success: true, message: `Đã unban user ${usernameLower}` });
     }

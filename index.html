@@ -247,6 +247,29 @@
     .toast.toast-error .toast-inner{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none}
     .toast.toast-info .toast-inner{background:var(--gradient-accent);color:white;border:none}
     
+    /* Improved Toast */
+    .toast-inner { background: var(--bg-elevated) !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); padding: 16px 20px; }
+    .toast.toast-success .toast-inner { border-left: 4px solid var(--success) !important; }
+    .toast.toast-error .toast-inner { border-left: 4px solid var(--error) !important; }
+    .toast.toast-info .toast-inner { border-left: 4px solid var(--accent) !important; }
+    
+    /* Region Grid */
+    .region-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
+    .region-option { background: var(--bg-card); border: 2px solid transparent; border-radius: var(--radius-md); padding: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition); text-align: center; }
+    .region-option:hover { border-color: var(--accent-soft); transform: translateY(-2px); background: var(--bg-surface); }
+    .region-option.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md); }
+    .region-flag { font-size: 1.5rem; }
+    .region-name { font-size: 0.8rem; font-weight: 600; }
+
+    /* Resume Banner */
+    .resume-banner { background: var(--bg-surface); border: 1px solid var(--accent-soft); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-lg); animation: slideUp 0.4s ease-out; position: relative; overflow: hidden; }
+    .resume-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gradient-accent); }
+    .resume-content { display: flex; align-items: center; gap: 16px; }
+    .resume-icon { width: 42px; height: 42px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; animation: spin 3s linear infinite; }
+    .resume-info h4 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary); }
+    .resume-info p { font-size: 0.82rem; color: var(--text-muted); }
+    .resume-actions { display: flex; gap: 12px; align-items: center; }
+
     .app-footer{border-top:1px solid var(--border-light);padding:16px 28px;background:var(--bg-surface);backdrop-filter:blur(16px)}
     .footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted)}
     .footer-discord{padding:8px 14px;border-radius:999px;text-decoration:none;font-weight:700;background:linear-gradient(135deg,#5865F2,#4752C4);color:white;font-size:0.78rem;transition:var(--transition)}
@@ -346,6 +369,21 @@
     <div class="scroll-area">
       <div class="container">
         
+        <!-- Resume Banner -->
+        <div id="resume-banner" class="resume-banner hidden">
+          <div class="resume-content">
+            <div class="resume-icon">🔄</div>
+            <div class="resume-info">
+              <h4>Phát hiện VPS đang tạo</h4>
+              <p>Repo: <strong id="resume-repo">...</strong> &bull; Đã chạy: <span id="resume-time">...</span></p>
+            </div>
+          </div>
+          <div class="resume-actions">
+            <button id="btn-resume-discard" class="btn-small-link" style="color:var(--text-muted)">Bỏ qua</button>
+            <button id="btn-resume-continue" class="btn btn-small">Quay lại</button>
+          </div>
+        </div>
+
         <!-- View: Create VPS -->
         <div id="view-create">
           <div class="grid-layout">
@@ -396,11 +434,7 @@
                 <div class="form-group">
                   <label class="label">🔑 GitHub Personal Access Token</label>
                   <input type="password" id="github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
-                  <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
-                    <label style="display:flex;align-items:center;gap:8px;margin:0"><input type="checkbox" id="save-github-token" /> <span style="font-size:0.85rem;color:var(--text-muted)">Lưu token trên trình duyệt</span></label>
-                    <button id="forget-github-token" class="btn btn-sm btn-secondary">Quên token</button>
-                  </div>
-                  <p class="input-hint">Cần quyền: repo, workflow, read:org (optional)</p>
+                  <p class="input-hint">Token sẽ được tự động lưu trên trình duyệt.</p>
                 </div>
                 <div class="form-group hidden" id="ngrok-group">
                   <label class="label">Ngrok Authtoken</label>
@@ -408,16 +442,10 @@
                 </div>
                 <div class="form-group hidden" id="region-group">
                   <label class="label">🌍 Ngrok Region</label>
-                  <select id="ngrok-region" class="input">
-                    <option value="auto">Auto (Nearest)</option>
-                    <option value="us">🇺🇸 United States</option>
-                    <option value="eu">🇪🇺 Europe</option>
-                    <option value="ap" selected>🌏 Asia Pacific</option>
-                    <option value="au">🇦🇺 Australia</option>
-                    <option value="sa">🇧🇷 South America</option>
-                    <option value="jp">🇯🇵 Japan</option>
-                    <option value="in">🇮🇳 India</option>
-                  </select>
+                  <div class="region-grid" id="ngrok-region-selector">
+                    <!-- Populated by JS -->
+                  </div>
+                  <input type="hidden" id="ngrok-region" value="ap">
                 </div>
                 <div class="form-group" id="duration-group">
                   <label class="label" style="display:flex;justify-content:space-between;align-items:center;">
@@ -511,6 +539,13 @@
           </div>
           <div class="panel">
             <div class="panel-header">
+              <h2 class="panel-title">Account Settings</h2>
+            </div>
+            <button id="btn-forget-token" class="btn btn-secondary">🔑 Quên GitHub Token đã lưu</button>
+            <p class="specs-footnote" style="margin-top:10px;">Xoá token GitHub khỏi trình duyệt này.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
               <h2 class="panel-title">Application Data</h2>
             </div>
             <button id="btn-clear-data" class="btn btn-danger">🗑️ Clear All Local Data</button>
@@ -589,6 +624,16 @@
     { id: 'win_web', name: 'Windows Web', desc: 'Windows via NoVNC' },
     { id: 'win_rdp', name: 'Windows RDP', desc: 'RDP via Ngrok' },
     { id: 'win_tailscale', name: 'Win Tailscale', desc: 'RDP via Tailscale (6h)' }
+  ];
+
+  const REGIONS = [
+    { id: 'ap', name: 'Asia Pacific', flag: '🌏' },
+    { id: 'us', name: 'United States', flag: '🇺🇸' },
+    { id: 'eu', name: 'Europe', flag: '🇪🇺' },
+    { id: 'au', name: 'Australia', flag: '🇦🇺' },
+    { id: 'sa', name: 'South America', flag: '🇧🇷' },
+    { id: 'jp', name: 'Japan', flag: '🇯🇵' },
+    { id: 'in', name: 'India', flag: '🇮🇳' }
   ];
   
   let selectedPlan = PLANS[0], selectedSpecs = 'public', currentDeployment = null, pollInterval = null, deploymentStartTime = null, elapsedTimer = null, isTailscalePlan = false;
@@ -741,12 +786,14 @@
     initNavigation();
     renderPlans();
     initSpecsSelector();
+    initRegionSelector();
     initDurationSlider();
     initRepoNameValidation();
     initSettings();
     initDeploy();
     loadSavedTokens();
     initModals();
+    checkActiveSession();
     await fetchTimeFromServer();
   }
 
@@ -838,6 +885,23 @@
     });
   }
 
+  function initRegionSelector() {
+    const container = $('#ngrok-region-selector');
+    const input = $('#ngrok-region');
+    container.innerHTML = '';
+    REGIONS.forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'region-option' + (r.id === 'ap' ? ' selected' : '');
+      el.innerHTML = `<span class="region-flag">${r.flag}</span><span class="region-name">${r.name}</span>`;
+      el.onclick = () => {
+        $$('.region-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        input.value = r.id;
+      };
+      container.appendChild(el);
+    });
+  }
+
   function initDurationSlider() {
     const durationSlider = $('#duration'), durationDisplay = $('#duration-val');
     durationSlider.oninput = () => { durationDisplay.textContent = durationSlider.value; checkTimeWarning(); };
@@ -885,6 +949,54 @@
   function stopElapsedTimer() { if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; } }
   function updateElapsedTime() { if (!deploymentStartTime) return; const elapsed = Math.floor((Date.now() - deploymentStartTime) / 1000); $('#progress-elapsed').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`; }
 
+  function checkActiveSession() {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (!saved) return;
+      const session = JSON.parse(saved);
+      // If session is older than 30 mins and no link found, maybe discard? keeping it simple for now.
+      
+      $('#resume-banner').classList.remove('hidden');
+      $('#resume-repo').textContent = session.repo;
+      
+      const updateBannerTime = () => {
+        const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
+        $('#resume-time').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`;
+      };
+      updateBannerTime();
+      const bannerTimer = setInterval(updateBannerTime, 1000);
+
+      $('#btn-resume-discard').onclick = () => {
+        clearInterval(bannerTimer);
+        clearDeploymentSession();
+        $('#resume-banner').classList.add('hidden');
+      };
+
+      $('#btn-resume-continue').onclick = () => {
+        clearInterval(bannerTimer);
+        $('#resume-banner').classList.add('hidden');
+        restoreSession(session);
+      };
+    } catch(e) { console.error(e); }
+  }
+
+  function restoreSession(session) {
+    currentDeployment = session;
+    deploymentStartTime = session.startTime;
+    isTailscalePlan = session.isTailscalePlan;
+    isDeploying = true;
+    
+    // Restore UI
+    $('#repo-name').value = session.repo;
+    showProgressPanel();
+    updateProgress({ progress: 50, status: 'in_progress', message: 'Resuming session...' });
+    log('🔄 Resuming previous session...', 'info');
+    
+    startElapsedTimer();
+    pollInterval = setInterval(pollForLink, 10000);
+    pollForLink();
+  }
+
   function saveDeploymentSession() { if (!currentDeployment) return; try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...currentDeployment, startTime: deploymentStartTime, savedAt: Date.now(), isTailscalePlan })); } catch(e) {} }
   function clearDeploymentSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {} }
 
@@ -920,6 +1032,11 @@
     $('#btn-clear-data').onclick = () => {
       openConfirmModal('Clear Data', 'Are you sure? This will wipe all local data and log you out.', () => { localStorage.clear(); location.reload(); });
     };
+    $('#btn-forget-token').onclick = () => {
+      localStorage.removeItem(GITHUB_KEY);
+      $('#github-token').value = '';
+      showToast('Đã xoá GitHub Token!', 'success');
+    };
   }
 
   function loadSavedTokens() {
@@ -929,33 +1046,10 @@
     $('#ngrok-token').onchange = e => { try { localStorage.setItem(NGROK_KEY, e.target.value || ''); } catch(err) {} };
 
     // GitHub token save/forget
-    try {
-      const savedGh = localStorage.getItem(GITHUB_KEY);
-      if (savedGh) {
-        const el = $('#github-token'); if (el) el.value = savedGh;
-        const cb = $('#save-github-token'); if (cb) cb.checked = true;
-      }
-    } catch(e) {}
-
-    const ghEl = $('#github-token');
-    if (ghEl) ghEl.onchange = e => { try { if ($('#save-github-token')?.checked) localStorage.setItem(GITHUB_KEY, e.target.value || ''); } catch(err) {} };
-
-    const saveCb = $('#save-github-token');
-    if (saveCb) saveCb.onchange = e => {
-      try {
-        if (e.target.checked) {
-          const v = $('#github-token')?.value || '';
-          if (v) localStorage.setItem(GITHUB_KEY, v);
-        } else {
-          localStorage.removeItem(GITHUB_KEY);
-        }
-      } catch(err) {}
-    };
-
-    const forgetBtn = $('#forget-github-token');
-    if (forgetBtn) forgetBtn.onclick = () => {
-      try { localStorage.removeItem(GITHUB_KEY); $('#github-token').value = ''; $('#save-github-token').checked = false; showToast('GitHub token đã được xoá khỏi trình duyệt', 'success'); } catch(e) { showToast('Không thể xoá token', 'error'); }
-    };
+    try { const savedGh = localStorage.getItem(GITHUB_KEY); if (savedGh) $('#github-token').value = savedGh; } catch(e) {}
+    $('#github-token').addEventListener('input', (e) => {
+      try { localStorage.setItem(GITHUB_KEY, e.target.value.trim()); } catch(e) {}
+    });
   }
 
   function initModals() {
