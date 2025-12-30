@@ -1,8 +1,5 @@
 // API for user authentication - Vercel Serverless Function
-// Using in-memory + JSON file storage (NO DATABASE)
-
-const fs = require('fs');
-const path = require('path');
+// Using Upstash Redis for persistent storage
 
 const FREE_TIME_FOR_NEW_USER = 30;
 
@@ -12,73 +9,91 @@ const ADMIN_ACCOUNTS = [
   { username: 'depchai', password: 'depchai' }
 ];
 
-// File paths for data storage
-const DATA_DIR = '/tmp';
-const USERS_FILE = path.join(DATA_DIR, 'users.json');
-const TIMES_FILE = path.join(DATA_DIR, 'user_times.json');
-const CONFIG_FILE = path.join(DATA_DIR, 'config.json');
-const IP_REGISTRY_FILE = path.join(DATA_DIR, 'ip_registry.json');
+// Upstash Redis REST API
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 
 // =====================================================
-// FILE HELPERS
+// REDIS HELPERS
 // =====================================================
 
-function readJsonFile(filePath, defaultValue = {}) {
+async function redis(command, ...args) {
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    console.error('Upstash Redis not configured!');
+    return null;
+  }
+  
   try {
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(data);
+    const res = await fetch(`${UPSTASH_URL}`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${UPSTASH_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify([command, ...args])
+    });
+    
+    const data = await res.json();
+    return data.result;
+  } catch (e) {
+    console.error('Redis error:', e.message);
+    return null;
+  }
+}
+
+// Log event helper (push to list 'userlogs')
+async function logEvent(evt) {
+  try {
+    await redis('LPUSH', 'userlogs', JSON.stringify(evt));
+  } catch (e) {
+    console.error('logEvent error:', e && e.message);
+  }
+}
+
+async function getUser(username) {
+  const data = await redis('GET', `user:${username}`);
+  if (!data) return null;
+  try { return JSON.parse(data); } catch { return null; }
+}
+
+async function saveUser(username, userData) {
+  return await redis('SET', `user:${username}`, JSON.stringify(userData));
+}
+
+async function getTime(username) {
+  const data = await redis('GET', `time:${username}`);
+  return data ? parseInt(data) || 0 : 0;
+}
+
+async function saveTime(username, minutes) {
+  return await redis('SET', `time:${username}`, String(minutes));
+}
+
+async function getIpRegistry(ip) {
+  const data = await redis('GET', `ip:${ip}`);
+  if (!data) return null;
+  try { return JSON.parse(data); } catch { return null; }
+}
+
+async function saveIpRegistry(ip, registryData) {
+  return await redis('SET', `ip:${ip}`, JSON.stringify(registryData));
+}
+
+async function getAllUsers() {
+  // Get all user keys
+  const keys = await redis('KEYS', 'user:*');
+  if (!keys || keys.length === 0) return [];
+  
+  const users = [];
+  for (const key of keys) {
+    const username = key.replace('user:', '');
+    const userData = await getUser(username);
+    if (userData) {
+      const timeMinutes = await getTime(username);
+      users.push({ ...userData, timeMinutes });
     }
-  } catch (e) {
-    console.error(`Error reading ${filePath}:`, e.message);
   }
-  return defaultValue;
-}
-
-function writeJsonFile(filePath, data) {
-  try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
-    return true;
-  } catch (e) {
-    console.error(`Error writing ${filePath}:`, e.message);
-    return false;
-  }
-}
-
-// =====================================================
-// DATA ACCESS FUNCTIONS
-// =====================================================
-
-function getUsers() {
-  return readJsonFile(USERS_FILE, {});
-}
-
-function saveUsers(users) {
-  return writeJsonFile(USERS_FILE, users);
-}
-
-function getTimes() {
-  return readJsonFile(TIMES_FILE, {});
-}
-
-function saveTimes(times) {
-  return writeJsonFile(TIMES_FILE, times);
-}
-
-function getConfig() {
-  return readJsonFile(CONFIG_FILE, { githubToken: '' });
-}
-
-function saveConfig(config) {
-  return writeJsonFile(CONFIG_FILE, config);
-}
-
-function getIpRegistry() {
-  return readJsonFile(IP_REGISTRY_FILE, {});
-}
-
-function saveIpRegistry(registry) {
-  return writeJsonFile(IP_REGISTRY_FILE, registry);
+  return users;
 }
 
 // =====================================================
@@ -111,8 +126,7 @@ function checkBanStatus(user) {
   if (user.banUntil) {
     const banUntilDate = new Date(user.banUntil);
     if (banUntilDate <= new Date()) {
-      // Ban expired - auto unban
-      return false;
+      return false; // Ban expired
     }
     return true;
   }
@@ -138,6 +152,14 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
 
+  // Check Redis config
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) {
+    return res.status(500).json({ 
+      success: false, 
+      message: 'Server chưa cấu hình database. Admin cần thêm UPSTASH_REDIS_REST_URL và UPSTASH_REDIS_REST_TOKEN vào Vercel Environment Variables.' 
+    });
+  }
+
   try {
     const clientIP = getClientIP(req);
     const body = req.body || {};
@@ -161,6 +183,8 @@ module.exports = async function handler(req, res) {
       );
       
       if (adminAccount) {
+        // log admin login
+        try { await logEvent({ type: 'admin_login', username: adminAccount.username, ip: clientIP, at: new Date().toISOString() }); } catch(e){}
         return res.json({
           success: true,
           user: {
@@ -173,8 +197,7 @@ module.exports = async function handler(req, res) {
       }
 
       // Check regular user
-      const users = getUsers();
-      const user = users[usernameLower];
+      const user = await getUser(usernameLower);
 
       if (!user) {
         return res.status(401).json({ success: false, message: 'Tài khoản không tồn tại' });
@@ -202,19 +225,19 @@ module.exports = async function handler(req, res) {
         user.banType = null;
         user.banUntil = null;
         user.banReason = null;
-        users[usernameLower] = user;
-        saveUsers(users);
+        await saveUser(usernameLower, user);
       }
 
       // Update last login
       user.lastLoginIP = clientIP;
       user.lastLoginAt = new Date().toISOString();
-      users[usernameLower] = user;
-      saveUsers(users);
+      await saveUser(usernameLower, user);
+
+      // log login
+      try { await logEvent({ type: 'login', username: user.username, ip: clientIP, at: new Date().toISOString() }); } catch(e) {}
 
       // Get user time
-      const times = getTimes();
-      const timeMinutes = times[usernameLower] || 0;
+      const timeMinutes = await getTime(usernameLower);
 
       return res.json({
         success: true,
@@ -254,41 +277,40 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Tên đăng nhập đã tồn tại' });
       }
 
-      const users = getUsers();
-      
       // Check if username exists
-      if (users[usernameLower]) {
+      const existingUser = await getUser(usernameLower);
+      if (existingUser) {
         return res.status(400).json({ success: false, message: 'Tên đăng nhập đã tồn tại' });
       }
 
       // Check IP for multi-account
-      const ipRegistry = getIpRegistry();
       let isBanned = false;
-      let existingUser = null;
+      let existingUsername = null;
+      const ipRegistry = await getIpRegistry(clientIP);
       
-      if (ipRegistry[clientIP]) {
+      if (ipRegistry) {
         // IP already has an account
-        existingUser = ipRegistry[clientIP].firstUsername;
+        existingUsername = ipRegistry.firstUsername;
         isBanned = true;
         
         // Update registry
-        ipRegistry[clientIP].allUsernames = ipRegistry[clientIP].allUsernames || [];
-        if (!ipRegistry[clientIP].allUsernames.includes(usernameLower)) {
-          ipRegistry[clientIP].allUsernames.push(usernameLower);
+        ipRegistry.allUsernames = ipRegistry.allUsernames || [];
+        if (!ipRegistry.allUsernames.includes(usernameLower)) {
+          ipRegistry.allUsernames.push(usernameLower);
         }
-        ipRegistry[clientIP].accountCount = (ipRegistry[clientIP].accountCount || 1) + 1;
-        ipRegistry[clientIP].lastActivity = new Date().toISOString();
+        ipRegistry.accountCount = (ipRegistry.accountCount || 1) + 1;
+        ipRegistry.lastActivity = new Date().toISOString();
+        await saveIpRegistry(clientIP, ipRegistry);
       } else {
         // New IP
-        ipRegistry[clientIP] = {
+        await saveIpRegistry(clientIP, {
           firstUsername: usernameLower,
           allUsernames: [usernameLower],
           accountCount: 1,
           createdAt: new Date().toISOString(),
           lastActivity: new Date().toISOString()
-        };
+        });
       }
-      saveIpRegistry(ipRegistry);
 
       // Create user
       const newUser = {
@@ -298,21 +320,21 @@ module.exports = async function handler(req, res) {
         createdAt: new Date().toISOString(),
         isBanned: isBanned,
         banType: isBanned ? 'permanent' : null,
-        banReason: isBanned ? `Tài khoản phụ (IP trùng với ${existingUser})` : null
+        banReason: isBanned ? `Tài khoản phụ (IP trùng với ${existingUsername})` : null
       };
       
-      users[usernameLower] = newUser;
-      saveUsers(users);
+      await saveUser(usernameLower, newUser);
 
       // Set initial time
-      const times = getTimes();
-      times[usernameLower] = isBanned ? 0 : FREE_TIME_FOR_NEW_USER;
-      saveTimes(times);
+      await saveTime(usernameLower, isBanned ? 0 : FREE_TIME_FOR_NEW_USER);
+
+      // log registration
+      try { await logEvent({ type: 'register', username: newUser.username, ip: clientIP, at: new Date().toISOString(), banned: isBanned }); } catch(e) {}
 
       if (isBanned) {
         return res.status(403).json({ 
           success: false, 
-          message: `Phát hiện tài khoản phụ! IP của bạn đã đăng ký tài khoản "${existingUser}". Tài khoản mới đã bị khóa.`
+          message: `Phát hiện tài khoản phụ! IP của bạn đã đăng ký tài khoản "${existingUsername}". Tài khoản mới đã bị khóa.`
         });
       }
 
@@ -332,8 +354,8 @@ module.exports = async function handler(req, res) {
       if (!usernameLower) {
         return res.status(400).json({ success: false, message: 'Missing username' });
       }
-      const times = getTimes();
-      return res.json({ success: true, minutes: times[usernameLower] || 0 });
+      const minutes = await getTime(usernameLower);
+      return res.json({ success: true, minutes });
     }
 
     // === UPDATE TIME ===
@@ -345,8 +367,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Invalid minutes' });
       }
 
-      const times = getTimes();
-      const previousMinutes = times[usernameLower] || 0;
+      const previousMinutes = await getTime(usernameLower);
       let newMinutes;
 
       switch (operation) {
@@ -360,8 +381,10 @@ module.exports = async function handler(req, res) {
           newMinutes = Math.max(0, minutes);
       }
 
-      times[usernameLower] = newMinutes;
-      saveTimes(times);
+      await saveTime(usernameLower, newMinutes);
+
+      // log time update
+      try { await logEvent({ type: 'updateTime', username: usernameLower, ip: clientIP, at: new Date().toISOString(), operation, minutes, previousMinutes, newMinutes }); } catch(e) {}
 
       return res.json({
         success: true,
@@ -372,26 +395,10 @@ module.exports = async function handler(req, res) {
 
     // === GET ALL USERS (Admin) ===
     if (action === 'getAllUsers') {
-      const users = getUsers();
-      const times = getTimes();
-      
-      const userList = Object.values(users).map(u => ({
-        username: u.username,
-        createdAt: u.createdAt,
-        timeMinutes: times[u.username] || 0,
-        isBanned: u.isBanned || false,
-        banType: u.banType,
-        banUntil: u.banUntil,
-        banReason: u.banReason,
-        registerIP: u.registerIP,
-        lastLoginIP: u.lastLoginIP,
-        lastLoginAt: u.lastLoginAt
-      }));
-
+      const users = await getAllUsers();
       return res.json({
         success: true,
-        users: userList,
-        times
+        users
       });
     }
 
@@ -401,8 +408,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Missing username' });
       }
       
-      const users = getUsers();
-      const user = users[usernameLower];
+      const user = await getUser(usernameLower);
       
       if (!user) {
         return res.status(404).json({ success: false, message: 'User không tồn tại' });
@@ -438,9 +444,11 @@ module.exports = async function handler(req, res) {
       user.banReason = reason;
       user.bannedAt = new Date().toISOString();
       
-      users[usernameLower] = user;
-      saveUsers(users);
+      await saveUser(usernameLower, user);
       
+      // log ban
+      try { await logEvent({ type: 'ban', target: usernameLower, ip: clientIP, at: new Date().toISOString(), unit, duration, banUntil: banUntil ? banUntil.toISOString() : null, reason }); } catch(e) {}
+
       return res.json({ 
         success: true, 
         message: `Đã ban user ${usernameLower}`,
@@ -454,8 +462,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ success: false, message: 'Missing username' });
       }
       
-      const users = getUsers();
-      const user = users[usernameLower];
+      const user = await getUser(usernameLower);
       
       if (!user) {
         return res.status(404).json({ success: false, message: 'User không tồn tại' });
@@ -466,59 +473,12 @@ module.exports = async function handler(req, res) {
       user.banUntil = null;
       user.banReason = null;
       
-      users[usernameLower] = user;
-      saveUsers(users);
+      await saveUser(usernameLower, user);
+
+      // log unban
+      try { await logEvent({ type: 'unban', target: usernameLower, ip: clientIP, at: new Date().toISOString() }); } catch(e) {}
       
       return res.json({ success: true, message: `Đã unban user ${usernameLower}` });
-    }
-
-    // === GET CONFIG (Admin) ===
-    if (action === 'getConfig') {
-      const config = getConfig();
-      return res.json({
-        success: true,
-        hasGithubToken: !!config.githubToken,
-        githubToken: config.githubToken || ''
-      });
-    }
-
-    // === SET CONFIG (Admin) ===
-    if (action === 'setConfig') {
-      const { githubToken: newToken } = body;
-      
-      if (newToken) {
-        // Verify token with GitHub
-        try {
-          const verifyRes = await fetch('https://api.github.com/user', {
-            headers: {
-              'Authorization': `Bearer ${newToken}`,
-              'Accept': 'application/vnd.github+json'
-            }
-          });
-          
-          if (!verifyRes.ok) {
-            return res.status(400).json({ success: false, message: 'Token không hợp lệ' });
-          }
-          
-          const config = getConfig();
-          config.githubToken = newToken;
-          saveConfig(config);
-          
-        } catch (e) {
-          return res.status(400).json({ success: false, message: 'Không thể xác minh token: ' + e.message });
-        }
-      }
-      
-      return res.json({ success: true, message: 'Cấu hình đã được lưu' });
-    }
-
-    // === GET ADMIN TOKEN (for VPS creation) ===
-    if (action === 'getAdminToken') {
-      const config = getConfig();
-      return res.json({
-        success: true,
-        token: config.githubToken || ''
-      });
     }
 
     return res.status(400).json({ success: false, message: 'Unknown action: ' + action });

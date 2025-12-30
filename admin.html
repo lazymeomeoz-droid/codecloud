@@ -182,6 +182,7 @@
       <button class="tab active" data-tab="users">👥 Quản Lý Users</button>
       <button class="tab" data-tab="time">⏱️ Cộng Thời Gian</button>
       <button class="tab" data-tab="settings">⚙️ Cài Đặt</button>
+      <button class="tab" data-tab="logs">📝 Logs</button>
     </div>
     
     <!-- Tab: Users -->
@@ -265,6 +266,36 @@
             <h4>🔐 Token GitHub</h4>
             <p>Tokens giờ do từng user nhập khi deploy. Không lưu token chung ở admin.</p>
           </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab: Logs -->
+    <div class="tab-content" id="tab-logs">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">📝 Hệ Thống Logs</h2>
+            <p class="panel-desc">Nhật ký sự kiện (đăng nhập, đăng ký, thay đổi thời gian, ban/unban)</p>
+          </div>
+          <button id="btn-refresh-logs" class="btn btn-secondary btn-sm">🔄 Làm mới</button>
+        </div>
+
+        <div class="user-table-wrapper">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th>Thời Gian</th>
+                <th>User</th>
+                <th>Hành Động</th>
+                <th>IP</th>
+                <th>Chi Tiết</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table-body">
+              <tr><td colspan="5" style="text-align:center;padding:40px">Đang tải...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -376,6 +407,34 @@
       allUsers = data.users || [];
       updateStats();
       renderUserTable();
+    }
+  }
+
+  async function fetchLogs() {
+    try {
+      const res = await fetch('/api/logs');
+      const data = await res.json();
+      const tbody = $('logs-table-body');
+      if (!data.success || !Array.isArray(data.items)) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px">Không có logs</td></tr>';
+        return;
+      }
+      if (data.items.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px">Không có logs</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.items.map(it => {
+        const time = it.at || it.createdAt || '';
+        const user = it.username || it.target || it.githubLogin || '';
+        const action = it.type || '';
+        const ip = it.ip || '';
+        let details = '';
+        try { details = JSON.stringify(it); } catch(e) { details = String(it); }
+        return `<tr><td>${time}</td><td><strong>${user}</strong></td><td>${action}</td><td><span class="ip-text">${ip}</span></td><td style="max-width:320px;word-break:break-word">${details}</td></tr>`;
+      }).join('');
+    } catch (e) {
+      const tbody = $('logs-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px">Lỗi khi tải logs</td></tr>';
     }
   }
   
@@ -562,6 +621,8 @@
   // GitHub Token
   // Init
   fetchAllUsers();
+    fetchLogs();
+    $('btn-refresh-logs').onclick = fetchLogs;
 })();
 </script>
 </body>
