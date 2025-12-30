@@ -318,21 +318,49 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { githubToken, repoName, checkTailscaleAuth } = req.body || {};
+    const { githubToken: clientToken, owner, repoName, checkTailscaleAuth } = req.body || {};
 
-    if (!githubToken) {
-      return res.status(400).json({ success: false, message: "Thiếu GitHub Token" });
-    }
     if (!repoName) {
       return res.status(400).json({ success: false, message: "Thiếu tên Repository" });
     }
 
-    // Get user
+    let githubToken = clientToken;
+    let login = owner;
+    // If client didn't provide a token, try to find a saved token for the owner
+    if (!githubToken) {
+      if (!owner) return res.status(400).json({ success: false, message: 'Missing owner or token' });
+      const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+      const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ success: false, message: 'Upstash not configured' });
+      try {
+        const r = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['LRANGE', 'gh_tokens', '0', '-1']) });
+        const j = await r.json();
+        const ids = Array.isArray(j.result) ? j.result : [];
+        for (const id of ids) {
+          const g = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['GET', `gh_token:${id}`]) });
+          const gj = await g.json();
+          if (gj.result) {
+            try {
+              const parsed = JSON.parse(gj.result);
+              const token = parsed.token;
+              const meta = parsed.meta || {};
+              if (meta.owner && meta.owner.toLowerCase() === owner.toLowerCase()) { githubToken = token; break; }
+            } catch (e) {}
+          }
+        }
+      } catch (e) { console.log('[find-link] upstash lookup error', e.message); }
+    }
+
+    if (!githubToken) {
+      return res.status(400).json({ success: false, message: "Thiếu GitHub Token và không tìm thấy token lưu của owner" });
+    }
+
+    // Get user from token (login) to build repoPath
     const me = await ghFetch("https://api.github.com/user", "GET", githubToken);
     if (me.status !== 200 || !me.data.login) {
       return res.status(401).json({ success: false, message: "GitHub Token không hợp lệ" });
     }
-    const login = me.data.login;
+    login = me.data.login;
     const repoPath = `${login}/${encodeURIComponent(repoName)}`;
     const cacheKey = `${repoPath}:link`;
 

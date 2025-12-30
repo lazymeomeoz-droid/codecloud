@@ -16,7 +16,7 @@
       --success: #34d399; --success-soft: rgba(52,211,153,0.12);
       --error: #f87171; --error-soft: rgba(248,113,113,0.12);
       --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
-      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);
+      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#d946ef 100%);
       --gradient-accent: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
       --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
       --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
@@ -102,7 +102,7 @@
     .user-table{width:100%;border-collapse:collapse}
     .user-table th,.user-table td{padding:12px;text-align:left;border-bottom:1px solid var(--border-light);font-size:0.82rem}
     .user-table th{background:var(--bg-card);font-weight:700;color:var(--text-primary);position:sticky;top:0}
-    .user-table tr:hover{background:var(--accent-soft)}
+    .user-table tr:hover{background:rgba(255,255,255,0.03)}
     .user-table-wrapper{max-height:500px;overflow-y:auto;border-radius:var(--radius-md);border:1px solid var(--border-light)}
     
     .badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700}
@@ -144,6 +144,11 @@
     .setting-item{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;border:1px solid var(--border-light)}
     .setting-item h4{font-size:0.9rem;font-weight:700;margin-bottom:8px}
     .setting-item p{font-size:0.75rem;color:var(--text-muted);margin-bottom:12px}
+
+    /* Log Details Formatter */
+    .detail-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 0.75rem; align-items: baseline; }
+    .detail-key { color: var(--accent); font-weight: 600; text-align: right; white-space: nowrap; }
+    .detail-val { color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; word-break: break-word; }
 
     /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -275,9 +280,17 @@
         <div class="settings-grid">
           <div class="setting-item">
             <h4>🔐 Token GitHub</h4>
-            <p>Tokens giờ do từng user nhập khi deploy. Không lưu token chung ở admin.</p>
+            <p>Quản lý GitHub Personal Access Tokens (PAT) dùng chung để tạo VPS. Thêm token sẽ được kiểm tra tự động trước khi lưu.</p>
+            <div style="margin-top:12px">
+              <label class="label">Add Token (PAT)</label>
+              <input type="password" id="admin-token-input" class="input" placeholder="ghp_xxxxxxxxxxxx" />
+              <div style="display:flex;gap:8px;margin-top:8px;"><button id="btn-add-token" class="btn btn-primary">Thêm và Kiểm tra</button><button id="btn-refresh-tokens" class="btn btn-secondary">Làm mới danh sách</button></div>
+            </div>
+            <div style="margin-top:14px">
+              <h4 style="margin-bottom:8px">Saved Tokens</h4>
+              <div id="token-list" style="max-height:260px;overflow:auto;border:1px solid var(--border-light);border-radius:8px;padding:8px;background:var(--bg-card)">Đang tải...</div>
+            </div>
           </div>
-        </div>
       </div>
     </div>
     
@@ -414,6 +427,25 @@
     }
   }
   
+  function formatLogDetails(obj) {
+    if (!obj || typeof obj !== 'object') return String(obj);
+    
+    // Filter out keys that are already columns
+    const ignore = ['type', 'username', 'ip', 'ipRaw', 'ua', 'at', 'createdAt', '_id', 'githubLogin', 'target'];
+    let html = '<div class="detail-grid">';
+    let hasContent = false;
+    
+    for (const [k, v] of Object.entries(obj)) {
+      if (ignore.includes(k)) continue;
+      let valStr = typeof v === 'object' ? JSON.stringify(v) : String(v);
+      html += `<div class="detail-key">${k}:</div><div class="detail-val">${valStr}</div>`;
+      hasContent = true;
+    }
+    html += '</div>';
+    
+    return hasContent ? html : '<span style="color:var(--text-muted);font-style:italic;font-size:0.75rem">No extra details</span>';
+  }
+
   async function fetchAllUsers() {
     const data = await callAPI({ action: 'getAllUsers' });
     if (data.success) {
@@ -443,8 +475,6 @@
         const ip = it.ip || '';
         const ipRaw = it.ipRaw || '';
         const ua = it.ua || '';
-        let details = '';
-        try { details = JSON.stringify(it); } catch(e) { details = String(it); }
         const uaShort = ua.length > 80 ? ua.slice(0,80) + '…' : ua;
         return `<tr>
           <td>${time}</td>
@@ -453,7 +483,7 @@
           <td><span class="ip-text">${ip}</span></td>
           <td><span class="ip-text">${ipRaw}</span></td>
           <td style="max-width:260px;word-break:break-word;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${uaShort}</td>
-          <td style="max-width:320px;word-break:break-word">${details}</td>
+          <td style="max-width:350px;">${formatLogDetails(it)}</td>
         </tr>`;
       }).join('');
     } catch (e) {
@@ -646,10 +676,49 @@
   };
   
   // GitHub Token
+  // Token management
+  async function loadTokens() {
+    try {
+      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) });
+      const d = await res.json();
+      const container = $('token-list');
+      if (!d.success || !Array.isArray(d.items)) { container.innerHTML = '<div style="padding:12px;color:var(--text-muted)">No tokens</div>'; return; }
+      container.innerHTML = d.items.map(t => {
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px dashed var(--border-light)"><div><div style="font-weight:700">${t.owner || 'unknown'}</div><div style="font-size:0.85rem;color:var(--text-muted)">${t.masked || ''} • ${t.status || ''}</div></div><div style="display:flex;gap:8px"><button class="btn btn-sm" data-id="${t.id}" data-action="check">Check</button><button class="btn btn-danger btn-sm" data-id="${t.id}" data-action="delete">Delete</button></div></div>`;
+      }).join('');
+      container.querySelectorAll('button[data-action]').forEach(b => b.onclick = async (e) => {
+        const id = b.dataset.id; const action = b.dataset.action;
+        b.disabled = true;
+        if (action === 'delete') {
+          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
+        } else if (action === 'check') {
+          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'check', id }) });
+        }
+        await loadTokens();
+      });
+    } catch (e) { console.error(e); showToast('Failed loading tokens', 'error'); }
+  }
+
+  $('btn-add-token').onclick = async () => {
+    const val = $('admin-token-input').value.trim();
+    if (!val) { showToast('Nhập token!', 'error'); return; }
+    const btn = $('btn-add-token'); btn.disabled = true; btn.textContent = 'Checking...';
+    try {
+      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add', token: val }) });
+      const d = await res.json();
+      if (!d.success) { showToast(d.message || 'Check failed', 'error'); }
+      else { showToast('Token live and saved', 'success'); $('admin-token-input').value = ''; }
+    } catch (e) { showToast('Error adding token', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Thêm và Kiểm tra'; await loadTokens(); }
+  };
+
+  $('btn-refresh-tokens').onclick = loadTokens;
+
   // Init
   fetchAllUsers();
-    fetchLogs();
-    $('btn-refresh-logs').onclick = fetchLogs;
+  fetchLogs();
+  $('btn-refresh-logs').onclick = fetchLogs;
+  loadTokens();
 })();
 </script>
 </body>

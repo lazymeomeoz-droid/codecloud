@@ -444,15 +444,31 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = req.body || {};
-    const { planId, durationMinutes, githubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
+    const { planId, durationMinutes, githubToken: clientGithubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    if (!githubToken || typeof githubToken !== "string" || githubToken.length < 10) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Vui lòng nhập GitHub Token của bạn" 
-      });
+    // Use client-provided token if present, otherwise select one from saved pool
+    let githubToken = clientGithubToken;
+    if (!githubToken || typeof githubToken !== 'string' || githubToken.length < 10) {
+      // try load from Upstash stored tokens
+      const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
+      if (!ids || ids.length === 0) {
+        return res.status(500).json({ success: false, message: 'No saved GitHub tokens available. Contact admin.' });
+      }
+      let found = null;
+      for (const id of ids) {
+        const raw = await upstash('GET', `gh_token:${id}`);
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          const meta = parsed.meta || {};
+          if (meta.status === 'live' && parsed.token) { found = { id, token: parsed.token, owner: meta.owner }; break; }
+        } catch (e) { continue; }
+      }
+      if (!found) return res.status(500).json({ success: false, message: 'No live GitHub tokens available.' });
+      githubToken = found.token;
+      // note: we will use 'found.owner' as login after verification
     }
     if (!repoName || typeof repoName !== "string") {
       return res.status(400).json({ success: false, message: "Thiếu tên Repository" });

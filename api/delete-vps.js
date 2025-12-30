@@ -82,22 +82,50 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { githubToken, owner, repo } = req.body || {};
+    let { githubToken, owner, repo } = req.body || {};
 
     if (!githubToken) {
-      return res.status(400).json({ success: false, message: "Thiếu GitHub Token" });
+      // attempt to find a stored token for this owner
+      const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+      const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+      if (UPSTASH_URL && UPSTASH_TOKEN) {
+        try {
+          const r = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['LRANGE', 'gh_tokens', '0', '-1']) });
+          const j = await r.json();
+          const ids = Array.isArray(j.result) ? j.result : [];
+          for (const id of ids) {
+            const g = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['GET', `gh_token:${id}`]) });
+              const gj = await g.json();
+              if (gj.result) {
+                try {
+                  const parsed = JSON.parse(gj.result);
+                  const token = parsed.token;
+                  const meta = parsed.meta || {};
+                  if (meta.owner && owner && meta.owner.toLowerCase() === owner.toLowerCase()) {
+                    req.body.githubToken = token; // inject for later use
+                    break;
+                  }
+                } catch (e) {}
+              }
+          }
+        } catch (e) { console.log('[delete-vps] Upstash lookup error', e.message); }
+      }
+      if (!req.body.githubToken) {
+        return res.status(400).json({ success: false, message: "Thiếu GitHub Token và không tìm thấy token lưu" });
+      }
     }
     if (!owner || !repo) {
       return res.status(400).json({ success: false, message: "Thiếu owner hoặc repo" });
     }
 
     const repoPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
+    const selectedToken = githubToken || req.body.githubToken;
 
     // Check if repo exists
     const checkRepo = await ghFetch(
       `https://api.github.com/repos/${repoPath}`,
       "GET",
-      githubToken
+      selectedToken
     );
 
     if (checkRepo.status === 404) {
@@ -109,7 +137,7 @@ module.exports = async function handler(req, res) {
 
     // Cancel all workflows first
     console.log(`[delete-vps] Cancelling workflows for ${repoPath}...`);
-    const cancelledCount = await cancelAllWorkflows(repoPath, githubToken);
+    const cancelledCount = await cancelAllWorkflows(repoPath, selectedToken);
     
     if (cancelledCount > 0) {
       console.log(`[delete-vps] Cancelled ${cancelledCount} workflows`);
@@ -120,7 +148,7 @@ module.exports = async function handler(req, res) {
     const deleteResult = await ghFetch(
       `https://api.github.com/repos/${repoPath}`,
       "DELETE",
-      githubToken
+      selectedToken
     );
 
     if (deleteResult.status === 204) {

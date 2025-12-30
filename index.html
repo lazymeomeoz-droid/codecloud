@@ -20,7 +20,7 @@
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
     :root {
-      --bg-base: #f0f4ff; --bg-surface: rgba(255,255,255,0.7); --bg-card: rgba(255,255,255,0.5); --bg-elevated: #fff;
+      --bg-base: #f0f4ff; --bg-surface: rgba(255,255,255,0.85); --bg-card: rgba(255,255,255,0.6); --bg-elevated: #fff;
       --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
       --border-light: rgba(99,102,241,0.12); --border-medium: rgba(99,102,241,0.2);
       --accent: #6366f1; --accent-light: #818cf8; --accent-soft: rgba(99,102,241,0.1); --accent-glow: rgba(99,102,241,0.3);
@@ -35,7 +35,7 @@
       --sidebar-w: 280px; --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
     }
     [data-theme="dark"] {
-      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.8); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
+      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.7); --bg-card: rgba(30,41,59,0.4); --bg-elevated: #1e293b;
       --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
       --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
       --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
@@ -69,7 +69,7 @@
     [data-theme="dark"] .icon-sun{display:none}
     [data-theme="dark"] .icon-moon{display:block}
     
-    .sidebar{width:var(--sidebar-w);background:var(--bg-surface);backdrop-filter:blur(30px);border-right:1px solid var(--border-light);display:flex;flex-direction:column;z-index:50;transition:var(--transition);animation:slideIn 0.5s ease-out;position:relative}
+    .sidebar{width:var(--sidebar-w);background:var(--bg-surface);backdrop-filter:blur(40px);border-right:1px solid var(--border-light);display:flex;flex-direction:column;z-index:50;transition:var(--transition);animation:slideIn 0.5s ease-out;position:relative}
     @media(max-width:1024px){.sidebar{position:fixed;inset:0 auto 0 0;transform:translateX(-100%);box-shadow:var(--shadow-lg)}.sidebar.active{transform:translateX(0)}}
     .sidebar-header{padding:24px 20px;border-bottom:1px solid var(--border-light)}
     .brand{display:flex;align-items:center;gap:14px}
@@ -86,7 +86,7 @@
     
     .nav-menu{padding:20px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
     .nav-item{width:100%;border:none;background:transparent;color:var(--text-secondary);padding:12px 14px;border-radius:var(--radius-md);font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--transition);position:relative}
-    .nav-item:hover{color:var(--text-primary);background:var(--accent-soft);transform:translateX(4px)}
+    .nav-item:hover{color:var(--text-primary);background:var(--accent-soft);transform:translateX(4px);border:1px solid var(--border-light)}
     .nav-item.active{color:white;background:var(--gradient-accent);box-shadow:var(--shadow-md)}
     .nav-icon{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
     .nav-icon svg{width:16px;height:16px;color:var(--accent)}
@@ -101,7 +101,7 @@
     .sidebar.active~.sidebar-overlay{opacity:1;pointer-events:auto}
     
     .main-content{flex:1;display:flex;flex-direction:column;min-width:0}
-    .top-bar{height:72px;display:flex;align-items:center;padding:0 28px;gap:14px;background:var(--bg-surface);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:30}
+    .top-bar{height:72px;display:flex;align-items:center;padding:0 28px;gap:14px;background:var(--bg-surface);backdrop-filter:blur(40px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:30}
     .menu-btn{background:var(--bg-card);border:1px solid var(--border-light);color:var(--text-primary);cursor:pointer;display:none;padding:10px;border-radius:var(--radius-sm);transition:var(--transition)}
     .menu-btn:hover{background:var(--accent-soft);border-color:var(--accent)}
     .menu-btn svg{width:20px;height:20px}
@@ -112,7 +112,7 @@
     @media(max-width:768px){.top-bar{padding:0 16px;height:64px}.page-title{font-size:1.25rem}.scroll-area{padding:16px}}
     .container{max-width:1300px;margin:0 auto}
     
-    .panel{background:var(--bg-surface);backdrop-filter:blur(30px);border-radius:var(--radius-xl);padding:28px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;transition:var(--transition);animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
+    .panel{background:var(--bg-surface);backdrop-filter:blur(40px);border-radius:var(--radius-xl);padding:28px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;transition:var(--transition);animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
     .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-light),transparent);opacity:0.5}
     .panel:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--border-medium)}
     .panel>*{position:relative;z-index:2}
@@ -127,7 +127,7 @@
     .plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
     @media(max-width:600px){.plans-grid{grid-template-columns:1fr}}
     .plan-card{background:var(--bg-card);border-radius:var(--radius-lg);padding:14px;border:2px solid transparent;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--transition)}
-    .plan-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:var(--shadow-lg)}
+    .plan-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:var(--shadow-lg);border-color:var(--accent-soft)}
     .plan-card.selected{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-soft) 0%,rgba(139,92,246,0.08) 100%);box-shadow:var(--shadow-lg),var(--shadow-glow)}
     .plan-icon{width:48px;height:48px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-sm)}
     .plan-icon svg{width:28px;height:28px}
@@ -201,7 +201,7 @@
     .stat-value{font-size:1.3rem;font-weight:900;color:var(--text-primary)}
     .stat-value-small{font-size:1rem}
     
-    .log-box{background:linear-gradient(180deg,rgba(15,23,42,0.95) 0%,rgba(2,6,23,0.98) 100%);color:#e2e8f0;border-radius:var(--radius-lg);padding:16px;height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.6;border:1px solid rgba(99,102,241,0.2)}
+    .log-box{background:linear-gradient(180deg,rgba(15,23,42,0.95) 0%,rgba(2,6,23,0.98) 100%);color:#e2e8f0;border-radius:var(--radius-lg);padding:16px;height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.6;border:1px solid rgba(99,102,241,0.2);box-shadow:inset 0 2px 10px rgba(0,0,0,0.5)}
     .log-entry{margin-bottom:4px;animation:slideUp 0.15s ease-out;padding:2px 0}
     .log-entry .time{color:#64748b;margin-right:8px;font-size:0.68rem}
     .log-entry.info{color:#93c5fd}
@@ -431,11 +431,7 @@
                   <input type="text" id="repo-name" class="input" placeholder="my-vps-01" autocomplete="off" />
                   <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
                 </div>
-                <div class="form-group">
-                  <label class="label">🔑 GitHub Personal Access Token</label>
-                  <input type="password" id="github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
-                  <p class="input-hint">Token sẽ được tự động lưu trên trình duyệt.</p>
-                </div>
+                <!-- GitHub tokens are managed by admins; client uses server token pool -->
                 <div class="form-group hidden" id="ngrok-group">
                   <label class="label">Ngrok Authtoken</label>
                   <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
@@ -1007,7 +1003,7 @@
   async function pollForLink() {
     if (!currentDeployment) return;
     try {
-      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: currentDeployment.token, repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
+      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner: currentDeployment.owner, repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
       const data = await res.json();
       updateProgress(data);
       if (data.tailscaleAuthUrl) { log(`🔐 Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
@@ -1033,9 +1029,7 @@
       openConfirmModal('Clear Data', 'Are you sure? This will wipe all local data and log you out.', () => { localStorage.clear(); location.reload(); });
     };
     $('#btn-forget-token').onclick = () => {
-      localStorage.removeItem(GITHUB_KEY);
-      $('#github-token').value = '';
-      showToast('Đã xoá GitHub Token!', 'success');
+      showToast('GitHub tokens now managed via Admin panel.', 'info');
     };
   }
 
@@ -1044,12 +1038,6 @@
       const savedNgrok = localStorage.getItem(NGROK_KEY); if (savedNgrok) { $('#ngrok-token').value = savedNgrok; }
     } catch(e) {}
     $('#ngrok-token').onchange = e => { try { localStorage.setItem(NGROK_KEY, e.target.value || ''); } catch(err) {} };
-
-    // GitHub token save/forget
-    try { const savedGh = localStorage.getItem(GITHUB_KEY); if (savedGh) $('#github-token').value = savedGh; } catch(e) {}
-    $('#github-token').addEventListener('input', (e) => {
-      try { localStorage.setItem(GITHUB_KEY, e.target.value.trim()); } catch(e) {}
-    });
   }
 
   function initModals() {
@@ -1081,9 +1069,6 @@
       log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
       
       try {
-        const userToken = document.getElementById('github-token')?.value?.trim();
-        if (!userToken) { showToast('Vui lòng nhập GitHub Token của bạn!', 'error'); btn.disabled = false; btn.innerHTML = originalText; isDeploying = false; return; }
-
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
@@ -1094,7 +1079,7 @@
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            githubToken: userToken,
+            // githubToken omitted: server will use saved token pool
             username: currentUser?.username || ''
           }) 
         });
@@ -1117,10 +1102,8 @@
         else log('⚠️ Manual trigger needed', 'pending');
         log(`📂 ${data.repoUrl}`, 'info');
         
-        // Use the user's token for polling
-        const userTokenForPolling = document.getElementById('github-token')?.value?.trim() || '';
-
-        currentDeployment = { token: userTokenForPolling, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
+        // Server will use stored token for polling; client does not hold token
+        currentDeployment = { token: null, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null, owner: data.owner };
         isTailscalePlan = data.planId === 'win_tailscale';
         updateConnInfo(currentDeployment);
         saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
@@ -1196,27 +1179,24 @@
       const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
       let timeDisplay = `⏱️ ${runningMinutes}m/${maxDuration}m`;
       if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">⏱️ ${remainingMinutes}m left</span>`;
-      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}">Delete</button></div>`;
+      // extract owner from repoUrl if available
+      let ownerAttr = '';
+      try { if (item.repoUrl) { const parts = item.repoUrl.split('/'); ownerAttr = parts[parts.length - 2]; } } catch(e) { ownerAttr = ''; }
+      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${ownerAttr}">Delete</button></div>`;
       container.appendChild(el);
     });
     container.querySelectorAll('.btn-del').forEach(btn => btn.onclick = () => {
-      openConfirmModal('Delete VPS', `Delete "${btn.dataset.repo}"? This will delete the GitHub repository.`, () => executeDeleteVps(parseInt(btn.dataset.id), btn.dataset.repo));
+      openConfirmModal('Delete VPS', `Delete "${btn.dataset.repo}"? This will delete the GitHub repository.`, () => executeDeleteVps(parseInt(btn.dataset.id), btn.dataset.repo, btn.dataset.owner));
     });
   }
 
-  async function executeDeleteVps(id, repo) {
+  async function executeDeleteVps(id, repo, owner) {
     try {
-      const token = document.getElementById('github-token')?.value?.trim();
-      if (!token) { showToast('Vui lòng nhập GitHub Token của bạn để xóa VPS', 'error'); return; }
-
-      const uRes = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${token}` } }); 
-      const uData = await uRes.json();
-      if (!uData.login) throw new Error('Invalid Token');
-
-      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: token, owner: uData.login, repo }) });
+      // backend will find appropriate token for owner
+      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner, repo }) });
       const d = await res.json(); 
       if (!d.success) throw new Error(d.message || 'Delete failed');
-      
+
       saveVpsList(getVpsList().filter(x => x.id !== id));
       clearLogs(); stopPolling(); clearDeploymentSession(); currentDeployment = null; resetConnInfo(); hideProgressPanel(); hideTailscaleAuthBanner();
       isDeploying = false;
