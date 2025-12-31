@@ -287,7 +287,7 @@
               <div style="display:flex;gap:8px;margin-top:8px;"><button id="btn-add-token" class="btn btn-primary">Thêm và Kiểm tra</button><button id="btn-refresh-tokens" class="btn btn-secondary">Làm mới danh sách</button></div>
             </div>
             <div style="margin-top:14px">
-              <h4 style="margin-bottom:8px">Saved Tokens</h4>
+              <h4 style="margin-bottom:8px">One-time Codes</h4>
               <div id="token-list" style="max-height:260px;overflow:auto;border:1px solid var(--border-light);border-radius:8px;padding:8px;background:var(--bg-card)">Đang tải...</div>
             </div>
           </div>
@@ -682,33 +682,40 @@
       const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) });
       const d = await res.json();
       const container = $('token-list');
-      if (!d.success || !Array.isArray(d.items)) { container.innerHTML = '<div style="padding:12px;color:var(--text-muted)">No tokens</div>'; return; }
+      if (!d.success || !Array.isArray(d.items)) { container.innerHTML = '<div style="padding:12px;color:var(--text-muted)">No codes</div>'; return; }
       container.innerHTML = d.items.map(t => {
-        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px dashed var(--border-light)"><div><div style="font-weight:700">${t.owner || 'unknown'}</div><div style="font-size:0.85rem;color:var(--text-muted)">${t.masked || ''} • ${t.status || ''}</div></div><div style="display:flex;gap:8px"><button class="btn btn-sm" data-id="${t.id}" data-action="check">Check</button><button class="btn btn-danger btn-sm" data-id="${t.id}" data-action="delete">Delete</button></div></div>`;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px dashed var(--border-light)"><div><div style="font-weight:700">${t.owner || 'unknown'}</div><div style="font-size:0.85rem;color:var(--text-muted)">Code: <strong>${t.code}</strong> • ${t.status || ''}</div></div><div style="display:flex;gap:8px"><button class="btn btn-sm" data-secret="${t.secretId}" data-action="new">Tạo mới</button><button class="btn btn-danger btn-sm" data-id="${t.codeId}" data-action="delete">Delete</button></div></div>`;
       }).join('');
       container.querySelectorAll('button[data-action]').forEach(b => b.onclick = async (e) => {
-        const id = b.dataset.id; const action = b.dataset.action;
+        const id = b.dataset.id; const action = b.dataset.action; const sid = b.dataset.secret;
         b.disabled = true;
         if (action === 'delete') {
-          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
-        } else if (action === 'check') {
-          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'check', id }) });
+          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', codeId: id }) });
+        } else if (action === 'new') {
+          const r = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'new_code_for_secret', secretId: sid }) });
+          const jr = await r.json();
+          if (jr.success && jr.code) {
+            navigator.clipboard?.writeText(jr.code).catch(()=>{});
+            showToast('New code created and copied to clipboard', 'success');
+          } else {
+            showToast(jr.message || 'Failed creating code', 'error');
+          }
         }
         await loadTokens();
       });
-    } catch (e) { console.error(e); showToast('Failed loading tokens', 'error'); }
+    } catch (e) { console.error(e); showToast('Failed loading codes', 'error'); }
   }
 
   $('btn-add-token').onclick = async () => {
     const val = $('admin-token-input').value.trim();
     if (!val) { showToast('Nhập token!', 'error'); return; }
-    const btn = $('btn-add-token'); btn.disabled = true; btn.textContent = 'Checking...';
+    const btn = $('btn-add-token'); btn.disabled = true; btn.textContent = 'Creating...';
     try {
-      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add', token: val }) });
+      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'create_code', token: val }) });
       const d = await res.json();
-      if (!d.success) { showToast(d.message || 'Check failed', 'error'); }
-      else { showToast('Token live and saved', 'success'); $('admin-token-input').value = ''; }
-    } catch (e) { showToast('Error adding token', 'error'); }
+      if (!d.success) { showToast(d.message || 'Create failed', 'error'); }
+      else { showToast(`Code: ${d.code} (copied)`, 'success'); try { navigator.clipboard.writeText(d.code); } catch(e){} $('admin-token-input').value = ''; }
+    } catch (e) { showToast('Error creating code', 'error'); }
     finally { btn.disabled = false; btn.textContent = 'Thêm và Kiểm tra'; await loadTokens(); }
   };
 
