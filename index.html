@@ -457,6 +457,11 @@
                 <div id="time-warning" class="hidden" style="background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--warning);display:flex;align-items:center;gap:8px;">
                   <span>⚠️</span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
                 </div>
+                <div class="form-group">
+                  <label class="label">Mã dùng 1 lần (vmmc)</label>
+                  <input type="text" id="one-time-code" class="input" placeholder="vmmc_xxxxxxxxx" />
+                  <p class="input-hint">Nhập mã do admin cung cấp (mỗi mã chỉ dùng 1 lần).</p>
+                </div>
                 <div style="margin-top:16px;">
                   <button id="btn-deploy" class="btn">🚀 Deploy VPS</button>
                 </div>
@@ -1069,6 +1074,7 @@
       log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
       
       try {
+        const oneTimeCode = $('#one-time-code')?.value?.trim() || '';
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
@@ -1079,7 +1085,8 @@
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            // githubToken omitted: server will use saved token pool
+            oneTimeCode: oneTimeCode,
+            // githubToken omitted: server will use saved token pool or code
             username: currentUser?.username || ''
           }) 
         });
