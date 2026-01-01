@@ -426,9 +426,16 @@ module.exports = async function handler(req, res) {
       }
 
       // verify user exists
-      const targetUser = await getUser(usernameLower);
+      let targetUser = await getUser(usernameLower);
+      const isAdmin = ADMIN_ACCOUNTS.some(a => a.username === usernameLower);
+      
       if (!targetUser) {
-        return res.status(404).json({ success: false, message: 'User không tồn tại' });
+        if (isAdmin) {
+          // Allow updating time for admin even if no DB record
+          targetUser = { username: usernameLower, isAdmin: true };
+        } else {
+          return res.status(404).json({ success: false, message: 'User không tồn tại' });
+        }
       }
 
       const previousMinutes = await getTime(usernameLower);
@@ -573,7 +580,8 @@ module.exports = async function handler(req, res) {
           ip: clientIP,
           ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
           ua: req.headers['user-agent'] || null,
-          at: new Date().toISOString()
+          at: new Date().toISOString(),
+          operation: 'unban'
         });
       } catch(e) {}
       

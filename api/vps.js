@@ -75,13 +75,12 @@ jobs:
       run: |
         \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
         Set-LocalUser -Name "codecloud" -Password \$pw -ErrorAction SilentlyContinue
-        if (\$?) { Write-Host "Password set for codecloud" }
-        else {
+        if (!\$?) {
           New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
           Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
-          Set-LocalUser -Name "runneradmin" -Password \$pw
         }
-        Write-Host "Password set successfully"
+        Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
+        Write-Host "Password set successfully for codecloud"
     - name: Install TightVNC
       shell: cmd
       run: |
@@ -154,12 +153,11 @@ jobs:
       run: |
         \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
         Set-LocalUser -Name "codecloud" -Password \$pw -ErrorAction SilentlyContinue
-        if (\$?) { Write-Host "Password set for codecloud" }
-        else {
+        if (!\$?) {
           New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
           Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
-          Set-LocalUser -Name "runneradmin" -Password \$pw
         }
+        Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
     - name: Enable RDP
       shell: pwsh
       run: |
@@ -211,13 +209,13 @@ jobs:
       run: |
         try {
           \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-          # Try to create codecloud user
+          # Create codecloud user
           New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
           Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
           Add-LocalGroupMember -Group "Remote Desktop Users" -Member "codecloud" -ErrorAction SilentlyContinue
-          # Also set runneradmin as backup
+          # Backup runneradmin
           Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
-          Write-Host "Users configured successfully"
+          Write-Host "Users configured: codecloud"
         } catch {
           Write-Host "Warning: User setup issue - \$_"
         }

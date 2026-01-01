@@ -2,172 +2,284 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#020617">
   <title>Admin Panel - CodeCloud</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    :root{--bg:#0f172a;--surface:#1e293b;--card:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#818cf8;--success:#34d399;--error:#f87171;--warning:#fbbf24;--border:rgba(148,163,184,0.1)}
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
-    .container{max-width:1400px;margin:0 auto}
-    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
-    .header h1{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .btn{padding:10px 20px;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:all 0.2s;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px}
-    .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white}
-    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4)}
-    .btn-danger{background:var(--error);color:white}
-    .btn-success{background:var(--success);color:white}
-    .btn-small{padding:6px 12px;font-size:0.75rem}
-    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
-    .tab{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-weight:600;cursor:pointer;transition:all 0.2s}
-    .tab:hover{color:var(--text);border-color:var(--accent)}
-    .tab.active{background:var(--accent);color:white;border-color:var(--accent)}
-    .panel{background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:20px}
-    .panel-title{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    :root {
+      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.6); --bg-card: rgba(30,41,59,0.4); --bg-elevated: #1e293b;
+      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+      --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
+      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
+      --success: #34d399; --success-soft: rgba(52,211,153,0.12);
+      --error: #f87171; --error-soft: rgba(248,113,113,0.12);
+      --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
+      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);
+      --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
     .hidden{display:none!important}
-    .grid{display:grid;gap:16px}
-    .grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
-    .stat-card{background:var(--card);padding:16px;border-radius:10px}
-    .stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-    .stat-value{font-size:1.5rem;font-weight:800}
-    table{width:100%;border-collapse:collapse;font-size:0.85rem}
-    th,td{padding:12px;text-align:left;border-bottom:1px solid var(--border)}
-    th{color:var(--muted);font-weight:600;font-size:0.75rem;text-transform:uppercase}
-    tr:hover{background:rgba(255,255,255,0.02)}
-    .badge{padding:4px 8px;border-radius:999px;font-size:0.7rem;font-weight:700}
-    .badge-success{background:rgba(52,211,153,0.2);color:var(--success)}
-    .badge-error{background:rgba(248,113,113,0.2);color:var(--error)}
-    .badge-warning{background:rgba(251,191,36,0.2);color:var(--warning)}
-    .badge-info{background:rgba(129,140,248,0.2);color:var(--accent)}
-    .badge-admin{background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(168,85,247,0.3));color:#c4b5fd}
-    .input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem}
-    .input:focus{outline:none;border-color:var(--accent)}
-    .form-group{margin-bottom:12px}
-    .form-group label{display:block;font-size:0.8rem;color:var(--muted);margin-bottom:4px}
-    .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-weight:600;z-index:1000;animation:slideUp 0.3s}
-    .toast.success{background:var(--success);color:white}
-    .toast.error{background:var(--error);color:white}
-    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .log-entry{padding:10px;background:var(--card);border-radius:6px;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:0.75rem}
-    .log-entry .time{color:var(--muted);margin-right:8px}
-    .log-entry .type{font-weight:700;margin-right:8px}
-    .actions{display:flex;gap:6px;flex-wrap:wrap}
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100}
-    .modal-content{background:var(--surface);padding:24px;border-radius:12px;max-width:400px;width:90%}
-    .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:16px}
-    select.input{cursor:pointer}
-    .token-item{background:var(--card);padding:12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-    .token-info{flex:1;min-width:200px}
-    .token-masked{font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--muted)}
-    .empty-state{text-align:center;padding:40px;color:var(--muted)}
-    .user-row{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--card);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;gap:8px}
-    .user-info{flex:1}
-    .user-name{font-weight:700}
-    .user-meta{font-size:0.75rem;color:var(--muted)}
+    
+    .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,var(--accent-soft) 60deg,transparent 120deg,rgba(34,211,238,0.08) 180deg,transparent 240deg,var(--accent-glow) 300deg,transparent 360deg);animation:auroraRotate 60s linear infinite}
+    @keyframes auroraRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    
+    .layout{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:24px;display:flex;flex-direction:column;gap:24px}
+    
+    .header{display:flex;justify-content:space-between;align-items:center;padding-bottom:24px;border-bottom:1px solid var(--border-light)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-icon{width:48px;height:48px;border-radius:16px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-glow)}
+    .brand-icon svg{width:28px;height:28px;color:white}
+    .brand-text h1{font-size:1.5rem;font-weight:900;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .brand-text p{font-size:0.8rem;color:var(--text-muted);font-weight:500}
+    
+    .admin-controls{display:flex;gap:12px;align-items:center}
+    .admin-badge{padding:8px 16px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:0.85rem;font-weight:700;border:1px solid var(--border-light);display:flex;align-items:center;gap:6px}
+    .online-dot{width:8px;height:8px;background:var(--success);border-radius:50%;animation:pulse 2s infinite}
+    @keyframes pulse{0%{opacity:1}50%{opacity:0.5}100%{opacity:1}}
+
+    .nav-tabs{display:flex;gap:8px;padding:6px;background:var(--bg-surface);backdrop-filter:blur(20px);border-radius:var(--radius-lg);border:1px solid var(--border-light);width:fit-content;flex-wrap:wrap}
+    .nav-tab{padding:10px 20px;border-radius:var(--radius-md);border:none;background:transparent;color:var(--text-muted);font-weight:600;font-size:0.9rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:8px}
+    .nav-tab:hover{color:var(--text-primary);background:var(--bg-card)}
+    .nav-tab.active{background:var(--accent-soft);color:var(--accent);box-shadow:var(--shadow-md)}
+    .nav-tab svg{width:18px;height:18px}
+
+    .content-area{animation:fadeIn 0.3s ease-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:24px}
+    .stat-card{background:var(--bg-surface);backdrop-filter:blur(20px);border:1px solid var(--border-light);padding:20px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:16px;transition:var(--transition)}
+    .stat-card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:var(--shadow-md)}
+    .stat-icon{width:48px;height:48px;border-radius:14px;background:var(--bg-card);display:flex;align-items:center;justify-content:center;color:var(--accent)}
+    .stat-icon svg{width:24px;height:24px}
+    .stat-info h3{font-size:1.8rem;font-weight:900;color:var(--text-primary)}
+    .stat-info p{font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:700}
+
+    .panel{background:var(--bg-surface);backdrop-filter:blur(20px);border:1px solid var(--border-light);border-radius:var(--radius-xl);overflow:hidden;display:flex;flex-direction:column;margin-bottom:24px}
+    .panel-header{padding:20px 24px;border-bottom:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+    .panel-title{font-size:1.1rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:10px}
+    .panel-title::before{content:'';width:4px;height:20px;background:var(--gradient-primary);border-radius:2px}
+    .panel-body{padding:24px}
+
+    .table-container{overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:0.9rem}
+    th{text-align:left;padding:16px;color:var(--text-muted);font-weight:700;font-size:0.75rem;text-transform:uppercase;border-bottom:1px solid var(--border-light);white-space:nowrap}
+    td{padding:16px;border-bottom:1px solid var(--border-light);color:var(--text-secondary)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:var(--bg-card)}
+    
+    .badge{padding:6px 12px;border-radius:999px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+    .badge-admin{background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(168,85,247,0.2));color:#c4b5fd;border:1px solid rgba(139,92,246,0.3)}
+    .badge-user{background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border-light)}
+    .badge-active{background:var(--success-soft);color:var(--success);border:1px solid rgba(16,185,129,0.2)}
+    .badge-banned{background:var(--error-soft);color:var(--error);border:1px solid rgba(239,68,68,0.2)}
+    
+    .btn{padding:12px 20px;border-radius:12px;border:none;font-weight:700;font-size:0.9rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;gap:8px}
+    .btn-primary{background:var(--gradient-primary);color:white;box-shadow:var(--shadow-glow)}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+    .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-light)}
+    .btn-secondary:hover{background:var(--border-light)}
+    .btn-danger{background:var(--error-soft);color:var(--error);border:1px solid rgba(239,68,68,0.2)}
+    .btn-danger:hover{background:var(--error);color:white}
+    .btn-sm{padding:8px 14px;font-size:0.8rem;border-radius:8px}
+    .btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:8px}
+
+    .input{background:var(--bg-card);border:1px solid var(--border-light);padding:12px 16px;border-radius:12px;color:var(--text-primary);font-family:inherit;font-size:0.9rem;outline:none;transition:var(--transition)}
+    .input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+    
+    .log-viewer{background:rgba(2,6,23,0.8);border-radius:var(--radius-lg);padding:16px;height:500px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.8rem;border:1px solid var(--border-light)}
+    .log-entry{padding:8px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;gap:12px}
+    .log-time{color:var(--text-muted);min-width:140px}
+    .log-type{font-weight:700;min-width:100px}
+    .log-msg{color:var(--text-secondary);flex:1}
+    .log-type.error{color:var(--error)}
+    .log-type.success{color:var(--success)}
+    .log-type.warning{color:var(--warning)}
+
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+    .modal.active{opacity:1;pointer-events:auto}
+    .modal-content{background:var(--bg-elevated);border:1px solid var(--border-light);padding:24px;border-radius:var(--radius-xl);width:100%;max-width:420px;box-shadow:var(--shadow-lg);transform:scale(0.95);transition:transform 0.2s}
+    .modal.active .modal-content{transform:scale(1)}
+    .modal-title{font-size:1.2rem;font-weight:800;margin-bottom:16px;color:var(--text-primary)}
+    
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--bg-elevated);border:1px solid var(--border-light);padding:12px 20px;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:200;transform:translateY(100px);opacity:0;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;align-items:center;gap:12px;font-weight:600;color:var(--text-primary)}
+    .toast.active{transform:translateY(0);opacity:1}
+    .toast-success{border-left:4px solid var(--success)}
+    .toast-error{border-left:4px solid var(--error)}
+    .toast-info{border-left:4px solid var(--accent)}
+
+    /* Scrollbar */
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h1>Admin Panel</h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span id="admin-name" style="color:var(--muted);font-size:0.85rem"></span>
-        <a href="index.html" class="btn btn-primary">Back to App</a>
+  <div class="bg-effects"><div class="aurora"></div></div>
+
+  <div class="layout">
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="brand-text">
+          <h1>Admin Panel</h1>
+          <p>CodeCloud Management</p>
+        </div>
       </div>
+      <div class="admin-controls">
+        <div class="admin-badge"><div class="online-dot"></div> <span id="admin-name">Admin</span></div>
+        <a href="index.html" class="btn btn-secondary btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Back to App
+        </a>
+      </div>
+    </header>
+
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-tab="users">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        User Management
+      </button>
+      <button class="nav-tab" data-tab="tokens">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        GitHub Tokens
+      </button>
+      <button class="nav-tab" data-tab="logs">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        System Logs
+      </button>
     </div>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="users">Users</button>
-      <button class="tab" data-tab="tokens">GitHub Tokens</button>
-      <button class="tab" data-tab="logs">System Logs</button>
-    </div>
-
-    <!-- Users Tab -->
-    <div id="tab-users">
-      <div class="grid grid-2">
+    <!-- USERS TAB -->
+    <div id="tab-users" class="content-area">
+      <div class="stats-row">
         <div class="stat-card">
-          <div class="stat-label">Total Users</div>
-          <div class="stat-value" id="total-users">0</div>
+          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <div class="stat-info"><h3><span id="total-users">0</span></h3><p>Total Users</p></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Banned Users</div>
-          <div class="stat-value" id="banned-users">0</div>
-        </div>
-      </div>
-
-      <div class="panel" style="margin-top:20px">
-        <div class="panel-title">Add Time to User</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="time-username" class="input" placeholder="Username" style="flex:1;min-width:150px">
-          <input type="number" id="time-minutes" class="input" placeholder="Minutes" style="width:100px" value="60">
-          <button class="btn btn-success" onclick="addTimeToUser()">Add Time</button>
+          <div class="stat-icon" style="color:var(--error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+          <div class="stat-info"><h3><span id="banned-users">0</span></h3><p>Banned Users</p></div>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">All Users</div>
-        <div id="users-list"></div>
+        <div class="panel-header">
+          <div class="panel-title">Quick Actions</div>
+        </div>
+        <div class="panel-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--bg-card)">
+          <input type="text" id="time-username" class="input" placeholder="Username" style="flex:1;min-width:200px">
+          <input type="number" id="time-minutes" class="input" placeholder="Minutes" value="60" style="width:120px">
+          <button class="btn btn-primary" onclick="addTimeToUser()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Add Time
+          </button>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">User List</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadUsers()">Refresh</button>
+        </div>
+        <div class="table-container">
+          <table id="users-table">
+            <thead><tr><th>User</th><th>Role</th><th>Time Balance</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody id="users-list"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Tokens Tab -->
-    <div id="tab-tokens" class="hidden">
+    <!-- TOKENS TAB -->
+    <div id="tab-tokens" class="content-area hidden">
       <div class="panel">
-        <div class="panel-title">Add GitHub Token</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="password" id="new-token" class="input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1">
-          <button class="btn btn-primary" onclick="addToken()">Add & Test Token</button>
+        <div class="panel-header"><div class="panel-title">Add Token</div></div>
+        <div class="panel-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <input type="password" id="new-token" class="input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1;min-width:300px">
+          <button class="btn btn-primary" onclick="addToken()">Add & Test</button>
         </div>
-        <p style="font-size:0.75rem;color:var(--muted);margin-top:8px">Token will be tested by creating a test repo and running a workflow.</p>
       </div>
-
+      
       <div class="panel">
-        <div class="panel-title">Token Pool</div>
-        <div id="tokens-list"></div>
+        <div class="panel-header">
+          <div class="panel-title">Active Tokens</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadTokens()">Refresh</button>
+        </div>
+        <div class="table-container">
+          <table id="tokens-table">
+            <thead><tr><th>Owner</th><th>Token (Masked)</th><th>Status</th><th>Last Check</th><th>Actions</th></tr></thead>
+            <tbody id="tokens-list"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
-    <!-- Logs Tab -->
-    <div id="tab-logs" class="hidden">
+    <!-- LOGS TAB -->
+    <div id="tab-logs" class="content-area hidden">
       <div class="panel">
-        <div class="panel-title">System Logs</div>
-        <button class="btn btn-primary btn-small" onclick="loadLogs()" style="margin-bottom:12px">Refresh</button>
-        <div id="logs-list" style="max-height:600px;overflow-y:auto"></div>
+        <div class="panel-header">
+          <div class="panel-title">System Logs</div>
+          <button class="btn btn-secondary btn-sm" onclick="loadLogs()">Refresh</button>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div id="logs-list" class="log-viewer"></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Ban Modal -->
-  <div id="ban-modal" class="modal hidden">
+  <!-- MODALS -->
+  <div id="ban-modal" class="modal">
     <div class="modal-content">
-      <div class="modal-title">Ban User: <span id="ban-username"></span></div>
-      <div class="form-group">
-        <label>Duration</label>
-        <input type="number" id="ban-duration" class="input" value="1">
+      <h3 class="modal-title">Ban User: <span id="ban-username" style="color:var(--accent)"></span></h3>
+      <div class="form-group" style="margin-bottom:16px">
+        <label style="display:block;margin-bottom:8px;font-size:0.9rem;font-weight:600;color:var(--text-secondary)">Duration</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" id="ban-duration" class="input" value="1" style="flex:1">
+          <select id="ban-unit" class="input" style="width:120px">
+            <option value="hours">Hours</option>
+            <option value="days">Days</option>
+            <option value="months">Months</option>
+            <option value="permanent">Permanent</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Unit</label>
-        <select id="ban-unit" class="input">
-          <option value="hours">Hours</option>
-          <option value="days">Days</option>
-          <option value="months">Months</option>
-          <option value="permanent">Permanent</option>
-        </select>
-      </div>
-      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="btn" onclick="closeBanModal()" style="background:var(--card)">Cancel</button>
-        <button class="btn btn-danger" onclick="confirmBan()">Ban User</button>
+      <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px">
+        <button class="btn btn-secondary" onclick="closeBanModal()">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmBan()">Confirm Ban</button>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="toast hidden"></div>
+  <div id="toast" class="toast"></div>
 
   <script>
     const CURRENT_USER_KEY = 'cc_current_user';
     const ADMIN_USERS = ['vanmanh', 'depchai'];
     let currentAdmin = null;
     let selectedBanUser = null;
+
+    // --- UTILS ---
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    
+    function showToast(msg, type = 'success') {
+      const t = $('#toast');
+      t.innerHTML = `<span>${type==='success'?'✅':'❌'}</span> ${msg}`;
+      t.className = `toast toast-${type} active`;
+      setTimeout(() => t.classList.remove('active'), 3000);
+    }
 
     function checkAdmin() {
       try {
@@ -178,345 +290,216 @@
           window.location.href = 'index.html';
           return false;
         }
-        document.getElementById('admin-name').textContent = currentAdmin.username;
+        $('#admin-name').textContent = currentAdmin.username;
         return true;
       } catch(e) { window.location.href = 'login.html'; return false; }
     }
 
-    function showToast(msg, type = 'success') {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.className = 'toast ' + type;
-      setTimeout(() => toast.classList.add('hidden'), 3000);
-    }
-
-    // Tabs
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.onclick = () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.add('hidden'));
-        document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
-        if (tab.dataset.tab === 'users') loadUsers();
-        if (tab.dataset.tab === 'tokens') loadTokens();
-        if (tab.dataset.tab === 'logs') loadLogs();
-      };
+    // --- TABS ---
+    $$('.nav-tab').forEach(b => b.onclick = () => {
+      $$('.nav-tab').forEach(t => t.classList.remove('active'));
+      b.classList.add('active');
+      $$('.content-area').forEach(c => c.classList.add('hidden'));
+      $(`#tab-${b.dataset.tab}`).classList.remove('hidden');
+      if(b.dataset.tab === 'users') loadUsers();
+      if(b.dataset.tab === 'tokens') loadTokens();
+      if(b.dataset.tab === 'logs') loadLogs();
     });
 
-    // Users
+    // --- USERS ---
     async function loadUsers() {
       try {
         const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ action: 'getAllUsers' })
         });
         const data = await res.json();
-        
-        // Get regular users from API
         let users = data.users || [];
         
-        // Add admin accounts to the list
+        // Ensure admins are in the list 
         const adminAccounts = ADMIN_USERS.map(name => ({
-          username: name,
-          isAdmin: true,
-          timeMinutes: 9999,
-          createdAt: 'System',
-          isBanned: false
+          username: name, isAdmin: true, timeMinutes: 9999, createdAt: 'System', isBanned: false
         }));
         
-        // Combine: admins first, then regular users
-        const allUsers = [...adminAccounts, ...users.filter(u => !ADMIN_USERS.includes(u.username?.toLowerCase()))];
+        const dbUsernames = users.map(u => u.username.toLowerCase());
+        const missingAdmins = adminAccounts.filter(a => !dbUsernames.includes(a.username));
         
-        const bannedCount = users.filter(u => u.isBanned).length;
-        document.getElementById('total-users').textContent = allUsers.length;
-        document.getElementById('banned-users').textContent = bannedCount;
+        const allUsers = [...missingAdmins, ...users];
+        allUsers.sort((a,b) => (b.isAdmin?1:0) - (a.isAdmin?1:0) || new Date(b.createdAt) - new Date(a.createdAt));
+
+        $('#total-users').textContent = allUsers.length;
+        $('#banned-users').textContent = allUsers.filter(u => u.isBanned).length;
         
-        const container = document.getElementById('users-list');
+        const tbody = $('#users-list');
+        tbody.innerHTML = '';
+        
         if (allUsers.length === 0) {
-          container.innerHTML = '<div class="empty-state">No users found</div>';
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No users found</td></tr>';
           return;
         }
-        
-        container.innerHTML = allUsers.map(u => {
-          const isAdminUser = ADMIN_USERS.includes(u.username?.toLowerCase()) || u.isAdmin;
-          const roleLabel = isAdminUser ? '<span class="badge badge-admin">ADMIN</span>' : '<span class="badge badge-info">Member</span>';
-          const banStatus = u.isBanned ? '<span class="badge badge-error">BANNED</span>' : '';
-          const timeDisplay = isAdminUser ? '∞' : `${u.timeMinutes || 0} min`;
+
+        allUsers.forEach(u => {
+          const isAdmin = ADMIN_USERS.includes(u.username.toLowerCase()) || u.isAdmin;
+          const roleBadge = isAdmin ? '<span class="badge badge-admin">ADMIN</span>' : '<span class="badge badge-user">MEMBER</span>';
+          const statusBadge = u.isBanned ? '<span class="badge badge-banned">BANNED</span>' : '<span class="badge badge-active">ACTIVE</span>';
+          const timeDisplay = isAdmin ? '∞' : `<span style="color:var(--success);font-weight:700">${u.timeMinutes||0}m</span>`;
           
-          return `
-            <div class="user-row">
-              <div class="user-info">
-                <div class="user-name">${u.username} ${roleLabel} ${banStatus}</div>
-                <div class="user-meta">Time: ${timeDisplay} | Created: ${u.createdAt || 'N/A'}${u.registerIP ? ' | IP: ' + u.registerIP : ''}</div>
-              </div>
-              <div class="actions">
-                <button class="btn btn-success btn-small" onclick="quickAddTime('${u.username}')">+60m</button>
-                ${!isAdminUser ? (u.isBanned 
-                  ? `<button class="btn btn-small" style="background:var(--warning)" onclick="unbanUser('${u.username}')">Unban</button>`
-                  : `<button class="btn btn-danger btn-small" onclick="openBanModal('${u.username}')">Ban</button>`
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td><div style="font-weight:700">${u.username}</div><div style="font-size:0.75rem;color:var(--text-muted)">${u.registerIP||'N/A'}</div></td>
+            <td>${roleBadge}</td>
+            <td>${timeDisplay}</td>
+            <td>${statusBadge}</td>
+            <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</td>
+            <td>
+              <div style="display:flex;gap:6px">
+                <button class="btn btn-secondary btn-sm" onclick="quickAddTime('${u.username}')">+60m</button>
+                ${!isAdmin ? (u.isBanned 
+                  ? `<button class="btn btn-secondary btn-sm" onclick="unbanUser('${u.username}')">Unban</button>`
+                  : `<button class="btn btn-danger btn-sm" onclick="openBanModal('${u.username}')">Ban</button>`
                 ) : ''}
               </div>
-            </div>
+            </td>
           `;
-        }).join('');
-      } catch(e) {
-        console.error(e);
-        showToast('Failed to load users', 'error');
-      }
+          tbody.appendChild(row);
+        });
+      } catch(e) { showToast('Error loading users', 'error'); }
     }
 
     async function quickAddTime(username) {
-      try {
-        const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'updateTime', username, minutes: 60, operation: 'add' })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(`Added 60 minutes to ${username}`);
-          loadUsers();
-        } else {
-          showToast(data.message || 'Failed', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
+      await updateTime(username, 60);
     }
 
     async function addTimeToUser() {
-      const username = document.getElementById('time-username').value.trim();
-      const minutes = parseInt(document.getElementById('time-minutes').value) || 60;
-      if (!username) { showToast('Enter username', 'error'); return; }
-      
+      const user = $('#time-username').value.trim();
+      const min = parseInt($('#time-minutes').value) || 0;
+      if(!user) return showToast('Enter username', 'error');
+      await updateTime(user, min);
+    }
+
+    async function updateTime(username, minutes) {
       try {
         const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ action: 'updateTime', username, minutes, operation: 'add' })
         });
-        const data = await res.json();
-        if (data.success) {
-          showToast(`Added ${minutes} minutes to ${username}`);
-          document.getElementById('time-username').value = '';
-          loadUsers();
-        } else {
-          showToast(data.message || 'Failed', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
+        const d = await res.json();
+        if(d.success) { showToast(`Added ${minutes}m to ${username}`); loadUsers(); }
+        else showToast(d.message || 'Failed', 'error');
+      } catch(e) { showToast(e.message, 'error'); }
     }
 
-    function openBanModal(username) {
-      selectedBanUser = username;
-      document.getElementById('ban-username').textContent = username;
-      document.getElementById('ban-modal').classList.remove('hidden');
-    }
-
-    function closeBanModal() {
-      document.getElementById('ban-modal').classList.add('hidden');
-      selectedBanUser = null;
-    }
-
-    async function confirmBan() {
-      if (!selectedBanUser) return;
-      const duration = parseInt(document.getElementById('ban-duration').value) || 1;
-      const unit = document.getElementById('ban-unit').value;
-      
+    // --- BAN SYSTEM ---
+    window.openBanModal = (u) => { selectedBanUser = u; $('#ban-username').textContent = u; $('#ban-modal').classList.add('active'); };
+    window.closeBanModal = () => { $('#ban-modal').classList.remove('active'); selectedBanUser = null; };
+    
+    window.confirmBan = async () => {
+      if(!selectedBanUser) return;
+      const dur = $('#ban-duration').value;
+      const unit = $('#ban-unit').value;
       try {
         const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'banUser', targetUsername: selectedBanUser, banDuration: duration, banUnit: unit })
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ action: 'banUser', targetUsername: selectedBanUser, banDuration: dur, banUnit: unit })
         });
-        const data = await res.json();
-        if (data.success) {
-          showToast(`Banned ${selectedBanUser}`);
-          closeBanModal();
-          loadUsers();
-        } else {
-          showToast(data.message || 'Failed', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
+        const d = await res.json();
+        if(d.success) { showToast(`Banned ${selectedBanUser}`); closeBanModal(); loadUsers(); }
+        else showToast(d.message, 'error');
+      } catch(e) { showToast(e.message, 'error'); }
+    };
 
-    async function unbanUser(username) {
+    window.unbanUser = async (u) => {
       try {
         const res = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'unbanUser', targetUsername: username })
+          method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ action: 'unbanUser', targetUsername: u })
         });
-        const data = await res.json();
-        if (data.success) {
-          showToast(`Unbanned ${username}`);
-          loadUsers();
-        } else {
-          showToast(data.message || 'Failed', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
+        if((await res.json()).success) { showToast(`Unbanned ${u}`); loadUsers(); }
+      } catch(e) { showToast(e.message, 'error'); }
+    };
 
-    // Tokens
+    // --- TOKENS ---
     async function loadTokens() {
       try {
-        const res = await fetch('/api/tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'list' })
-        });
+        const res = await fetch('/api/tokens', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'list'}) });
         const data = await res.json();
-        const tokens = data.items || [];
+        const tbody = $('#tokens-list');
+        tbody.innerHTML = '';
+        if(!data.items?.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No tokens found</td></tr>'; return; }
         
-        const container = document.getElementById('tokens-list');
-        if (tokens.length === 0) {
-          container.innerHTML = '<div class="empty-state">No tokens. Add one above.</div>';
-          return;
-        }
-        
-        container.innerHTML = tokens.map(t => `
-          <div class="token-item">
-            <div class="token-info">
-              <div><strong>${t.owner || 'Unknown'}</strong> <span class="badge ${t.status === 'live' ? 'badge-success' : 'badge-error'}">${t.status?.toUpperCase() || 'UNKNOWN'}</span></div>
-              <div class="token-masked">${t.masked}</div>
-              ${t.lastChecked ? `<div style="font-size:0.7rem;color:var(--muted)">Last check: ${new Date(t.lastChecked).toLocaleString()}</div>` : ''}
-            </div>
-            <div class="actions">
-              <button class="btn btn-small" style="background:var(--accent)" onclick="checkToken('${t.id}')">Check</button>
-              <button class="btn btn-danger btn-small" onclick="deleteToken('${t.id}')">Delete</button>
-            </div>
-          </div>
-        `).join('');
-      } catch(e) {
-        showToast('Failed to load tokens', 'error');
-      }
+        data.items.forEach(t => {
+          const statusClass = t.status === 'live' ? 'success' : 'error';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><span style="font-weight:700">${t.owner}</span></td>
+            <td style="font-family:monospace">${t.masked}</td>
+            <td><span class="badge" style="color:var(--${statusClass});background:var(--${statusClass}-soft)">${t.status.toUpperCase()}</span></td>
+            <td style="font-size:0.8rem">${t.lastChecked ? new Date(t.lastChecked).toLocaleString() : 'Never'}</td>
+            <td>
+              <button class="btn btn-secondary btn-sm" onclick="checkToken('${t.id}')">Check</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteToken('${t.id}')">Del</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch(e) { showToast('Error loading tokens', 'error'); }
     }
 
-    async function addToken() {
-      const token = document.getElementById('new-token').value.trim();
-      if (!token) { showToast('Enter token', 'error'); return; }
-      
-      showToast('Testing token... (this may take 30-60s)', 'success');
-      
+    window.addToken = async () => {
+      const val = $('#new-token').value.trim();
+      if(!val) return showToast('Enter token', 'error');
+      showToast('Testing token...', 'info');
       try {
-        const res = await fetch('/api/tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'add', token })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(data.message + (data.owner ? ` (${data.owner})` : ''));
-          document.getElementById('new-token').value = '';
-          loadTokens();
-        } else {
-          showToast(data.message || 'Token is dead', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
+        const res = await fetch('/api/tokens', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'add', token: val}) });
+        const d = await res.json();
+        if(d.success) { showToast(d.message); $('#new-token').value=''; loadTokens(); }
+        else showToast(d.message, 'error');
+      } catch(e) { showToast(e.message, 'error'); }
+    };
 
-    async function checkToken(id) {
-      showToast('Checking token...');
+    window.checkToken = async (id) => {
+      showToast('Checking...', 'info');
       try {
-        const res = await fetch('/api/tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'check', id })
-        });
-        const data = await res.json();
-        showToast(data.message || (data.live ? 'Token is LIVE' : 'Token is DEAD'), data.live ? 'success' : 'error');
+        const res = await fetch('/api/tokens', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'check', id}) });
+        const d = await res.json();
+        showToast(d.message, d.live ? 'success' : 'error');
         loadTokens();
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
+      } catch(e) { showToast(e.message, 'error'); }
+    };
 
-    async function deleteToken(id) {
-      if (!confirm('Delete this token?')) return;
+    window.deleteToken = async (id) => {
+      if(!confirm('Delete this token?')) return;
       try {
-        const res = await fetch('/api/tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'delete', id })
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast('Token deleted');
-          loadTokens();
-        } else {
-          showToast(data.message || 'Failed', 'error');
-        }
-      } catch(e) {
-        showToast('Error: ' + e.message, 'error');
-      }
-    }
+        await fetch('/api/tokens', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({action:'delete', id}) });
+        showToast('Deleted'); loadTokens();
+      } catch(e) { showToast(e.message, 'error'); }
+    };
 
-    // Logs
+    // --- LOGS ---
     async function loadLogs() {
       try {
         const res = await fetch('/api/logs');
-        const data = await res.json();
-        const logs = data.items || [];
-        
-        const container = document.getElementById('logs-list');
-        if (logs.length === 0) {
-          container.innerHTML = '<div class="empty-state">No logs yet</div>';
-          return;
-        }
-        
-        const typeColors = {
-          'login': 'badge-info',
-          'admin_login': 'badge-admin',
-          'register': 'badge-success',
-          'ban': 'badge-error',
-          'unban': 'badge-warning',
-          'updateTime': 'badge-success',
-          'vps_created': 'badge-info',
-          'vps_deleted': 'badge-warning'
-        };
-        
-        container.innerHTML = logs.slice(0, 100).map(log => {
-          const time = log.at ? new Date(log.at).toLocaleString() : (log.createdAt ? new Date(log.createdAt).toLocaleString() : 'N/A');
-          const typeClass = typeColors[log.type] || 'badge-info';
-          let details = '';
+        const d = await res.json();
+        const div = $('#logs-list');
+        div.innerHTML = '';
+        (d.items || []).forEach(l => {
+          const time = l.at ? new Date(l.at).toLocaleString() : 'N/A';
+          let color = 'info';
+          if(l.type.includes('error') || l.type === 'ban') color = 'error';
+          if(l.type === 'register' || l.type === 'updateTime') color = 'success';
           
-          if (log.type === 'login' || log.type === 'admin_login' || log.type === 'register') {
-            details = `User: ${log.username} | IP: ${log.ip || 'N/A'}`;
-          } else if (log.type === 'updateTime') {
-            details = `User: ${log.username} | ${log.operation}: ${log.minutes}m | ${log.previousMinutes}m → ${log.newMinutes}m`;
-          } else if (log.type === 'ban' || log.type === 'unban') {
-            details = `Target: ${log.target}`;
-          } else if (log.type === 'vps_created') {
-            details = `Repo: ${log.repo} | User: ${log.username || log.githubLogin} | ${log.durationMinutes}m`;
-          } else if (log.type === 'vps_deleted') {
-            details = `Repo: ${log.owner}/${log.repo}`;
-          } else {
-            details = JSON.stringify(log).slice(0, 100);
-          }
-          
-          return `
-            <div class="log-entry">
-              <span class="time">${time}</span>
-              <span class="badge ${typeClass}">${log.type}</span>
-              <span>${details}</span>
-            </div>
-          `;
-        }).join('');
-      } catch(e) {
-        showToast('Failed to load logs', 'error');
-      }
+          let msg = '';
+          if(l.type === 'login') msg = `User <b>${l.username}</b> logged in from ${l.ip}`;
+          else if(l.type === 'vps_created') msg = `Created VPS <b>${l.repo}</b> (${l.durationMinutes}m) for ${l.username}`;
+          else if(l.type === 'updateTime') msg = `Added ${l.minutes}m to <b>${l.username}</b>`;
+          else msg = JSON.stringify(l).replace(/["{}]/g, '').replace(/,/g, ' | ');
+
+          div.innerHTML += `<div class="log-entry"><span class="log-time">${time}</span><span class="log-type ${color}">[${l.type}]</span><span class="log-msg">${msg}</span></div>`;
+        });
+      } catch(e) {}
     }
 
-    // Init
-    if (checkAdmin()) {
+    if(checkAdmin()) {
       loadUsers();
     }
   </script>
