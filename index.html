@@ -59,6 +59,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
     @keyframes slideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
     
     .app-layout{display:flex;min-height:100vh;position:relative;z-index:1}
     .theme-toggle{position:fixed;top:20px;right:20px;width:52px;height:52px;border-radius:50%;border:2px solid var(--border-light);background:var(--bg-surface);backdrop-filter:blur(20px);box-shadow:var(--shadow-md);cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
@@ -202,13 +203,24 @@
     .stat-value{font-size:1.3rem;font-weight:900;color:var(--text-primary)}
     .stat-value-small{font-size:1rem}
     
-    .log-box{background:linear-gradient(180deg,rgba(15,23,42,0.95) 0%,rgba(2,6,23,0.98) 100%);color:#e2e8f0;border-radius:var(--radius-lg);padding:16px;height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.6;border:1px solid rgba(99,102,241,0.2);box-shadow:inset 0 2px 10px rgba(0,0,0,0.5)}
-    .log-entry{margin-bottom:4px;animation:slideUp 0.15s ease-out;padding:2px 0}
-    .log-entry .time{color:#64748b;margin-right:8px;font-size:0.68rem}
-    .log-entry.info{color:#93c5fd}
-    .log-entry.success{color:#4ade80}
-    .log-entry.error{color:#f87171}
-    .log-entry.pending{color:#fbbf24}
+    /* Enhanced Log Timeline */
+    .log-timeline{background:linear-gradient(180deg,rgba(15,23,42,0.95) 0%,rgba(2,6,23,0.98) 100%);color:#e2e8f0;border-radius:var(--radius-lg);padding:20px;min-height:200px;max-height:350px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.8rem;line-height:1.8;border:1px solid rgba(99,102,241,0.2);box-shadow:inset 0 2px 10px rgba(0,0,0,0.5)}
+    .log-timeline:empty::before{content:'Ready to deploy...';color:var(--text-muted);display:flex;justify-content:center;padding:40px}
+    .log-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);animation:slideUp 0.2s ease-out}
+    .log-item:last-child{border-bottom:none}
+    .log-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:0.7rem}
+    .log-icon svg{width:14px;height:14px}
+    .log-icon.pending{background:var(--warning-soft);color:var(--warning);animation:pulse 1.5s ease-in-out infinite}
+    .log-icon.success{background:var(--success-soft);color:var(--success)}
+    .log-icon.error{background:var(--error-soft);color:var(--error)}
+    .log-icon.info{background:var(--accent-soft);color:var(--accent)}
+    .log-content{flex:1;min-width:0}
+    .log-title{font-weight:600;color:#f1f5f9;font-size:0.82rem}
+    .log-desc{color:#94a3b8;font-size:0.72rem;margin-top:2px}
+    .log-time{font-size:0.68rem;color:#64748b;margin-top:4px}
+    .log-ready{text-align:center;padding:40px 20px;color:var(--text-muted)}
+    .log-ready-icon{width:60px;height:60px;margin:0 auto 16px;border-radius:50%;background:var(--accent-soft);display:flex;align-items:center;justify-content:center}
+    .log-ready-icon svg{width:28px;height:28px;color:var(--accent)}
     
     .vps-item{background:var(--bg-card);border-radius:var(--radius-lg);padding:16px;border:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;transition:var(--transition);flex-wrap:wrap}
     .vps-item:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}
@@ -244,33 +256,25 @@
     .toast{position:fixed;bottom:20px;right:20px;z-index:300;animation:slideUp 0.3s ease-out}
     .toast.hidden{display:none}
     .toast-inner{min-width:240px;max-width:360px;padding:14px 18px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:10px;font-size:0.88rem;font-weight:600;background:var(--bg-elevated);color:var(--text-primary);box-shadow:var(--shadow-lg);border:1px solid var(--border-light)}
-    .toast.toast-success .toast-inner{background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none}
-    .toast.toast-error .toast-inner{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none}
-    .toast.toast-info .toast-inner{background:var(--gradient-accent);color:white;border:none}
+    .toast.toast-success .toast-inner{border-left:4px solid var(--success)}
+    .toast.toast-error .toast-inner{border-left:4px solid var(--error)}
+    .toast.toast-info .toast-inner{border-left:4px solid var(--accent)}
     
-    /* Improved Toast */
-    .toast-inner { background: var(--bg-elevated) !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); padding: 16px 20px; }
-    .toast.toast-success .toast-inner { border-left: 4px solid var(--success) !important; }
-    .toast.toast-error .toast-inner { border-left: 4px solid var(--error) !important; }
-    .toast.toast-info .toast-inner { border-left: 4px solid var(--accent) !important; }
-    
-    /* Region Grid */
-    .region-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
-    .region-option { background: var(--bg-card); border: 2px solid transparent; border-radius: var(--radius-md); padding: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition); text-align: center; }
-    .region-option:hover { border-color: var(--accent-soft); transform: translateY(-2px); background: var(--bg-surface); }
-    .region-option.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md); }
-    .region-flag { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; color: var(--accent); }
-    .region-flag svg { width: 24px; height: 24px; }
-    .region-name { font-size: 0.8rem; font-weight: 600; }
+    .region-grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));gap:10px;margin-top:8px}
+    .region-option{background:var(--bg-card);border:2px solid transparent;border-radius:var(--radius-md);padding:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:var(--transition);text-align:center}
+    .region-option:hover{border-color:var(--accent-soft);transform:translateY(-2px);background:var(--bg-surface)}
+    .region-option.selected{border-color:var(--accent);background:var(--accent-soft);box-shadow:var(--shadow-md)}
+    .region-flag{width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--accent)}
+    .region-flag svg{width:24px;height:24px}
+    .region-name{font-size:0.8rem;font-weight:600}
 
-    /* Resume Banner */
-    .resume-banner { background: var(--bg-surface); border: 1px solid var(--accent-soft); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-lg); animation: slideUp 0.4s ease-out; position: relative; overflow: hidden; }
-    .resume-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gradient-accent); }
-    .resume-content { display: flex; align-items: center; gap: 16px; }
-    .resume-icon { width: 42px; height: 42px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; animation: spin 3s linear infinite; }
-    .resume-info h4 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary); }
-    .resume-info p { font-size: 0.82rem; color: var(--text-muted); }
-    .resume-actions { display: flex; gap: 12px; align-items: center; }
+    .resume-banner{background:var(--bg-surface);border:1px solid var(--accent-soft);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:var(--shadow-lg);animation:slideUp 0.4s ease-out;position:relative;overflow:hidden}
+    .resume-banner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gradient-accent)}
+    .resume-content{display:flex;align-items:center;gap:16px}
+    .resume-icon{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;animation:spin 3s linear infinite}
+    .resume-info h4{font-size:0.95rem;font-weight:800;margin-bottom:4px;color:var(--text-primary)}
+    .resume-info p{font-size:0.82rem;color:var(--text-muted)}
+    .resume-actions{display:flex;gap:12px;align-items:center}
 
     .app-footer{border-top:1px solid var(--border-light);padding:16px 28px;background:var(--bg-surface);backdrop-filter:blur(16px)}
     .footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted)}
@@ -278,23 +282,20 @@
     .footer-discord:hover{transform:translateY(-2px)}
     
     .text-center{text-align:center;color:var(--text-muted);padding:24px;font-size:0.88rem}
-    .template-actions{display:flex;gap:10px;margin-top:12px}
-    .template-actions button{flex:1}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
     
-    .time-badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;background:var(--success-soft);color:var(--success)}
-    .time-badge.low{background:var(--warning-soft);color:var(--warning)}
-    .time-badge.empty{background:var(--error-soft);color:var(--error)}
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-    /* Custom Select & Button Fixes */
-    select.input { appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
-    .btn-sm { width: auto; padding: 8px 16px; font-size: 0.85rem; }
+    select.input{appearance:none;-webkit-appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;background-size:16px}
+    
+    .name-generator{display:flex;gap:8px;align-items:center}
+    .name-generator .input{flex:1}
+    .btn-generate{padding:12px;border-radius:var(--radius-md);border:2px solid var(--border-light);background:var(--bg-card);color:var(--accent);cursor:pointer;transition:var(--transition);display:flex;align-items:center;justify-content:center}
+    .btn-generate:hover{border-color:var(--accent);background:var(--accent-soft)}
+    .btn-generate svg{width:18px;height:18px}
   </style>
 </head>
 <body>
@@ -317,7 +318,7 @@
         </div>
         <div class="brand-info">
           <div class="app-name">CodeCloud</div>
-          <div class="tagline">Made with ❤️ by _Justalazydev</div>
+          <div class="tagline">Made by _Justalazydev</div>
         </div>
       </div>
     </div>
@@ -371,7 +372,6 @@
     <div class="scroll-area">
       <div class="container">
         
-        <!-- Resume Banner -->
         <div id="resume-banner" class="resume-banner hidden">
           <div class="resume-content">
             <div class="resume-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
@@ -386,7 +386,6 @@
           </div>
         </div>
 
-        <!-- View: Create VPS -->
         <div id="view-create">
           <div class="grid-layout">
             <div>
@@ -426,23 +425,25 @@
               <div class="panel">
                 <div class="panel-header">
                   <h2 class="panel-title">Configuration</h2>
-                  <p class="panel-desc">Enter your settings.</p>
+                  <p class="panel-desc">Server settings. Name is auto-generated.</p>
                 </div>
                 <div class="form-group">
                   <label class="label">Server Name</label>
-                  <input type="text" id="repo-name" class="input" placeholder="vps-01" autocomplete="off" />
-                  <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
+                  <div class="name-generator">
+                    <input type="text" id="repo-name" class="input" placeholder="vps-xxxx" autocomplete="off" readonly />
+                    <button type="button" id="btn-regenerate" class="btn-generate" title="Generate new name">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                    </button>
+                  </div>
+                  <p class="input-hint" id="repo-name-hint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--success)"><polyline points="20 6 9 17 4 12"/></svg> Tên được tạo tự động</p>
                 </div>
-                <!-- GitHub tokens are managed by admins; client uses server token pool -->
                 <div class="form-group hidden" id="ngrok-group">
                   <label class="label">Ngrok Authtoken</label>
                   <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
                 </div>
                 <div class="form-group hidden" id="region-group">
-                  <label class="label">🌍 Ngrok Region</label>
-                  <div class="region-grid" id="ngrok-region-selector">
-                    <!-- Populated by JS -->
-                  </div>
+                  <label class="label">Ngrok Region</label>
+                  <div class="region-grid" id="ngrok-region-selector"></div>
                   <input type="hidden" id="ngrok-region" value="ap">
                 </div>
                 <div class="form-group" id="duration-group">
@@ -460,7 +461,7 @@
                   <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
                 </div>
                 <div style="margin-top:16px;">
-                  <button id="btn-deploy" class="btn">🚀 Deploy VPS</button>
+                  <button id="btn-deploy" class="btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg> Deploy VPS</button>
                 </div>
               </div>
             </div>
@@ -482,12 +483,17 @@
                 <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Tailscale Authentication Required</h3>
                 <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">Click the link below to authenticate your VPS.</p>
                 <a id="tailscale-auth-link" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;text-decoration:none;border-radius:999px;font-weight:800;font-size:0.9rem;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Login to Tailscale</a>
-                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> After logging in, wait 10-30 seconds.</p>
+                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">After logging in, wait 10-30 seconds.</p>
               </div>
 
               <div class="panel">
                 <div class="panel-header"><h3 class="panel-title">Deployment Status</h3></div>
-                <div class="log-box" id="logs" style="height:auto;min-height:100px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.9rem;color:var(--text-secondary);">Ready to deploy.</div>
+                <div class="log-timeline" id="logs">
+                  <div class="log-ready">
+                    <div class="log-ready-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path></svg></div>
+                    <p>Ready to deploy your VPS</p>
+                  </div>
+                </div>
               </div>
 
               <div class="panel">
@@ -498,7 +504,6 @@
           </div>
         </div>
 
-        <!-- View: Manager -->
         <div id="view-manager" class="hidden">
           <div class="panel">
             <div class="panel-header"><h2 class="panel-title">Usage Statistics</h2></div>
@@ -521,12 +526,9 @@
           </div>
         </div>
 
-        <!-- View: Settings -->
         <div id="view-settings" class="hidden">
           <div class="panel">
-            <div class="panel-header">
-              <h2 class="panel-title">Interface Settings</h2>
-            </div>
+            <div class="panel-header"><h2 class="panel-title">Interface Settings</h2></div>
             <div class="form-group">
               <label class="label">Theme Preference</label>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
@@ -536,29 +538,17 @@
             </div>
           </div>
           <div class="panel">
-            <div class="panel-header">
-              <h2 class="panel-title">Account Settings</h2>
-            </div>
-            <button id="btn-forget-token" class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Quên GitHub Token đã lưu</button>
-            <p class="specs-footnote" style="margin-top:10px;">Xoá token GitHub khỏi trình duyệt này.</p>
-          </div>
-          <div class="panel">
-            <div class="panel-header">
-              <h2 class="panel-title">Application Data</h2>
-            </div>
+            <div class="panel-header"><h2 class="panel-title">Application Data</h2></div>
             <button id="btn-clear-data" class="btn btn-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear All Local Data</button>
             <p class="specs-footnote" style="text-align:center;margin-top:10px;">Removes all saved history and settings.</p>
           </div>
         </div>
 
-        <!-- View: Admin (redirect) -->
         <div id="view-admin" class="hidden">
           <div class="panel">
-            <div class="panel-header">
-              <h2 class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Admin Panel</h2>
-            </div>
+            <div class="panel-header"><h2 class="panel-title">Admin Panel</h2></div>
             <p style="margin-bottom:16px;">Truy cập trang Admin Panel đầy đủ:</p>
-            <a href="admin.html" class="btn">Mở Admin Panel →</a>
+            <a href="admin.html" class="btn">Mở Admin Panel</a>
           </div>
         </div>
 
@@ -569,7 +559,7 @@
 
 <footer class="app-footer">
   <div class="footer-inner">
-    <span>© 2025 CodeCloud VPS · Made by <strong>_Justalazydev</strong></span>
+    <span>© 2025 CodeCloud VPS</span>
     <a href="https://discord.gg/Q3p8mrZFJT" target="_blank" class="footer-discord">Join Discord</a>
   </div>
 </footer>
@@ -579,7 +569,7 @@
 <div id="confirm-modal" class="modal hidden">
   <div class="modal-backdrop"></div>
   <div class="modal-dialog">
-    <h3 class="modal-title" id="confirm-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Confirm</h3>
+    <h3 class="modal-title" id="confirm-title">Confirm</h3>
     <p class="confirm-text" id="confirm-text">Are you sure?</p>
     <div class="confirm-actions">
       <button class="confirm-btn cancel" id="confirm-cancel-btn">Cancel</button>
@@ -592,8 +582,8 @@
   <div class="modal-backdrop"></div>
   <div class="modal-dialog" style="text-align:center;max-width:380px;">
     <button class="modal-close" id="captcha-close">&times;</button>
-    <div style="font-size:3.5rem;margin-bottom:12px;display:flex;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></div>
-    <h3 class="modal-title" style="justify-content:center;margin-bottom:10px;">Bạn có phải robot không?</h3>
+    <div style="font-size:3.5rem;margin-bottom:12px;display:flex;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/></svg></div>
+    <h3 class="modal-title" style="justify-content:center;margin-bottom:10px;">Xác minh</h3>
     <p class="confirm-text" style="margin-bottom:24px;">Vui lòng xác minh bạn là con người</p>
     <div style="display:flex;justify-content:center;">
       <div class="h-captcha" data-sitekey="a044fd58-a078-46ca-9f5e-71a6ecbcd500" data-callback="onCaptchaSuccess"></div>
@@ -607,7 +597,6 @@
 
   const THEME_KEY = 'cc_theme';
   const NGROK_KEY = 'cc_ngrok_token';
-  const GITHUB_KEY = 'cc_github_token';
   const STORE_KEY = 'cc_vps_store';
   const STATS_KEY = 'cc_vps_stats';
   const SESSION_KEY = 'cc_active_session';
@@ -624,7 +613,7 @@
     { id: 'win_tailscale', name: 'Win Tailscale', desc: 'RDP via Tailscale (6h)' }
   ];
 
-  const GLOBE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
+  const GLOBE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
 
   const REGIONS = [
     { id: 'ap', name: 'Asia Pacific', icon: GLOBE_ICON },
@@ -641,9 +630,20 @@
   let currentUser = null;
   let confirmCallback = null;
   let userTimeMinutes = 0;
+  let logEntries = [];
 
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
+
+  // Generate random repo name
+  function generateRepoName() {
+    const adjectives = ['swift', 'quick', 'fast', 'nova', 'turbo', 'hyper', 'mega', 'ultra', 'super', 'prime', 'alpha', 'beta', 'delta', 'omega', 'pixel', 'cyber', 'nano', 'micro', 'macro', 'quantum'];
+    const nouns = ['cloud', 'server', 'node', 'box', 'core', 'hub', 'net', 'sys', 'dev', 'lab', 'zone', 'pod', 'deck', 'base', 'stack', 'forge', 'vault', 'spark', 'pulse', 'wave'];
+    const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    const num = Math.floor(Math.random() * 9000) + 1000;
+    return `${adj}-${noun}-${num}`;
+  }
 
   let toastTimer = null;
   window.showToast = function(msg, type = 'info') {
@@ -768,13 +768,40 @@
     });
   };
 
-  function log(msg, type = 'info') {
-    // Replace log appending with status description update
-    const statusBox = $('#logs');
-    statusBox.innerHTML = `<div style="padding:20px;font-weight:600;color:var(--text-primary)">${msg}</div>`;
+  // Enhanced logging
+  function addLogEntry(title, desc, type = 'info') {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    logEntries.push({ title, desc, type, time: timeStr });
+    renderLogs();
   }
 
-  function clearLogs() { $('#logs').innerHTML = ''; }
+  function renderLogs() {
+    const container = $('#logs');
+    if (logEntries.length === 0) {
+      container.innerHTML = `<div class="log-ready"><div class="log-ready-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path></svg></div><p>Ready to deploy your VPS</p></div>`;
+      return;
+    }
+    const icons = {
+      pending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+      info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+    container.innerHTML = logEntries.map(e => `
+      <div class="log-item">
+        <div class="log-icon ${e.type}">${icons[e.type] || icons.info}</div>
+        <div class="log-content">
+          <div class="log-title">${e.title}</div>
+          ${e.desc ? `<div class="log-desc">${e.desc}</div>` : ''}
+          <div class="log-time">${e.time}</div>
+        </div>
+      </div>
+    `).join('');
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function clearLogs() { logEntries = []; renderLogs(); }
 
   async function initApp() {
     if (!checkAuth()) return;
@@ -786,7 +813,7 @@
     initSpecsSelector();
     initRegionSelector();
     initDurationSlider();
-    initRepoNameValidation();
+    initRepoName();
     initSettings();
     initDeploy();
     loadSavedTokens();
@@ -905,23 +932,11 @@
     durationSlider.oninput = () => { durationDisplay.textContent = durationSlider.value; checkTimeWarning(); };
   }
 
-  function isValidRepoName(name) {
-    if (!name || typeof name !== 'string') return false;
-    if (name.length < 1 || name.length > 100) return false;
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(name)) return false;
-    if (/\[.]\.\./.test(name)) return false;
-    return true;
-  }
-
-  function initRepoNameValidation() {
+  function initRepoName() {
     const input = $('#repo-name');
-    const hint = $('#repo-name-hint');
-    input.addEventListener('input', () => {
-      const val = input.value.trim();
-      if (!val) { input.classList.remove('input-error'); hint.classList.remove('error'); hint.textContent = 'Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)'; }
-      else if (!isValidRepoName(val)) { input.classList.add('input-error'); hint.classList.add('error'); hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Tên không hợp lệ!'; }
-      else { input.classList.remove('input-error'); hint.classList.remove('error'); hint.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;color:var(--success)"><polyline points="20 6 9 17 4 12"/></svg> Tên hợp lệ'; }
-    });
+    const btn = $('#btn-regenerate');
+    input.value = generateRepoName();
+    btn.onclick = () => { input.value = generateRepoName(); };
   }
 
   function resetConnInfo() { $('#conn-info').innerHTML = '<div class="text-center">No active VPS deployment.</div>'; }
@@ -952,7 +967,6 @@
       const saved = sessionStorage.getItem(SESSION_KEY);
       if (!saved) return;
       const session = JSON.parse(saved);
-      // If session is older than 30 mins and no link found, maybe discard? keeping it simple for now.
       
       $('#resume-banner').classList.remove('hidden');
       $('#resume-repo').textContent = session.repo;
@@ -984,11 +998,10 @@
     isTailscalePlan = session.isTailscalePlan;
     isDeploying = true;
     
-    // Restore UI
     $('#repo-name').value = session.repo;
     showProgressPanel();
     updateProgress({ progress: 50, status: 'in_progress', message: 'Resuming session...' });
-    log('Resuming previous session...', 'info');
+    addLogEntry('Resuming Session', `Continuing deployment for ${session.repo}`, 'info');
     
     startElapsedTimer();
     pollInterval = setInterval(pollForLink, 10000);
@@ -1008,15 +1021,32 @@
       const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner: currentDeployment.owner, repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
       const data = await res.json();
       updateProgress(data);
-      if (data.tailscaleAuthUrl) { log(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
+      
+      if (data.tailscaleAuthUrl) { 
+        addLogEntry('Authentication Required', 'Click the Tailscale link above to login', 'pending');
+        saveDeploymentSession(); 
+        return; 
+      }
       if (data.found && data.vpsLink) {
-        log('VPS is ready!', 'success'); hideTailscaleAuthBanner();
-        currentDeployment.vpsLink = data.vpsLink; if (data.vpsPassword) currentDeployment.vpsPassword = data.vpsPassword;
-        updateConnInfo(currentDeployment); updateHistoryWithLink(currentDeployment.repo, data.vpsLink);
-        stopPolling(); clearDeploymentSession(); showToast('VPS is ready!', 'success');
+        addLogEntry('VPS Ready!', `Connection: ${data.vpsLink}`, 'success');
+        hideTailscaleAuthBanner();
+        currentDeployment.vpsLink = data.vpsLink; 
+        if (data.vpsPassword) currentDeployment.vpsPassword = data.vpsPassword;
+        updateConnInfo(currentDeployment); 
+        updateHistoryWithLink(currentDeployment.repo, data.vpsLink);
+        stopPolling(); 
+        clearDeploymentSession(); 
+        showToast('VPS is ready!', 'success');
         isDeploying = false;
-      } else { log(`${data.message || 'Waiting...'}`, 'pending'); saveDeploymentSession(); }
-    } catch(err) { log(`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> ${err.message}`, 'error'); }
+      } else { 
+        if (data.currentStep) {
+          addLogEntry(data.currentStep, data.message || 'Processing...', 'pending');
+        }
+        saveDeploymentSession(); 
+      }
+    } catch(err) { 
+      addLogEntry('Error', err.message, 'error');
+    }
   }
 
   function updateHistoryWithLink(repo, link) { const list = getVpsList(); const idx = list.findIndex(x => x.repo === repo); if (idx !== -1) { list[idx].link = link; localStorage.setItem(STORE_KEY, JSON.stringify(list)); } }
@@ -1029,9 +1059,6 @@
   function initSettings() {
     $('#btn-clear-data').onclick = () => {
       openConfirmModal('Clear Data', 'Are you sure? This will wipe all local data and log you out.', () => { localStorage.clear(); location.reload(); });
-    };
-    $('#btn-forget-token').onclick = () => {
-      showToast('GitHub tokens now managed via Admin panel.', 'info');
     };
   }
 
@@ -1054,11 +1081,14 @@
       let requestedDuration = isTailscalePlan ? 360 : parseInt($('#duration').value, 10);
       const ngrokRegion = $('#ngrok-region').value;
       
-      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
-      if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi! Liên hệ admin.', 'error'); log('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Không đủ thời gian chơi!', 'error'); return; }
+      if (!repo) { 
+        $('#repo-name').value = generateRepoName(); 
+      }
+      const finalRepo = $('#repo-name').value.trim();
+      
+      if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi! Liên hệ admin.', 'error'); addLogEntry('Lỗi', 'Không đủ thời gian chơi', 'error'); return; }
       
       let actualDuration = Math.min(requestedDuration, userTimeMinutes, MAX_VPS_DURATION);
-      if (actualDuration < requestedDuration) { log(`⚠️ Thời gian được giới hạn: ${actualDuration} phút (bạn có ${userTimeMinutes} phút)`, 'pending'); }
       
       isDeploying = true;
       stopPolling(); clearDeploymentSession(); hideTailscaleAuthBanner();
@@ -1066,21 +1096,25 @@
       btn.disabled = true; 
       btn.innerHTML = '<span class="spinner"></span> Deploying...';
       
-      clearLogs(); showProgressPanel(); updateProgress({ progress: 5, status: 'pending', message: 'Sending request...' });
-      log(`Creating Server (${actualDuration}m, ${selectedSpecs})...`, 'info');
+      clearLogs(); 
+      showProgressPanel(); 
+      updateProgress({ progress: 5, status: 'pending', message: 'Sending request...' });
+      
+      addLogEntry('Starting Deployment', `Plan: ${getPlanDisplayName(selectedPlan.id)} | Duration: ${actualDuration}m | Specs: ${selectedSpecs}`, 'info');
       
       try {
+        addLogEntry('Creating Repository', `Name: ${finalRepo}`, 'pending');
+        
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
           body: JSON.stringify({ 
             planId: selectedPlan.id, 
             durationMinutes: actualDuration, 
-            repoName: repo, 
+            repoName: finalRepo, 
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            // githubToken omitted: server will use saved token pool
             username: currentUser?.username || ''
           }) 
         });
@@ -1088,45 +1122,57 @@
         
         if (!data.success) {
           if (data.timeout) {
-            log('Workflow timeout. Please try again.', 'error');
+            addLogEntry('Timeout', 'Workflow did not start. Please try again.', 'error');
           }
           throw new Error(data.message || 'Unknown error');
         }
         
         await deductTime(actualDuration);
-        log(`Allocated ${actualDuration} minutes.`, 'info');
+        addLogEntry('Time Deducted', `${actualDuration} minutes allocated`, 'success');
         
         updateProgress({ progress: 15, status: 'in_progress', message: 'Repository created' });
-        log('Server initialized.', 'success');
-        if (data.dispatched) { log('Starting workflow...', 'success'); updateProgress({ progress: 25, status: 'in_progress', message: 'Workflow started' }); }
-        else log('Manual trigger needed', 'pending');
+        addLogEntry('Repository Created', data.repoUrl, 'success');
         
-        // Server will use stored token for polling; client does not hold token
-        currentDeployment = { token: null, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null, owner: data.owner };
+        if (data.dispatched) { 
+          addLogEntry('Workflow Started', 'GitHub Actions workflow has been triggered', 'success'); 
+          updateProgress({ progress: 25, status: 'in_progress', message: 'Workflow started' }); 
+        } else {
+          addLogEntry('Manual Trigger Needed', 'Please trigger workflow in GitHub Actions', 'pending');
+        }
+        
+        currentDeployment = { token: null, repo: finalRepo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null, owner: data.owner };
         isTailscalePlan = data.planId === 'win_tailscale';
         updateConnInfo(currentDeployment);
-        saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
-        startElapsedTimer(); saveDeploymentSession();
-        log('Waiting for connection...', 'info');
-        pollInterval = setInterval(pollForLink, 10000); setTimeout(pollForLink, 15000);
+        saveToVpsList(data, finalRepo, actualDuration); 
+        addToStats({ repo: finalRepo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
+        startElapsedTimer(); 
+        saveDeploymentSession();
+        
+        addLogEntry('Waiting for Connection', 'Polling for VPS link...', 'pending');
+        pollInterval = setInterval(pollForLink, 10000); 
+        setTimeout(pollForLink, 15000);
         showToast('VPS deployment started!', 'success');
+        
+        // Generate new name for next deployment
+        $('#repo-name').value = generateRepoName();
+        
       } catch(err) { 
-        log('Error: ' + err.message, 'error'); 
+        addLogEntry('Error', err.message, 'error'); 
         showToast('Error: ' + err.message, 'error'); 
         updateProgress({ progress: 0, status: 'error', message: err.message }); 
         hideProgressPanel(); 
         isDeploying = false;
+      } finally { 
+        btn.disabled = false; 
+        btn.innerHTML = originalText; 
       }
-      finally { btn.disabled = false; btn.innerHTML = originalText; }
     };
 
     window.onCaptchaSuccess = (token) => { $('#captcha-modal').classList.add('hidden'); executeDeploy(); };
 
     $('#btn-deploy').onclick = () => {
       if (isDeploying) { showToast('Đang deploy, vui lòng chờ...', 'info'); return; }
-      const repo = $('#repo-name').value.trim(), ngrok = $('#ngrok-token').value.trim();
-      if (!repo) { showToast('Repository name required!', 'error'); return; }
-      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
+      const ngrok = $('#ngrok-token').value.trim();
       if (selectedPlan.id === 'win_rdp' && !ngrok) { showToast('Ngrok Token required!', 'error'); return; }
       if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi!', 'error'); return; }
       $('#captcha-modal').classList.remove('hidden');
@@ -1146,7 +1192,7 @@
       <div class="info-row"><span class="info-label">Specs</span><span class="info-value">${specsLabel}</span></div>
       <div class="info-row"><span class="info-label">${isTailscale ? 'RDP' : 'URL'}</span><span class="info-value"><span style="user-select:all;overflow:hidden;text-overflow:ellipsis;">${vpsUrl}</span>${data.vpsLink ? `<button class="copy-btn" onclick="copyToClipboard('${vpsUrl}', this)">Copy</button>` : isPolling ? '<span class="spinner" style="border-color:var(--accent-soft);border-top-color:var(--accent);"></span>' : ''}</span></div>
       <div class="info-row"><span class="info-label">Password</span><span class="info-value"><span style="user-select:all;">${vpsPass}</span><button class="copy-btn" onclick="copyToClipboard('${vpsPass}', this)">Copy</button></span></div>
-      ${isTailscale ? '<div class="info-row"><span class="info-label">Username</span><span class="info-value">runneradmin</span></div>' : ''}
+      ${isTailscale ? '<div class="info-row"><span class="info-label">Username</span><span class="info-value">codecloud</span></div>' : ''}
       <div class="info-row"><span class="info-label">Duration</span><span class="info-value">${displayDuration} min</span></div>
     `;
   }
@@ -1155,8 +1201,6 @@
     const item = { id: Date.now(), repo, plan: data.planId, link: data.vpsLink || null, pass: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, duration: actualDuration, specs: data.specs?.label || null, created: new Date().toLocaleString(), startTime: Date.now() };
     const list = getVpsList().filter(x => x.repo !== repo); list.unshift(item); saveVpsList(list.slice(0, 50));
   }
-
-  function formatRuntime(m) { return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; }
 
   function renderStats() {
     const stats = getStats();
@@ -1175,9 +1219,8 @@
       const maxDuration = item.duration || 60, remainingMinutes = Math.max(0, maxDuration - runningMinutes);
       const isExpired = remainingMinutes <= 0, isWarning = remainingMinutes > 0 && remainingMinutes <= 30;
       const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
-      let timeDisplay = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${runningMinutes}m/${maxDuration}m`;
-      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${remainingMinutes}m left</span>`;
-      // extract owner from repoUrl if available
+      let timeDisplay = `${runningMinutes}m/${maxDuration}m`;
+      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">${remainingMinutes}m left</span>`;
       let ownerAttr = '';
       try { if (item.repoUrl) { const parts = item.repoUrl.split('/'); ownerAttr = parts[parts.length - 2]; } } catch(e) { ownerAttr = ''; }
       el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${ownerAttr}">Delete</button></div>`;
@@ -1190,7 +1233,6 @@
 
   async function executeDeleteVps(id, repo, owner) {
     try {
-      // backend will find appropriate token for owner
       const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner, repo }) });
       const d = await res.json(); 
       if (!d.success) throw new Error(d.message || 'Delete failed');

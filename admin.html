@@ -2,1107 +2,523 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Panel - CodeCloud</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.85); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
-      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
-      --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
-      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
-      --success: #34d399; --success-soft: rgba(52,211,153,0.12);
-      --error: #f87171; --error-soft: rgba(248,113,113,0.12);
-      --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
-      --info: #38bdf8; --info-soft: rgba(56,189,248,0.12);
-      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#d946ef 100%);
-      --gradient-accent: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
-      --gradient-success: linear-gradient(135deg,#10b981 0%,#14b8a6 100%);
-      --gradient-warning: linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);
-      --gradient-error: linear-gradient(135deg,#ef4444 0%,#f87171 100%);
-      --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
-      --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
-      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
-      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
-    }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    html,body{height:100%}
-    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    :root{--bg:#0f172a;--surface:#1e293b;--card:#334155;--text:#f1f5f9;--muted:#94a3b8;--accent:#818cf8;--success:#34d399;--error:#f87171;--warning:#fbbf24;--border:rgba(148,163,184,0.1)}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px}
+    .container{max-width:1400px;margin:0 auto}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    .header h1{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .btn{padding:10px 20px;border-radius:8px;border:none;font-weight:600;cursor:pointer;transition:all 0.2s;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white}
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(99,102,241,0.4)}
+    .btn-danger{background:var(--error);color:white}
+    .btn-success{background:var(--success);color:white}
+    .btn-small{padding:6px 12px;font-size:0.75rem}
+    .tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .tab{padding:10px 20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-weight:600;cursor:pointer;transition:all 0.2s}
+    .tab:hover{color:var(--text);border-color:var(--accent)}
+    .tab.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .panel{background:var(--surface);border-radius:12px;padding:20px;border:1px solid var(--border);margin-bottom:20px}
+    .panel-title{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
     .hidden{display:none!important}
-    
-    .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,var(--accent-soft) 60deg,transparent 120deg,rgba(34,211,238,0.08) 180deg,transparent 240deg,var(--accent-glow) 300deg,transparent 360deg);animation:auroraRotate 60s linear infinite}
-    @keyframes auroraRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-    @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    
-    .app-container{min-height:100vh;position:relative;z-index:1;padding:20px}
-    
-    .header{max-width:1600px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
-    .brand{display:flex;align-items:center;gap:14px}
-    .logo{width:56px;height:56px;border-radius:16px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-glow);animation:float 4s ease-in-out infinite}
-    .logo svg{width:32px;height:32px;color:white}
-    .brand-text h1{font-size:1.5rem;font-weight:900;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-    .brand-text p{font-size:0.8rem;color:var(--text-muted)}
-    
-    .header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-    .admin-badge{padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-weight:700;font-size:0.8rem;display:flex;align-items:center;gap:6px}
-    .online-indicator{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
-    .btn-back{padding:10px 20px;border-radius:999px;border:2px solid var(--border-light);background:var(--bg-card);color:var(--text-primary);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);text-decoration:none;display:flex;align-items:center;gap:6px}
-    .btn-back:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
-    .auto-refresh-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border-light);font-size:0.8rem;color:var(--text-muted);cursor:pointer;transition:var(--transition)}
-    .auto-refresh-toggle.active{background:var(--success-soft);border-color:var(--success);color:var(--success)}
-    
-    .container{max-width:1600px;margin:0 auto}
-    
-    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px}
-    @media(max-width:1400px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
-    @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:600px){.stats-grid{grid-template-columns:1fr}}
-    
-    .stat-card{background:var(--bg-surface);backdrop-filter:blur(20px);border-radius:var(--radius-lg);padding:20px;border:1px solid var(--border-light);transition:var(--transition);animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
-    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-accent);opacity:0;transition:var(--transition)}
-    .stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
-    .stat-card:hover::before{opacity:1}
-    .stat-card.highlight{border-color:var(--accent)}
-    .stat-card.highlight::before{opacity:1}
-    .stat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .stat-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
-    .stat-icon svg{width:22px;height:22px;color:white}
-    .stat-icon.users{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
-    .stat-icon.time{background:linear-gradient(135deg,#10b981,#14b8a6)}
-    .stat-icon.active{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
-    .stat-icon.banned{background:linear-gradient(135deg,#ef4444,#dc2626)}
-    .stat-icon.vps{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}
-    .stat-icon.tokens{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
-    .stat-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
-    .stat-value{font-size:1.8rem;font-weight:900;color:var(--text-primary);animation:countUp 0.5s ease-out}
-    .stat-sub{font-size:0.72rem;color:var(--text-muted);margin-top:4px}
-    
-    .panel{background:var(--bg-surface);backdrop-filter:blur(30px);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
-    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-light),transparent);opacity:0.5}
-    .panel-header{margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-    .panel-title{font-size:1.1rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:10px}
-    .panel-title::before{content:'';width:4px;height:24px;background:var(--gradient-accent);border-radius:2px}
-    .panel-desc{color:var(--text-muted);font-size:0.8rem;margin-top:4px}
-    .panel-actions{display:flex;gap:8px;flex-wrap:wrap}
-    
-    .tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;background:var(--bg-card);padding:6px;border-radius:999px;border:1px solid var(--border-light)}
-    .tab{padding:10px 18px;border-radius:999px;border:none;background:transparent;color:var(--text-muted);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px;position:relative}
-    .tab svg{width:16px;height:16px}
-    .tab:hover{color:var(--text-primary);background:var(--accent-soft)}
-    .tab.active{background:var(--gradient-accent);color:white}
-    .tab-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--error);color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
-    
-    .tab-content{display:none}
-    .tab-content.active{display:block;animation:fadeIn 0.3s ease-out}
-    
-    .form-group{margin-bottom:16px}
-    .form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px}
-    @media(max-width:600px){.form-row{grid-template-columns:1fr}}
-    .label{font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px}
-    .input{width:100%;background:var(--bg-card);border-radius:var(--radius-md);border:2px solid var(--border-light);padding:12px 14px;font-size:0.9rem;color:var(--text-primary);transition:var(--transition);font-family:inherit}
-    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
-    select.input{cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;background-size:16px}
-    textarea.input{resize:vertical;min-height:80px}
-    
-    .btn{padding:12px 20px;border-radius:999px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:6px}
-    .btn svg{width:16px;height:16px}
-    .btn:hover:not(:disabled){transform:translateY(-2px)}
-    .btn:disabled{opacity:0.6;cursor:not-allowed}
-    .btn-primary{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md)}
-    .btn-success{background:var(--gradient-success);color:white}
-    .btn-danger{background:var(--gradient-error);color:white}
-    .btn-warning{background:var(--gradient-warning);color:#000}
-    .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:2px solid var(--border-light)}
-    .btn-sm{padding:8px 14px;font-size:0.78rem}
-    .btn-xs{padding:5px 10px;font-size:0.72rem}
-    .btn-full{width:100%}
-    
-    .user-table{width:100%;border-collapse:collapse}
-    .user-table th,.user-table td{padding:14px 12px;text-align:left;border-bottom:1px solid var(--border-light);font-size:0.82rem}
-    .user-table th{background:var(--bg-card);font-weight:700;color:var(--text-muted);position:sticky;top:0;text-transform:uppercase;font-size:0.72rem;letter-spacing:0.5px;z-index:10}
-    .user-table tr:hover{background:rgba(255,255,255,0.03)}
-    .user-table tr.selected{background:var(--accent-soft)}
-    .user-table-wrapper{max-height:500px;overflow-y:auto;border-radius:var(--radius-md);border:1px solid var(--border-light)}
-    
-    .badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;display:inline-flex;align-items:center;gap:4px}
-    .badge svg{width:12px;height:12px}
-    .badge-success{background:var(--success-soft);color:var(--success)}
-    .badge-warning{background:var(--warning-soft);color:var(--warning)}
-    .badge-error{background:var(--error-soft);color:var(--error)}
-    .badge-info{background:var(--accent-soft);color:var(--accent)}
-    .badge-cyan{background:var(--info-soft);color:var(--info)}
-    
-    .action-badge{padding:5px 10px;border-radius:var(--radius-sm);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
-    .action-badge.login{background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(139,92,246,0.2));color:#a5b4fc;border:1px solid rgba(139,92,246,0.3)}
-    .action-badge.register{background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(20,184,166,0.2));color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
-    .action-badge.ban{background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(220,38,38,0.2));color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
-    .action-badge.unban{background:linear-gradient(135deg,rgba(34,211,238,0.2),rgba(14,165,233,0.2));color:#67e8f9;border:1px solid rgba(34,211,238,0.3)}
-    .action-badge.vps{background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));color:#fcd34d;border:1px solid rgba(251,191,36,0.3)}
-    .action-badge.time{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(139,92,246,0.2));color:#c4b5fd;border:1px solid rgba(168,85,247,0.3)}
-    .action-badge.admin{background:linear-gradient(135deg,rgba(236,72,153,0.2),rgba(219,39,119,0.2));color:#f9a8d4;border:1px solid rgba(236,72,153,0.3)}
-    .action-badge.delete{background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(185,28,28,0.2));color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
-    
-    .search-box{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-    .search-box .input{flex:1;min-width:200px}
-    
-    .toast{position:fixed;bottom:20px;right:20px;z-index:300;animation:slideUp 0.3s ease-out}
-    .toast.hidden{display:none}
-    .toast-inner{min-width:280px;max-width:420px;padding:16px 20px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:12px;font-size:0.9rem;font-weight:600;box-shadow:var(--shadow-lg);background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-light)}
-    .toast.toast-success .toast-inner{border-left:4px solid var(--success)}
-    .toast.toast-error .toast-inner{border-left:4px solid var(--error)}
-    .toast.toast-info .toast-inner{border-left:4px solid var(--accent)}
-    .toast-icon svg{width:20px;height:20px}
-    
-    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
-    .spinner-dark{border-color:var(--border-light);border-top-color:var(--accent)}
-    
-    .ip-text{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-muted);background:var(--bg-card);padding:2px 6px;border-radius:4px}
-    
-    .modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center}
-    .modal.hidden{display:none}
-    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px)}
-    .modal-dialog{position:relative;z-index:1;width:100%;max-width:500px;margin:16px;background:var(--bg-elevated);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-lg);animation:slideUp 0.3s ease-out;max-height:90vh;overflow-y:auto}
-    .modal-dialog.wide{max-width:700px}
-    .modal-title{font-size:1.1rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:1.2rem}
-    .modal-close:hover{background:var(--error-soft);color:var(--error);transform:rotate(90deg)}
-    
-    .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-    @media(max-width:800px){.settings-grid{grid-template-columns:1fr}}
-    .setting-item{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;border:1px solid var(--border-light)}
-    .setting-item h4{font-size:0.9rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-    .setting-item p{font-size:0.75rem;color:var(--text-muted);margin-bottom:12px}
-
-    .detail-card{background:var(--bg-card);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border-light);min-width:200px;max-width:320px}
-    .detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;border-bottom:1px dashed var(--border-light);gap:12px}
-    .detail-row:last-child{border-bottom:none}
-    .detail-key{font-size:0.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0}
-    .detail-val{font-size:0.75rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;text-align:right;word-break:break-all}
-    .detail-empty{color:var(--text-muted);font-style:italic;font-size:0.72rem;padding:8px;text-align:center}
-
-    .user-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .user-detail-item{background:var(--bg-card);padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border-light)}
-    .user-detail-item .label{font-size:0.7rem;color:var(--text-muted);margin-bottom:4px}
-    .user-detail-item .value{font-size:0.9rem;font-weight:600;color:var(--text-primary);word-break:break-all}
-
-    .checkbox-wrapper{display:flex;align-items:center;gap:8px;cursor:pointer}
-    .checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border-medium);background:var(--bg-card);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer}
-    .checkbox.checked{background:var(--gradient-accent);border-color:var(--accent)}
-    .checkbox.checked::after{content:'✓';color:white;font-size:0.7rem;font-weight:700}
-
-    .health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    .health-item{background:var(--bg-card);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border-light);display:flex;align-items:center;gap:12px}
-    .health-indicator{width:12px;height:12px;border-radius:50%}
-    .health-indicator.good{background:var(--success);box-shadow:0 0 10px var(--success)}
-    .health-indicator.warning{background:var(--warning);box-shadow:0 0 10px var(--warning)}
-    .health-indicator.bad{background:var(--error);box-shadow:0 0 10px var(--error)}
-    .health-info h4{font-size:0.85rem;font-weight:700}
-    .health-info p{font-size:0.72rem;color:var(--text-muted)}
-
-    ::-webkit-scrollbar{width:6px;height:6px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:10px}
-    ::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
-    
-    .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
-    .empty-state h3{font-size:1.1rem;margin-bottom:8px;color:var(--text-secondary)}
-    .empty-state p{font-size:0.85rem}
-
-    .last-updated{font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
-    .icon-svg{width:16px;height:16px;display:inline-block;vertical-align:middle}
+    .grid{display:grid;gap:16px}
+    .grid-2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+    .stat-card{background:var(--card);padding:16px;border-radius:10px}
+    .stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+    .stat-value{font-size:1.5rem;font-weight:800}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem}
+    th,td{padding:12px;text-align:left;border-bottom:1px solid var(--border)}
+    th{color:var(--muted);font-weight:600;font-size:0.75rem;text-transform:uppercase}
+    tr:hover{background:rgba(255,255,255,0.02)}
+    .badge{padding:4px 8px;border-radius:999px;font-size:0.7rem;font-weight:700}
+    .badge-success{background:rgba(52,211,153,0.2);color:var(--success)}
+    .badge-error{background:rgba(248,113,113,0.2);color:var(--error)}
+    .badge-warning{background:rgba(251,191,36,0.2);color:var(--warning)}
+    .badge-info{background:rgba(129,140,248,0.2);color:var(--accent)}
+    .badge-admin{background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(168,85,247,0.3));color:#c4b5fd}
+    .input{width:100%;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem}
+    .input:focus{outline:none;border-color:var(--accent)}
+    .form-group{margin-bottom:12px}
+    .form-group label{display:block;font-size:0.8rem;color:var(--muted);margin-bottom:4px}
+    .toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-weight:600;z-index:1000;animation:slideUp 0.3s}
+    .toast.success{background:var(--success);color:white}
+    .toast.error{background:var(--error);color:white}
+    @keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .log-entry{padding:10px;background:var(--card);border-radius:6px;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+    .log-entry .time{color:var(--muted);margin-right:8px}
+    .log-entry .type{font-weight:700;margin-right:8px}
+    .actions{display:flex;gap:6px;flex-wrap:wrap}
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:100}
+    .modal-content{background:var(--surface);padding:24px;border-radius:12px;max-width:400px;width:90%}
+    .modal-title{font-size:1.1rem;font-weight:700;margin-bottom:16px}
+    select.input{cursor:pointer}
+    .token-item{background:var(--card);padding:12px;border-radius:8px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+    .token-info{flex:1;min-width:200px}
+    .token-masked{font-family:'JetBrains Mono',monospace;font-size:0.8rem;color:var(--muted)}
+    .empty-state{text-align:center;padding:40px;color:var(--muted)}
+    .user-row{display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--card);border-radius:8px;margin-bottom:8px;flex-wrap:wrap;gap:8px}
+    .user-info{flex:1}
+    .user-name{font-weight:700}
+    .user-meta{font-size:0.75rem;color:var(--muted)}
   </style>
 </head>
 <body>
-
-<div class="bg-effects"><div class="aurora"></div></div>
-
-<div class="app-container">
-  <header class="header">
-    <div class="brand">
-      <div class="logo">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <div class="brand-text">
-        <h1>Admin Panel</h1>
-        <p>CodeCloud Management v2.0</p>
-      </div>
-    </div>
-    <div class="header-actions">
-      <div class="admin-badge"><span class="online-indicator"></span> <span id="admin-name">Admin</span></div>
-      <button id="auto-refresh-btn" class="auto-refresh-toggle active" title="Auto Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Auto: <span id="auto-refresh-status">ON</span></button>
-      <span class="last-updated">Cập nhật: <span id="last-updated-time">--:--</span></span>
-      <a href="index.html" class="btn-back">← Dashboard</a>
-    </div>
-  </header>
-  
   <div class="container">
-    <div class="stats-grid">
-      <div class="stat-card" style="animation-delay:0.1s">
-        <div class="stat-header"><div class="stat-icon users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div></div>
-        <div class="stat-label">Tổng Users</div>
-        <div class="stat-value" id="stat-total-users">0</div>
-        <div class="stat-sub" id="stat-new-users">+0 hôm nay</div>
-      </div>
-      <div class="stat-card" style="animation-delay:0.15s">
-        <div class="stat-header"><div class="stat-icon time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
-        <div class="stat-label">Tổng Thời Gian</div>
-        <div class="stat-value" id="stat-total-time">0h</div>
-        <div class="stat-sub">Tất cả users</div>
-      </div>
-      <div class="stat-card" style="animation-delay:0.2s">
-        <div class="stat-header"><div class="stat-icon active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div></div>
-        <div class="stat-label">Đang Hoạt Động</div>
-        <div class="stat-value" id="stat-active-users">0</div>
-        <div class="stat-sub">Có time > 0</div>
-      </div>
-      <div class="stat-card" style="animation-delay:0.25s">
-        <div class="stat-header"><div class="stat-icon banned"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div></div>
-        <div class="stat-label">Đã Bị Ban</div>
-        <div class="stat-value" id="stat-banned-users">0</div>
-        <div class="stat-sub">Users bị khóa</div>
-      </div>
-      <div class="stat-card highlight" style="animation-delay:0.3s">
-        <div class="stat-header"><div class="stat-icon vps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div></div>
-        <div class="stat-label">VPS Đang Chạy</div>
-        <div class="stat-value" id="stat-active-vps">-</div>
-        <div class="stat-sub">Tổng instances</div>
-      </div>
-      <div class="stat-card" style="animation-delay:0.35s">
-        <div class="stat-header"><div class="stat-icon tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div></div>
-        <div class="stat-label">GitHub Tokens</div>
-        <div class="stat-value" id="stat-tokens">0</div>
-        <div class="stat-sub" id="stat-tokens-sub">Live tokens</div>
+    <div class="header">
+      <h1>Admin Panel</h1>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="admin-name" style="color:var(--muted);font-size:0.85rem"></span>
+        <a href="index.html" class="btn btn-primary">Back to App</a>
       </div>
     </div>
-    
+
     <div class="tabs">
-      <button class="tab active" data-tab="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Users</button>
-      <button class="tab" data-tab="time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Thời Gian</button>
-      <button class="tab" data-tab="bulk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Bulk Actions</button>
-      <button class="tab" data-tab="tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Tokens</button>
-      <button class="tab" data-tab="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Logs</button>
-      <button class="tab" data-tab="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> System</button>
+      <button class="tab active" data-tab="users">Users</button>
+      <button class="tab" data-tab="tokens">GitHub Tokens</button>
+      <button class="tab" data-tab="logs">System Logs</button>
     </div>
-    
-    <!-- Tab: Users -->
-    <div class="tab-content active" id="tab-users">
-      <div class="panel">
-        <div class="panel-header">
-          <div>
-            <h2 class="panel-title">Quản Lý Users</h2>
-            <p class="panel-desc">Quản lý tài khoản, ban/unban, cộng thời gian</p>
-          </div>
-          <div class="panel-actions">
-            <button id="btn-export-csv" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
-            <button id="btn-refresh" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
-          </div>
-        </div>
-        
-        <div class="search-box">
-          <input type="text" id="user-search" class="input" placeholder="🔍 Tìm username hoặc IP..." />
-          <select id="user-filter" class="input" style="width:150px">
-            <option value="all">Tất cả</option>
-            <option value="active">Có time</option>
-            <option value="notime">Hết time</option>
-            <option value="banned">Đã ban</option>
-          </select>
-          <select id="user-sort" class="input" style="width:150px">
-            <option value="newest">Mới nhất</option>
-            <option value="oldest">Cũ nhất</option>
-            <option value="time-high">Time cao→thấp</option>
-            <option value="time-low">Time thấp→cao</option>
-          </select>
-        </div>
-        
-        <div class="user-table-wrapper">
-          <table class="user-table">
-            <thead>
-              <tr>
-                <th style="width:40px"><div class="checkbox" id="select-all-users"></div></th>
-                <th>Username</th>
-                <th>Thời Gian</th>
-                <th>IP Đăng Ký</th>
-                <th>Ngày Tạo</th>
-                <th>Trạng Thái</th>
-                <th>Thao Tác</th>
-              </tr>
-            </thead>
-            <tbody id="user-table-body">
-              <tr><td colspan="7" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span> Đang tải...</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">Hiển thị <strong id="user-count-display">0</strong> users | Đã chọn: <strong id="selected-users-count">0</strong></div>
-      </div>
-    </div>
-    
-    <!-- Tab: Time -->
-    <div class="tab-content" id="tab-time">
-      <div class="panel">
-        <div class="panel-header"><h2 class="panel-title">Cộng/Trừ Thời Gian</h2></div>
-        
-        <div class="form-group">
-          <label class="label">Tên User</label>
-          <input type="text" id="time-username" class="input" placeholder="Nhập username" list="user-list-datalist" />
-          <datalist id="user-list-datalist"></datalist>
-        </div>
-        
-        <div class="form-row">
-          <div class="form-group">
-            <label class="label">Số Phút</label>
-            <input type="number" id="time-minutes" class="input" placeholder="60" min="1" max="10000" value="60" />
-          </div>
-          <div class="form-group">
-            <label class="label">Thao Tác</label>
-            <select id="time-operation" class="input">
-              <option value="add">➕ Cộng</option>
-              <option value="deduct">➖ Trừ</option>
-              <option value="set">🎯 Đặt cố định</option>
-            </select>
-          </div>
-          <button id="btn-apply-time" class="btn btn-primary">Áp dụng</button>
-        </div>
-        
-        <div style="margin-top:20px">
-          <h4 style="font-size:0.9rem;margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Quick Add</h4>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="30">+30m</button>
-            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="60">+1h</button>
-            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="120">+2h</button>
-            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="180">+3h</button>
-            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="360">+6h</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Tab: Bulk Actions -->
-    <div class="tab-content" id="tab-bulk">
-      <div class="panel">
-        <div class="panel-header"><h2 class="panel-title">Bulk Actions</h2><p class="panel-desc">Thực hiện hành động hàng loạt</p></div>
-        
-        <div class="setting-item" style="margin-bottom:16px">
-          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Cộng thời gian cho TẤT CẢ users</h4>
-          <p>Cộng thời gian cho tất cả users đang hoạt động (không bị ban)</p>
-          <div style="display:flex;gap:10px;align-items:end;margin-top:12px">
-            <div class="form-group" style="margin:0">
-              <label class="label">Số phút</label>
-              <input type="number" id="bulk-time-minutes" class="input" value="30" min="1" max="1000" style="width:120px" />
-            </div>
-            <button id="btn-bulk-add-time" class="btn btn-success">Cộng cho tất cả</button>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban users đã chọn</h4>
-          <p>Chọn users từ tab Users trước, sau đó quay lại đây</p>
-          <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
-            <span id="bulk-selected-info">0 users đã chọn</span>
-            <button id="btn-bulk-ban" class="btn btn-danger btn-sm" disabled>Ban tất cả đã chọn</button>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Tab: Tokens -->
-    <div class="tab-content" id="tab-tokens">
-      <div class="panel">
-        <div class="panel-header"><h2 class="panel-title">GitHub Tokens</h2></div>
-        
-        <div class="form-group">
-          <label class="label">Thêm Token (PAT)</label>
-          <div style="display:flex;gap:10px">
-            <input type="password" id="admin-token-input" class="input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1" />
-            <button id="btn-add-token" class="btn btn-primary">Thêm</button>
-          </div>
-        </div>
-        
-        <div style="margin-top:20px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-            <h4 style="font-size:0.9rem">Saved Tokens</h4>
-            <button id="btn-refresh-tokens" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
-          </div>
-          <div id="token-list" style="border:1px solid var(--border-light);border-radius:var(--radius-md);max-height:400px;overflow:auto">Đang tải...</div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Tab: Logs -->
-    <div class="tab-content" id="tab-logs">
-      <div class="panel">
-        <div class="panel-header">
-          <div><h2 class="panel-title">System Logs</h2><p class="panel-desc">Nhật ký hoạt động hệ thống</p></div>
-          <button id="btn-refresh-logs" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
-        </div>
-        
-        <div class="search-box">
-          <select id="log-filter" class="input" style="width:180px">
-            <option value="all">Tất cả</option>
-            <option value="login">Đăng nhập</option>
-            <option value="register">Đăng ký</option>
-            <option value="vps">VPS</option>
-            <option value="ban">Ban/Unban</option>
-            <option value="time">Thời gian</option>
-          </select>
-          <input type="text" id="log-search" class="input" placeholder="🔍 Tìm theo username, IP..." />
-        </div>
 
-        <div class="user-table-wrapper" style="max-height:600px">
-          <table class="user-table logs-table">
-            <thead>
-              <tr>
-                <th style="width:140px">Thời Gian</th>
-                <th style="width:100px">User</th>
-                <th style="width:110px">Hành Động</th>
-                <th style="width:120px">IP</th>
-                <th style="min-width:200px">Chi Tiết</th>
-              </tr>
-            </thead>
-            <tbody id="logs-table-body">
-              <tr><td colspan="5" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span></td></tr>
-            </tbody>
-          </table>
+    <!-- Users Tab -->
+    <div id="tab-users">
+      <div class="grid grid-2">
+        <div class="stat-card">
+          <div class="stat-label">Total Users</div>
+          <div class="stat-value" id="total-users">0</div>
         </div>
+        <div class="stat-card">
+          <div class="stat-label">Banned Users</div>
+          <div class="stat-value" id="banned-users">0</div>
+        </div>
+      </div>
+
+      <div class="panel" style="margin-top:20px">
+        <div class="panel-title">Add Time to User</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="time-username" class="input" placeholder="Username" style="flex:1;min-width:150px">
+          <input type="number" id="time-minutes" class="input" placeholder="Minutes" style="width:100px" value="60">
+          <button class="btn btn-success" onclick="addTimeToUser()">Add Time</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">All Users</div>
+        <div id="users-list"></div>
       </div>
     </div>
-    
-    <!-- Tab: System -->
-    <div class="tab-content" id="tab-system">
+
+    <!-- Tokens Tab -->
+    <div id="tab-tokens" class="hidden">
       <div class="panel">
-        <div class="panel-header"><h2 class="panel-title">System Health</h2></div>
-        <div class="health-grid">
-          <div class="health-item">
-            <div class="health-indicator good"></div>
-            <div class="health-info"><h4>API Server</h4><p>Hoạt động bình thường</p></div>
-          </div>
-          <div class="health-item">
-            <div class="health-indicator" id="health-redis"></div>
-            <div class="health-info"><h4>Redis Database</h4><p id="health-redis-text">Đang kiểm tra...</p></div>
-          </div>
-          <div class="health-item">
-            <div class="health-indicator" id="health-tokens"></div>
-            <div class="health-info"><h4>GitHub Tokens</h4><p id="health-tokens-text">Đang kiểm tra...</p></div>
-          </div>
-          <div class="health-item">
-            <div class="health-indicator good" id="health-cron"></div>
-            <div class="health-info"><h4>Cron Jobs</h4><p>Chạy mỗi 6 giờ (Vercel)</p></div>
-          </div>
+        <div class="panel-title">Add GitHub Token</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="password" id="new-token" class="input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1">
+          <button class="btn btn-primary" onclick="addToken()">Add & Test Token</button>
         </div>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:8px">Token will be tested by creating a test repo and running a workflow.</p>
       </div>
-      
+
       <div class="panel">
-        <div class="panel-header"><h2 class="panel-title">Manual Actions</h2></div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <button id="btn-run-cron" class="btn btn-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Chạy Cron thủ công</button>
-        </div>
+        <div class="panel-title">Token Pool</div>
+        <div id="tokens-list"></div>
+      </div>
+    </div>
+
+    <!-- Logs Tab -->
+    <div id="tab-logs" class="hidden">
+      <div class="panel">
+        <div class="panel-title">System Logs</div>
+        <button class="btn btn-primary btn-small" onclick="loadLogs()" style="margin-bottom:12px">Refresh</button>
+        <div id="logs-list" style="max-height:600px;overflow-y:auto"></div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Ban Modal -->
-<div id="ban-modal" class="modal hidden">
-  <div class="modal-backdrop"></div>
-  <div class="modal-dialog">
-    <button class="modal-close" id="ban-modal-close">×</button>
-    <h3 class="modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban User: <span id="ban-username"></span></h3>
-    <div class="form-group">
-      <label class="label">Thời gian ban</label>
-      <select id="ban-duration" class="input">
-        <option value="1-hours">1 giờ</option>
-        <option value="6-hours">6 giờ</option>
-        <option value="12-hours">12 giờ</option>
-        <option value="24-hours">24 giờ</option>
-        <option value="3-days">3 ngày</option>
-        <option value="7-days">7 ngày</option>
-        <option value="30-days">30 ngày</option>
-        <option value="0-permanent">Vĩnh viễn</option>
-      </select>
-    </div>
-    <button id="btn-confirm-ban" class="btn btn-danger btn-full">Xác nhận Ban</button>
-  </div>
-</div>
-
-<!-- User Detail Modal -->
-<div id="user-detail-modal" class="modal hidden">
-  <div class="modal-backdrop"></div>
-  <div class="modal-dialog wide">
-    <button class="modal-close" id="user-detail-close">×</button>
-    <h3 class="modal-title">👤 Chi tiết: <span id="detail-username"></span></h3>
-    <div id="user-detail-content"></div>
-    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-success btn-sm" id="detail-add-time">+1h</button>
-      <button class="btn btn-danger btn-sm" id="detail-ban">Ban</button>
-      <button class="btn btn-secondary btn-sm" id="detail-close-btn">Đóng</button>
+  <!-- Ban Modal -->
+  <div id="ban-modal" class="modal hidden">
+    <div class="modal-content">
+      <div class="modal-title">Ban User: <span id="ban-username"></span></div>
+      <div class="form-group">
+        <label>Duration</label>
+        <input type="number" id="ban-duration" class="input" value="1">
+      </div>
+      <div class="form-group">
+        <label>Unit</label>
+        <select id="ban-unit" class="input">
+          <option value="hours">Hours</option>
+          <option value="days">Days</option>
+          <option value="months">Months</option>
+          <option value="permanent">Permanent</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+        <button class="btn" onclick="closeBanModal()" style="background:var(--card)">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmBan()">Ban User</button>
+      </div>
     </div>
   </div>
-</div>
 
-<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-icon"></span><span id="toast-message"></span></div></div>
+  <div id="toast" class="toast hidden"></div>
 
-<script>
-(function() {
-  'use strict';
-  
-  const CURRENT_USER_KEY = 'cc_current_user';
-  const ADMIN_USERS = ['vanmanh', 'depchai'];
-  const API_URL = '/api/auth';
-  
-  let currentUser = null;
-  let allUsers = [];
-  let allLogs = [];
-  let selectedUsers = new Set();
-  let banTargetUser = null;
-  let autoRefresh = true;
-  let autoRefreshInterval = null;
-  
-  function checkAdmin() {
-    try {
-      const saved = localStorage.getItem(CURRENT_USER_KEY);
-      if (!saved) { window.location.href = 'login.html'; return false; }
-      currentUser = JSON.parse(saved);
-      if (!ADMIN_USERS.includes(currentUser.username?.toLowerCase())) {
-        alert('Không có quyền truy cập!');
-        window.location.href = 'index.html';
-        return false;
-      }
-      return true;
-    } catch(e) { window.location.href = 'login.html'; return false; }
-  }
-  
-  if (!checkAdmin()) return;
-  document.getElementById('admin-name').textContent = currentUser.username;
-  
-  const $ = id => document.getElementById(id);
-  const $$ = sel => document.querySelectorAll(sel);
-  
-  let toastTimer = null;
-  function showToast(msg, type = 'info') {
-    const toast = $('toast');
-    const icons = { success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>', error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>', info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' };
-    toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
-    toast.classList.add('toast-' + type);
-    $('toast-message').textContent = msg;
-    $('toast-icon').innerHTML = icons[type] || icons.info;
-    if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
-  }
-  
-  function formatTime(minutes) {
-    if (minutes < 60) return `${minutes}m`;
-    const h = Math.floor(minutes / 60);
-    const m = minutes % 60;
-    return m > 0 ? `${h}h ${m}m` : `${h}h`;
-  }
-  
-  function formatDateTime(str) {
-    if (!str) return '—';
-    try {
-      const d = new Date(str);
-      return d.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
-    } catch(e) { return str; }
-  }
-  
-  function formatDateShort(str) {
-    if (!str) return '—';
-    try {
-      const d = new Date(str);
-      return d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'2-digit' });
-    } catch(e) { return str; }
-  }
-  
-  function updateLastUpdated() {
-    $('last-updated-time').textContent = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
-  }
-  
-  async function callAPI(data) {
-    try {
-      const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-      return await res.json();
-    } catch(e) { console.error('API error:', e); return { success: false, message: e.message }; }
-  }
-  
-  async function fetchAllUsers() {
-    const data = await callAPI({ action: 'getAllUsers' });
-    if (data.success) {
-      allUsers = data.users || [];
-      updateStats();
-      renderUserTable();
-      updateUserDatalist();
-    }
-  }
-  
-  function updateStats() {
-    let totalTime = 0, activeUsers = 0, bannedUsers = 0;
-    const today = new Date().toDateString();
-    let newToday = 0;
-    
-    allUsers.forEach(u => {
-      totalTime += u.timeMinutes || 0;
-      if (u.timeMinutes > 0 && !u.isBanned) activeUsers++;
-      if (u.isBanned) bannedUsers++;
-      if (u.createdAt && new Date(u.createdAt).toDateString() === today) newToday++;
-    });
-    
-    $('stat-total-users').textContent = allUsers.length;
-    $('stat-total-time').textContent = formatTime(totalTime);
-    $('stat-active-users').textContent = activeUsers;
-    $('stat-banned-users').textContent = bannedUsers;
-    $('stat-new-users').textContent = `+${newToday} hôm nay`;
-  }
-  
-  function updateUserDatalist() {
-    const datalist = $('user-list-datalist');
-    datalist.innerHTML = allUsers.map(u => `<option value="${u.username}">`).join('');
-  }
-  
-  function renderUserTable() {
-    const tbody = $('user-table-body');
-    const search = $('user-search').value.toLowerCase();
-    const filter = $('user-filter').value;
-    const sort = $('user-sort').value;
-    
-    let filtered = allUsers.filter(u => {
-      const matchSearch = u.username.toLowerCase().includes(search) || (u.registerIP && u.registerIP.includes(search));
-      if (!matchSearch) return false;
-      if (filter === 'active') return u.timeMinutes > 0 && !u.isBanned;
-      if (filter === 'notime') return (u.timeMinutes || 0) === 0;
-      if (filter === 'banned') return u.isBanned;
-      return true;
-    });
-    
-    filtered.sort((a, b) => {
-      switch(sort) {
-        case 'oldest': return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-        case 'time-high': return (b.timeMinutes || 0) - (a.timeMinutes || 0);
-        case 'time-low': return (a.timeMinutes || 0) - (b.timeMinutes || 0);
-        default: return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-      }
-    });
-    
-    $('user-count-display').textContent = filtered.length;
-    
-    if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Không tìm thấy user</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = filtered.map(u => {
-      const time = u.timeMinutes || 0;
-      const isSelected = selectedUsers.has(u.username);
-      let statusBadge = '';
-      if (u.isBanned) {
-        statusBadge = u.banType === 'permanent' ? '<span class="badge badge-error">Vĩnh viễn</span>' : '<span class="badge badge-warning">Đã ban</span>';
-      } else {
-        statusBadge = '<span class="badge badge-success">OK</span>';
-      }
-      
-      return `<tr class="${isSelected ? 'selected' : ''}" data-username="${u.username}">
-        <td><div class="checkbox ${isSelected ? 'checked' : ''}" data-user="${u.username}"></div></td>
-        <td><strong style="cursor:pointer;color:var(--accent)" onclick="showUserDetail('${u.username}')">${u.username}</strong></td>
-        <td><span class="badge ${time > 60 ? 'badge-success' : time > 0 ? 'badge-warning' : 'badge-error'}">${formatTime(time)}</span></td>
-        <td><span class="ip-text">${u.registerIP || 'N/A'}</span></td>
-        <td style="font-size:0.75rem;color:var(--text-muted)">${formatDateShort(u.createdAt)}</td>
-        <td>${statusBadge}</td>
-        <td style="white-space:nowrap">
-          ${u.isBanned ? `<button class="btn btn-success btn-xs" onclick="unbanUser('${u.username}')">Unban</button>` : `<button class="btn btn-danger btn-xs" onclick="openBanModal('${u.username}')">Ban</button>`}
-          <button class="btn btn-primary btn-xs" onclick="quickAddTime('${u.username}')">+1h</button>
-        </td>
-      </tr>`;
-    }).join('');
-    
-    tbody.querySelectorAll('.checkbox').forEach(cb => {
-      cb.onclick = () => {
-        const user = cb.dataset.user;
-        if (selectedUsers.has(user)) {
-          selectedUsers.delete(user);
-          cb.classList.remove('checked');
-          cb.closest('tr').classList.remove('selected');
-        } else {
-          selectedUsers.add(user);
-          cb.classList.add('checked');
-          cb.closest('tr').classList.add('selected');
+  <script>
+    const CURRENT_USER_KEY = 'cc_current_user';
+    const ADMIN_USERS = ['vanmanh', 'depchai'];
+    let currentAdmin = null;
+    let selectedBanUser = null;
+
+    function checkAdmin() {
+      try {
+        const saved = localStorage.getItem(CURRENT_USER_KEY);
+        if (!saved) { window.location.href = 'login.html'; return false; }
+        currentAdmin = JSON.parse(saved);
+        if (!ADMIN_USERS.includes(currentAdmin.username?.toLowerCase())) {
+          window.location.href = 'index.html';
+          return false;
         }
-        updateSelectedCount();
+        document.getElementById('admin-name').textContent = currentAdmin.username;
+        return true;
+      } catch(e) { window.location.href = 'login.html'; return false; }
+    }
+
+    function showToast(msg, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast ' + type;
+      setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.onclick = () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('[id^="tab-"]').forEach(p => p.classList.add('hidden'));
+        document.getElementById('tab-' + tab.dataset.tab).classList.remove('hidden');
+        if (tab.dataset.tab === 'users') loadUsers();
+        if (tab.dataset.tab === 'tokens') loadTokens();
+        if (tab.dataset.tab === 'logs') loadLogs();
       };
     });
-  }
-  
-  function updateSelectedCount() {
-    $('selected-users-count').textContent = selectedUsers.size;
-    $('bulk-selected-info').textContent = `${selectedUsers.size} users đã chọn`;
-    $('btn-bulk-ban').disabled = selectedUsers.size === 0;
-  }
-  
-  $('select-all-users').onclick = () => {
-    const allCb = $('select-all-users');
-    const isChecked = allCb.classList.contains('checked');
-    if (isChecked) {
-      selectedUsers.clear();
-      allCb.classList.remove('checked');
-    } else {
-      allUsers.forEach(u => selectedUsers.add(u.username));
-      allCb.classList.add('checked');
-    }
-    renderUserTable();
-    updateSelectedCount();
-  };
-  
-  window.showUserDetail = function(username) {
-    const user = allUsers.find(u => u.username === username);
-    if (!user) return;
-    $('detail-username').textContent = username;
-    $('user-detail-content').innerHTML = `
-      <div class="user-detail-grid">
-        <div class="user-detail-item"><div class="label">Username</div><div class="value">${user.username}</div></div>
-        <div class="user-detail-item"><div class="label">Thời gian còn</div><div class="value">${formatTime(user.timeMinutes || 0)}</div></div>
-        <div class="user-detail-item"><div class="label">IP Đăng ký</div><div class="value">${user.registerIP || 'N/A'}</div></div>
-        <div class="user-detail-item"><div class="label">IP Login cuối</div><div class="value">${user.lastLoginIP || 'N/A'}</div></div>
-        <div class="user-detail-item"><div class="label">Ngày tạo</div><div class="value">${formatDateTime(user.createdAt)}</div></div>
-        <div class="user-detail-item"><div class="label">Login cuối</div><div class="value">${formatDateTime(user.lastLoginAt)}</div></div>
-        <div class="user-detail-item"><div class="label">Trạng thái</div><div class="value">${user.isBanned ? '<span class="badge badge-error">🚫 Đã ban</span>' : '<span class="badge badge-success">✅ OK</span>'}</div></div>
-        ${user.isBanned ? `<div class="user-detail-item"><div class="label">Lý do ban</div><div class="value">${user.banReason || 'N/A'}</div></div>` : ''}
-      </div>
-    `;
-    $('detail-add-time').onclick = () => { quickAddTime(username); $('user-detail-modal').classList.add('hidden'); };
-    $('detail-ban').onclick = () => { $('user-detail-modal').classList.add('hidden'); openBanModal(username); };
-    $('user-detail-modal').classList.remove('hidden');
-  };
-  
-  $('user-detail-close').onclick = () => $('user-detail-modal').classList.add('hidden');
-  $('detail-close-btn').onclick = () => $('user-detail-modal').classList.add('hidden');
-  $('user-detail-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) $('user-detail-modal').classList.add('hidden'); };
-  
-  $('btn-export-csv').onclick = () => {
-    const headers = ['Username', 'Time (minutes)', 'Register IP', 'Created At', 'Status'];
-    const rows = allUsers.map(u => [u.username, u.timeMinutes || 0, u.registerIP || '', u.createdAt || '', u.isBanned ? 'Banned' : 'Active']);
-    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `codecloud-users-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click(); URL.revokeObjectURL(url);
-    showToast('Đã export CSV!', 'success');
-  };
-  
-  async function fetchLogs() {
-    const tbody = $('logs-table-body');
-    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span></td></tr>';
-    try {
-      const res = await fetch('/api/logs');
-      const data = await res.json();
-      allLogs = data.success ? (data.items || []) : [];
-      renderLogs();
-    } catch (e) {
-      console.error('Fetch logs error:', e);
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--error)">Lỗi khi tải logs</td></tr>';
-    }
-  }
-  
-  function renderLogs() {
-    const tbody = $('logs-table-body');
-    const filter = $('log-filter').value;
-    const search = $('log-search').value.toLowerCase();
-    
-    let filtered = allLogs.filter(it => {
-      const type = (it.type || '').toLowerCase();
-      const user = (it.username || it.target || it.githubLogin || '').toLowerCase();
-      const ip = (it.ip || '').toLowerCase();
-      if (filter !== 'all') {
-        if (filter === 'login' && !type.includes('login')) return false;
-        if (filter === 'register' && !type.includes('register')) return false;
-        if (filter === 'vps' && !type.includes('vps')) return false;
-        if (filter === 'ban' && !type.includes('ban')) return false;
-        if (filter === 'time' && !type.includes('time')) return false;
-      }
-      if (search && !user.includes(search) && !ip.includes(search)) return false;
-      return true;
-    });
-    
-    if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted)">Không có logs</td></tr>';
-      return;
-    }
-    
-    tbody.innerHTML = filtered.slice(0, 200).map(it => {
-      const time = formatDateTime(it.at || it.createdAt);
-      const user = it.username || it.target || it.githubLogin || '—';
-      const action = it.type || '';
-      const badgeClass = getActionBadgeClass(action);
-      const ip = it.ip || '—';
-      return `<tr>
-        <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-secondary)">${time}</span></td>
-        <td><strong style="color:var(--text-primary)">${user}</strong></td>
-        <td><span class="action-badge ${badgeClass}">${action}</span></td>
-        <td><span class="ip-text">${ip}</span></td>
-        <td>${formatLogDetails(it)}</td>
-      </tr>`;
-    }).join('');
-  }
-  
-  function getActionBadgeClass(type) {
-    if (!type) return '';
-    const t = type.toLowerCase();
-    if (t.includes('login') && !t.includes('admin')) return 'login';
-    if (t.includes('admin')) return 'admin';
-    if (t.includes('register')) return 'register';
-    if (t.includes('ban') && !t.includes('unban')) return 'ban';
-    if (t.includes('unban')) return 'unban';
-    if (t.includes('vps') && t.includes('delete')) return 'delete';
-    if (t.includes('vps')) return 'vps';
-    if (t.includes('time')) return 'time';
-    return '';
-  }
-  
-  function formatLogDetails(obj) {
-    if (!obj || typeof obj !== 'object') return '<div class="detail-empty">—</div>';
-    const ignore = ['type', 'username', 'ip', 'ipRaw', 'ua', 'at', 'createdAt', '_id', 'target'];
-    const entries = Object.entries(obj).filter(([k]) => !ignore.includes(k));
-    if (entries.length === 0) return '<div class="detail-empty">—</div>';
-    let html = '<div class="detail-card">';
-    for (const [k, v] of entries) {
-      let valStr;
-      if (v === null || v === undefined) valStr = '<span style="color:var(--text-muted)">—</span>';
-      else if (typeof v === 'boolean') valStr = v ? '<span style="color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><polyline points="20 6 9 17 4 12"/></svg></span>' : '<span style="color:var(--error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
-      else if (typeof v === 'object') valStr = JSON.stringify(v);
-      else valStr = String(v);
-      const keyName = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
-      html += `<div class="detail-row"><span class="detail-key">${keyName}</span><span class="detail-val">${valStr}</span></div>`;
-    }
-    return html + '</div>';
-  }
-  
-  async function loadTokens() {
-    try {
-      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) });
-      const d = await res.json();
-      const container = $('token-list');
-      if (!d.success || !Array.isArray(d.items) || d.items.length === 0) {
-        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted)">Chưa có token nào</div>';
-        $('stat-tokens').textContent = '0'; $('stat-tokens-sub').textContent = '0 live';
-        updateHealthTokens(0); return;
-      }
-      const liveCount = d.items.filter(t => t.status === 'live').length;
-      $('stat-tokens').textContent = d.items.length; $('stat-tokens-sub').textContent = `${liveCount} live`;
-      updateHealthTokens(liveCount);
-      container.innerHTML = d.items.map(t => {
-        const statusBadge = t.status === 'live' ? '<span class="badge badge-success">Live</span>' : '<span class="badge badge-error">Dead</span>';
-        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border-light);gap:10px">
-          <div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--text-primary)">${t.owner || 'unknown'}</div>
-          <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:8px;margin-top:4px"><code style="background:var(--bg-base);padding:2px 6px;border-radius:4px">${t.masked || ''}</code>${statusBadge}</div></div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="btn btn-secondary btn-xs" data-id="${t.id}" data-action="check">Check</button>
-            <button class="btn btn-danger btn-xs" data-id="${t.id}" data-action="delete">Xóa</button>
-          </div>
-        </div>`;
-      }).join('');
-      container.querySelectorAll('button[data-action]').forEach(b => b.onclick = async () => {
-        const id = b.dataset.id, action = b.dataset.action;
-        b.disabled = true;
-        if (action === 'delete') {
-          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
-          showToast('Đã xóa token', 'success');
-        } else if (action === 'check') {
-          const r = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'check', id }) });
-          const d = await r.json();
-          showToast(d.success && d.live ? 'Token OK' : 'Token lỗi', d.live ? 'success' : 'error');
+
+    // Users
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'getAllUsers' })
+        });
+        const data = await res.json();
+        
+        // Get regular users from API
+        let users = data.users || [];
+        
+        // Add admin accounts to the list
+        const adminAccounts = ADMIN_USERS.map(name => ({
+          username: name,
+          isAdmin: true,
+          timeMinutes: 9999,
+          createdAt: 'System',
+          isBanned: false
+        }));
+        
+        // Combine: admins first, then regular users
+        const allUsers = [...adminAccounts, ...users.filter(u => !ADMIN_USERS.includes(u.username?.toLowerCase()))];
+        
+        const bannedCount = users.filter(u => u.isBanned).length;
+        document.getElementById('total-users').textContent = allUsers.length;
+        document.getElementById('banned-users').textContent = bannedCount;
+        
+        const container = document.getElementById('users-list');
+        if (allUsers.length === 0) {
+          container.innerHTML = '<div class="empty-state">No users found</div>';
+          return;
         }
-        await loadTokens();
-      });
-    } catch (e) { console.error(e); showToast('Failed loading tokens', 'error'); }
-  }
-  
-  function updateHealthTokens(count) {
-    const el = $('health-tokens'), text = $('health-tokens-text');
-    if (count >= 2) { el.className = 'health-indicator good'; text.textContent = `${count} tokens hoạt động`; }
-    else if (count === 1) { el.className = 'health-indicator warning'; text.textContent = '1 token (nên thêm)'; }
-    else { el.className = 'health-indicator bad'; text.textContent = 'Không có token!'; }
-  }
-  
-  $('btn-add-token').onclick = async () => {
-    const val = $('admin-token-input').value.trim();
-    if (!val) { showToast('Nhập token!', 'error'); return; }
-    const btn = $('btn-add-token'); btn.disabled = true; btn.textContent = 'Checking...';
-    try {
-      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add', token: val }) });
-      const d = await res.json();
-      if (!d.success) showToast(d.message || 'Check failed', 'error');
-      else { showToast('Token live and saved', 'success'); $('admin-token-input').value = ''; }
-    } catch (e) { showToast('Error adding token', 'error'); }
-    finally { btn.disabled = false; btn.textContent = 'Thêm'; await loadTokens(); }
-  };
-  
-  window.openBanModal = function(username) {
-    banTargetUser = username;
-    $('ban-username').textContent = username;
-    $('ban-modal').classList.remove('hidden');
-  };
-  function closeBanModal() { $('ban-modal').classList.add('hidden'); banTargetUser = null; }
-  $('ban-modal-close').onclick = closeBanModal;
-  $('ban-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) closeBanModal(); };
-  
-  $('btn-confirm-ban').onclick = async () => {
-    if (!banTargetUser) return;
-    const durationValue = $('ban-duration').value;
-    const [duration, unit] = durationValue.split('-');
-    const btn = $('btn-confirm-ban'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-    const result = await callAPI({ action: 'banUser', targetUsername: banTargetUser, banDuration: parseInt(duration), banUnit: unit });
-    btn.disabled = false; btn.textContent = 'Xác nhận Ban';
-    if (result.success) { showToast(`Đã ban ${banTargetUser}`, 'success'); closeBanModal(); await fetchAllUsers(); }
-    else showToast(result.message || 'Lỗi!', 'error');
-  };
-  
-  window.unbanUser = async function(username) {
-    if (!confirm(`Unban ${username}?`)) return;
-    const result = await callAPI({ action: 'unbanUser', targetUsername: username });
-    if (result.success) { showToast(`Đã unban ${username}`, 'success'); await fetchAllUsers(); }
-    else showToast(result.message || 'Lỗi!', 'error');
-  };
-  
-  window.quickAddTime = async function(username) {
-    const result = await callAPI({ action: 'updateTime', username, minutes: 60, operation: 'add' });
-    if (result.success) { showToast(`+1h cho ${username}`, 'success'); await fetchAllUsers(); }
-    else showToast(result.message || 'Lỗi!', 'error');
-  };
-  
-  $('btn-apply-time').onclick = async () => {
-    const username = $('time-username').value.trim();
-    const minutes = parseInt($('time-minutes').value) || 0;
-    const operation = $('time-operation').value;
-    if (!username) { showToast('Nhập tên user!', 'error'); return; }
-    if (minutes < 1 || minutes > 10000) { showToast('Số phút từ 1-10000!', 'error'); return; }
-    const btn = $('btn-apply-time'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-    const result = await callAPI({ action: 'updateTime', username, minutes, operation });
-    btn.disabled = false; btn.textContent = 'Áp dụng';
-    if (result.success) {
-      const opText = { add: 'Cộng', deduct: 'Trừ', set: 'Đặt' }[operation];
-      showToast(`${opText} ${formatTime(minutes)} cho ${username}`, 'success');
-      $('time-username').value = ''; await fetchAllUsers();
-    } else showToast(result.message || 'Lỗi!', 'error');
-  };
-  
-  $$('.quick-time-btn').forEach(btn => {
-    btn.onclick = () => {
-      const username = $('time-username').value.trim();
-      if (!username) { showToast('Nhập tên user trước!', 'error'); return; }
-      const minutes = parseInt(btn.dataset.minutes);
-      callAPI({ action: 'updateTime', username, minutes, operation: 'add' }).then(result => {
-        if (result.success) { showToast(`+${formatTime(minutes)} cho ${username}`, 'success'); fetchAllUsers(); }
-        else showToast(result.message || 'Lỗi!', 'error');
-      });
-    };
-  });
-  
-  $('btn-bulk-add-time').onclick = async () => {
-    const minutes = parseInt($('bulk-time-minutes').value) || 0;
-    if (minutes < 1) { showToast('Nhập số phút hợp lệ!', 'error'); return; }
-    if (!confirm(`Cộng ${minutes} phút cho TẤT CẢ users?`)) return;
-    const btn = $('btn-bulk-add-time'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
-    let success = 0, failed = 0;
-    for (const user of allUsers) {
-      if (!user.isBanned) {
-        const result = await callAPI({ action: 'updateTime', username: user.username, minutes, operation: 'add' });
-        if (result.success) success++; else failed++;
+        
+        container.innerHTML = allUsers.map(u => {
+          const isAdminUser = ADMIN_USERS.includes(u.username?.toLowerCase()) || u.isAdmin;
+          const roleLabel = isAdminUser ? '<span class="badge badge-admin">ADMIN</span>' : '<span class="badge badge-info">Member</span>';
+          const banStatus = u.isBanned ? '<span class="badge badge-error">BANNED</span>' : '';
+          const timeDisplay = isAdminUser ? '∞' : `${u.timeMinutes || 0} min`;
+          
+          return `
+            <div class="user-row">
+              <div class="user-info">
+                <div class="user-name">${u.username} ${roleLabel} ${banStatus}</div>
+                <div class="user-meta">Time: ${timeDisplay} | Created: ${u.createdAt || 'N/A'}${u.registerIP ? ' | IP: ' + u.registerIP : ''}</div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-success btn-small" onclick="quickAddTime('${u.username}')">+60m</button>
+                ${!isAdminUser ? (u.isBanned 
+                  ? `<button class="btn btn-small" style="background:var(--warning)" onclick="unbanUser('${u.username}')">Unban</button>`
+                  : `<button class="btn btn-danger btn-small" onclick="openBanModal('${u.username}')">Ban</button>`
+                ) : ''}
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {
+        console.error(e);
+        showToast('Failed to load users', 'error');
       }
     }
-    btn.disabled = false; btn.textContent = 'Cộng cho tất cả';
-    showToast(`Đã cộng cho ${success} users (${failed} thất bại)`, 'success');
-    await fetchAllUsers();
-  };
-  
-  $('btn-bulk-ban').onclick = async () => {
-    if (selectedUsers.size === 0) return;
-    if (!confirm(`Ban ${selectedUsers.size} users đã chọn?`)) return;
-    const btn = $('btn-bulk-ban'); btn.disabled = true;
-    for (const username of selectedUsers) {
-      await callAPI({ action: 'banUser', targetUsername: username, banDuration: 0, banUnit: 'permanent' });
+
+    async function quickAddTime(username) {
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'updateTime', username, minutes: 60, operation: 'add' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Added 60 minutes to ${username}`);
+          loadUsers();
+        } else {
+          showToast(data.message || 'Failed', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
     }
-    selectedUsers.clear(); updateSelectedCount();
-    showToast('Đã ban tất cả users đã chọn', 'success');
-    await fetchAllUsers();
-  };
-  
-  $('btn-run-cron').onclick = async () => {
-    if (!confirm('Chạy cron job thủ công?')) return;
-    const btn = $('btn-run-cron'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Đang chạy...';
-    try {
-      const res = await fetch('/api/cron');
-      const data = await res.json();
-      showToast(`Cron hoàn tất: ${data.vpsCleanup?.deleted || 0} VPS đã xóa`, 'success');
-    } catch (e) { showToast('Lỗi chạy cron: ' + e.message, 'error'); }
-    finally { btn.disabled = false; btn.textContent = '🔄 Chạy Cron thủ công'; }
-  };
-  
-  async function checkHealth() {
-    try {
-      await callAPI({ action: 'getAllUsers' });
-      $('health-redis').className = 'health-indicator good';
-      $('health-redis-text').textContent = 'Hoạt động bình thường';
-    } catch (e) {
-      $('health-redis').className = 'health-indicator bad';
-      $('health-redis-text').textContent = 'Lỗi kết nối';
+
+    async function addTimeToUser() {
+      const username = document.getElementById('time-username').value.trim();
+      const minutes = parseInt(document.getElementById('time-minutes').value) || 60;
+      if (!username) { showToast('Enter username', 'error'); return; }
+      
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'updateTime', username, minutes, operation: 'add' })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Added ${minutes} minutes to ${username}`);
+          document.getElementById('time-username').value = '';
+          loadUsers();
+        } else {
+          showToast(data.message || 'Failed', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
     }
-  }
-  
-  $$('.tab').forEach(tab => {
-    tab.onclick = () => {
-      $$('.tab').forEach(t => t.classList.remove('active'));
-      $$('.tab-content').forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      $('tab-' + tab.dataset.tab).classList.add('active');
-      if (tab.dataset.tab === 'logs') fetchLogs();
-      if (tab.dataset.tab === 'system') checkHealth();
-    };
-  });
-  
-  $('user-search').oninput = renderUserTable;
-  $('user-filter').onchange = renderUserTable;
-  $('user-sort').onchange = renderUserTable;
-  $('btn-refresh').onclick = fetchAllUsers;
-  $('btn-refresh-tokens').onclick = loadTokens;
-  $('btn-refresh-logs').onclick = fetchLogs;
-  $('log-filter').onchange = renderLogs;
-  $('log-search').oninput = renderLogs;
-  
-  $('auto-refresh-btn').onclick = () => {
-    autoRefresh = !autoRefresh;
-    $('auto-refresh-status').textContent = autoRefresh ? 'ON' : 'OFF';
-    $('auto-refresh-btn').classList.toggle('active', autoRefresh);
-    if (autoRefresh) startAutoRefresh();
-    else stopAutoRefresh();
-  };
-  
-  function startAutoRefresh() {
-    stopAutoRefresh();
-    autoRefreshInterval = setInterval(() => {
-      fetchAllUsers();
-      updateLastUpdated();
-    }, 30000);
-  }
-  
-  function stopAutoRefresh() {
-    if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
-  }
-  
-  async function init() {
-    await fetchAllUsers();
-    await loadTokens();
-    updateLastUpdated();
-    checkHealth();
-    if (autoRefresh) startAutoRefresh();
-  }
-  
-  init();
-})();
-</script>
+
+    function openBanModal(username) {
+      selectedBanUser = username;
+      document.getElementById('ban-username').textContent = username;
+      document.getElementById('ban-modal').classList.remove('hidden');
+    }
+
+    function closeBanModal() {
+      document.getElementById('ban-modal').classList.add('hidden');
+      selectedBanUser = null;
+    }
+
+    async function confirmBan() {
+      if (!selectedBanUser) return;
+      const duration = parseInt(document.getElementById('ban-duration').value) || 1;
+      const unit = document.getElementById('ban-unit').value;
+      
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'banUser', targetUsername: selectedBanUser, banDuration: duration, banUnit: unit })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Banned ${selectedBanUser}`);
+          closeBanModal();
+          loadUsers();
+        } else {
+          showToast(data.message || 'Failed', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function unbanUser(username) {
+      try {
+        const res = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'unbanUser', targetUsername: username })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(`Unbanned ${username}`);
+          loadUsers();
+        } else {
+          showToast(data.message || 'Failed', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Tokens
+    async function loadTokens() {
+      try {
+        const res = await fetch('/api/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'list' })
+        });
+        const data = await res.json();
+        const tokens = data.items || [];
+        
+        const container = document.getElementById('tokens-list');
+        if (tokens.length === 0) {
+          container.innerHTML = '<div class="empty-state">No tokens. Add one above.</div>';
+          return;
+        }
+        
+        container.innerHTML = tokens.map(t => `
+          <div class="token-item">
+            <div class="token-info">
+              <div><strong>${t.owner || 'Unknown'}</strong> <span class="badge ${t.status === 'live' ? 'badge-success' : 'badge-error'}">${t.status?.toUpperCase() || 'UNKNOWN'}</span></div>
+              <div class="token-masked">${t.masked}</div>
+              ${t.lastChecked ? `<div style="font-size:0.7rem;color:var(--muted)">Last check: ${new Date(t.lastChecked).toLocaleString()}</div>` : ''}
+            </div>
+            <div class="actions">
+              <button class="btn btn-small" style="background:var(--accent)" onclick="checkToken('${t.id}')">Check</button>
+              <button class="btn btn-danger btn-small" onclick="deleteToken('${t.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch(e) {
+        showToast('Failed to load tokens', 'error');
+      }
+    }
+
+    async function addToken() {
+      const token = document.getElementById('new-token').value.trim();
+      if (!token) { showToast('Enter token', 'error'); return; }
+      
+      showToast('Testing token... (this may take 30-60s)', 'success');
+      
+      try {
+        const res = await fetch('/api/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add', token })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message + (data.owner ? ` (${data.owner})` : ''));
+          document.getElementById('new-token').value = '';
+          loadTokens();
+        } else {
+          showToast(data.message || 'Token is dead', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function checkToken(id) {
+      showToast('Checking token...');
+      try {
+        const res = await fetch('/api/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'check', id })
+        });
+        const data = await res.json();
+        showToast(data.message || (data.live ? 'Token is LIVE' : 'Token is DEAD'), data.live ? 'success' : 'error');
+        loadTokens();
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    async function deleteToken(id) {
+      if (!confirm('Delete this token?')) return;
+      try {
+        const res = await fetch('/api/tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Token deleted');
+          loadTokens();
+        } else {
+          showToast(data.message || 'Failed', 'error');
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+      }
+    }
+
+    // Logs
+    async function loadLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        const data = await res.json();
+        const logs = data.items || [];
+        
+        const container = document.getElementById('logs-list');
+        if (logs.length === 0) {
+          container.innerHTML = '<div class="empty-state">No logs yet</div>';
+          return;
+        }
+        
+        const typeColors = {
+          'login': 'badge-info',
+          'admin_login': 'badge-admin',
+          'register': 'badge-success',
+          'ban': 'badge-error',
+          'unban': 'badge-warning',
+          'updateTime': 'badge-success',
+          'vps_created': 'badge-info',
+          'vps_deleted': 'badge-warning'
+        };
+        
+        container.innerHTML = logs.slice(0, 100).map(log => {
+          const time = log.at ? new Date(log.at).toLocaleString() : (log.createdAt ? new Date(log.createdAt).toLocaleString() : 'N/A');
+          const typeClass = typeColors[log.type] || 'badge-info';
+          let details = '';
+          
+          if (log.type === 'login' || log.type === 'admin_login' || log.type === 'register') {
+            details = `User: ${log.username} | IP: ${log.ip || 'N/A'}`;
+          } else if (log.type === 'updateTime') {
+            details = `User: ${log.username} | ${log.operation}: ${log.minutes}m | ${log.previousMinutes}m → ${log.newMinutes}m`;
+          } else if (log.type === 'ban' || log.type === 'unban') {
+            details = `Target: ${log.target}`;
+          } else if (log.type === 'vps_created') {
+            details = `Repo: ${log.repo} | User: ${log.username || log.githubLogin} | ${log.durationMinutes}m`;
+          } else if (log.type === 'vps_deleted') {
+            details = `Repo: ${log.owner}/${log.repo}`;
+          } else {
+            details = JSON.stringify(log).slice(0, 100);
+          }
+          
+          return `
+            <div class="log-entry">
+              <span class="time">${time}</span>
+              <span class="badge ${typeClass}">${log.type}</span>
+              <span>${details}</span>
+            </div>
+          `;
+        }).join('');
+      } catch(e) {
+        showToast('Failed to load logs', 'error');
+      }
+    }
+
+    // Init
+    if (checkAdmin()) {
+      loadUsers();
+    }
+  </script>
 </body>
 </html>
