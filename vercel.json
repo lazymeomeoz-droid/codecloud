@@ -1,17 +1,8 @@
 {
-  "version": 2,
-  "buildCommand": null,
-  "outputDirectory": ".",
-  "framework": null,
-  "functions": {
-    "api/**/*.js": {
-      "maxDuration": 60
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "*/10 * * * *"
     }
-  },
-  "rewrites": [
-    { "source": "/api/auth", "destination": "/api/auth.js" },
-    { "source": "/api/vps", "destination": "/api/vps.js" },
-    { "source": "/api/find-link", "destination": "/api/find-link.js" },
-    { "source": "/api/delete-vps", "destination": "/api/delete-vps.js" }
   ]
 }

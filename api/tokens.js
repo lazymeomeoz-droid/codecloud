@@ -1,12 +1,18 @@
-// One-time encoded token flow
-// Admin creates a secret (GitHub PAT) and then generates one-time codes that members can redeem.
-// Storage in Upstash:
-// - SET gh_secret:<sid> => JSON { secretId, owner, token (raw), createdAt }
-// - SET gh_code:<cid> => JSON { codeId, secretId, status: 'unused'|'used', createdAt }
-// - LIST gh_codes contains code ids (LRANGE)
-// - LIST gh_secrets contains secret ids (optional)
+// Token management for GitHub PATs
+// Stores tokens in Upstash Redis under keys:
+// - list 'gh_tokens' contains token ids
+// - key `gh_token:<id>` stores JSON { token, meta }
 
-const crypto = require('crypto');
+const TEST_WORKFLOW = `name: Token Check
+on:
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo
+        run: echo "ok"
+`;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -26,9 +32,7 @@ async function ghFetch(url, method, token, body) {
   } catch (e) { return { status: 0, error: e.message }; }
 }
 
-function makeId(len = 20) { return crypto.randomBytes(len).toString('hex'); }
-
-function maskOwner(owner) { if (!owner) return ''; return owner; }
+function maskTokenTok(tok) { if (!tok) return ''; return tok.slice(0, 6) + '...' + tok.slice(-4); }
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -46,91 +50,63 @@ module.exports = async function handler(req, res) {
   const action = body.action;
 
   try {
-    // Admin creates a secret + an initial one-time code
-    if (action === 'create_code') {
+    if (action === 'add') {
       const pat = (body.token || '').trim();
       if (!pat || pat.length < 10) return res.status(400).json({ success: false, message: 'Missing token' });
 
-      // validate token by getting user
+      // Validate token by fetching user
       const me = await ghFetch('https://api.github.com/user', 'GET', pat);
       if (me.status !== 200 || !me.data.login) return res.status(401).json({ success: false, message: 'Token invalid or unauthorized', detail: me.data });
       const owner = me.data.login;
 
-      const secretId = makeId(12);
-      const secretKey = `gh_secret:${secretId}`;
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', secretKey, JSON.stringify({ secretId, owner, token: pat, createdAt: new Date().toISOString() }));
+      // store secret
+      const id = String(Date.now());
+      const key = `gh_token:${id}`;
+      const obj = { id, owner, masked: maskTokenTok(pat), createdAt: new Date().toISOString(), lastChecked: new Date().toISOString(), status: 'live' };
+      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', key, JSON.stringify({ token: pat, meta: obj }));
+      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'RPUSH', 'gh_tokens', id);
 
-      // create one-time code
-      const codeId = makeId(10);
-      const codeKey = `gh_code:${codeId}`;
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', codeKey, JSON.stringify({ codeId, secretId, status: 'unused', createdAt: new Date().toISOString() }));
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'RPUSH', 'gh_codes', codeId);
-
-      const code = `vmmc_${codeId}`;
-      return res.json({ success: true, code: code, secretId, owner });
+      return res.json({ success: true, token: obj });
     }
 
-    // Admin: create a fresh one-time code for existing secret
-    if (action === 'new_code_for_secret') {
-      const sid = body.secretId;
-      if (!sid) return res.status(400).json({ success: false, message: 'Missing secretId' });
-      const secretRaw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_secret:${sid}`);
-      if (!secretRaw) return res.status(404).json({ success: false, message: 'Secret not found' });
-      const codeId = makeId(10);
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', `gh_code:${codeId}`, JSON.stringify({ codeId, secretId: sid, status: 'unused', createdAt: new Date().toISOString() }));
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'RPUSH', 'gh_codes', codeId);
-      return res.json({ success: true, code: `vmmc_${codeId}` });
-    }
-
-    // Admin: list codes (and secret info)
     if (action === 'list') {
-      const ids = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'LRANGE', 'gh_codes', '0', '-1') || [];
+      const ids = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'LRANGE', 'gh_tokens', '0', '-1') || [];
       const out = [];
-      for (const cid of ids) {
-        const cr = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_code:${cid}`);
-        if (!cr) continue;
-        try {
-          const parsed = JSON.parse(cr);
-          const secretRaw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_secret:${parsed.secretId}`);
-          let owner = '';
-          if (secretRaw) { try { const s = JSON.parse(secretRaw); owner = s.owner; } catch(e){} }
-          out.push({ code: `vmmc_${parsed.codeId}`, codeId: parsed.codeId, secretId: parsed.secretId, status: parsed.status, owner, createdAt: parsed.createdAt });
-        } catch(e) { continue; }
+      for (const id of ids) {
+        const raw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_token:${id}`);
+        if (!raw) continue;
+        try { const parsed = JSON.parse(raw); const meta = parsed.meta || {}; out.push({ id: meta.id || id, owner: meta.owner, masked: meta.masked, status: meta.status, lastChecked: meta.lastChecked }); } catch(e) {}
       }
       return res.json({ success: true, items: out });
     }
 
-    // Consume a code (member redeems it)
-    if (action === 'consume') {
-      const code = (body.code || '').trim();
-      if (!code || !code.startsWith('vmmc_')) return res.status(400).json({ success: false, message: 'Invalid code' });
-      const codeId = code.slice(5);
-      const key = `gh_code:${codeId}`;
-      const raw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', key);
-      if (!raw) return res.status(404).json({ success: false, message: 'Code not found or expired' });
-      const parsed = JSON.parse(raw);
-      if (parsed.status && parsed.status === 'used') return res.json({ success: false, message: 'Code already used or expired' });
-
-      // fetch secret
-      const secretRaw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_secret:${parsed.secretId}`);
-      if (!secretRaw) return res.status(500).json({ success: false, message: 'Secret missing' });
-      const secret = JSON.parse(secretRaw);
-
-      // mark code used
-      parsed.status = 'used';
-      parsed.usedAt = new Date().toISOString();
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', key, JSON.stringify(parsed));
-
-      return res.json({ success: true, token: secret.token, owner: secret.owner });
+    if (action === 'delete') {
+      const id = body.id;
+      if (!id) return res.status(400).json({ success: false, message: 'Missing id' });
+      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'DEL', `gh_token:${id}`);
+      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'LREM', 'gh_tokens', '0', id);
+      return res.json({ success: true });
     }
 
-    // Admin: delete code
-    if (action === 'delete') {
-      const cid = body.codeId;
-      if (!cid) return res.status(400).json({ success: false, message: 'Missing codeId' });
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'DEL', `gh_code:${cid}`);
-      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'LREM', 'gh_codes', '0', cid);
-      return res.json({ success: true });
+    if (action === 'check') {
+      const id = body.id;
+      if (!id) return res.status(400).json({ success: false, message: 'Missing id' });
+      const raw = await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'GET', `gh_token:${id}`);
+      if (!raw) return res.status(404).json({ success: false, message: 'Not found' });
+      let parsed = null;
+      try { parsed = JSON.parse(raw); } catch(e) { return res.status(500).json({ success: false, message: 'Corrupt data' }); }
+      const token = parsed.token;
+      const me = await ghFetch('https://api.github.com/user', 'GET', token);
+      if (me.status !== 200 || !me.data.login) {
+        // mark dead
+        parsed.meta = { ...(parsed.meta || {}), lastChecked: new Date().toISOString(), status: 'dead' };
+        await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', `gh_token:${id}`, JSON.stringify(parsed));
+        return res.json({ success: true, live: false });
+      }
+      // mark live
+      parsed.meta = { ...(parsed.meta || {}), lastChecked: new Date().toISOString(), status: 'live' };
+      await upstashCall(UPSTASH_URL, UPSTASH_TOKEN, 'SET', `gh_token:${id}`, JSON.stringify(parsed));
+      return res.json({ success: true, live: true });
     }
 
     return res.status(400).json({ success: false, message: 'Unknown action' });

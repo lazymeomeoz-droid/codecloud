@@ -325,7 +325,7 @@
       <div class="user-details">
         <h4><span id="user-display-name">User</span></h4>
         <p id="user-role">Member</p>
-        <p class="user-time" id="user-time-display">⏱️ Loading...</p>
+        <p class="user-time" id="user-time-display"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Loading...</p>
       </div>
     </div>
     
@@ -372,7 +372,7 @@
         <!-- Resume Banner -->
         <div id="resume-banner" class="resume-banner hidden">
           <div class="resume-content">
-            <div class="resume-icon">🔄</div>
+            <div class="resume-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
             <div class="resume-info">
               <h4>Phát hiện VPS đang tạo</h4>
               <p>Repo: <strong id="resume-repo">...</strong> &bull; Đã chạy: <span id="resume-time">...</span></p>
@@ -427,8 +427,8 @@
                   <p class="panel-desc">Enter your settings.</p>
                 </div>
                 <div class="form-group">
-                  <label class="label">Repository Name</label>
-                  <input type="text" id="repo-name" class="input" placeholder="my-vps-01" autocomplete="off" />
+                  <label class="label">Server Name</label>
+                  <input type="text" id="repo-name" class="input" placeholder="vps-01" autocomplete="off" />
                   <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
                 </div>
                 <!-- GitHub tokens are managed by admins; client uses server token pool -->
@@ -446,21 +446,16 @@
                 <div class="form-group" id="duration-group">
                   <label class="label" style="display:flex;justify-content:space-between;align-items:center;">
                     <span>Session Duration</span>
-                    <span style="color:var(--accent);font-weight:800;"><span id="duration-val">60</span> min</span>
+                    <span style="color:var(--accent);font-weight:800;display:flex;align-items:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span id="duration-val">60</span> min</span>
                   </label>
                   <input type="range" id="duration" min="30" max="330" step="30" value="60" />
                   <p class="input-hint">Tối đa 5h30p (330 phút). Thời gian sẽ bị trừ từ tài khoản của bạn.</p>
                 </div>
                 <div id="tailscale-duration-notice" class="hidden" style="background:var(--accent-soft);border:1px solid var(--border-medium);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
-                  <span>⏱️</span><span><strong>Tailscale:</strong> Fixed 6-hour duration.</span>
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span><span><strong>Tailscale:</strong> Fixed 6-hour duration.</span>
                 </div>
                 <div id="time-warning" class="hidden" style="background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--warning);display:flex;align-items:center;gap:8px;">
-                  <span>⚠️</span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
-                </div>
-                <div class="form-group">
-                  <label class="label">Mã dùng 1 lần (vmmc)</label>
-                  <input type="text" id="one-time-code" class="input" placeholder="vmmc_xxxxxxxxx" />
-                  <p class="input-hint">Nhập mã do admin cung cấp (mỗi mã chỉ dùng 1 lần).</p>
+                  <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
                 </div>
                 <div style="margin-top:16px;">
                   <button id="btn-deploy" class="btn">🚀 Deploy VPS</button>
@@ -482,15 +477,15 @@
               </div>
 
               <div id="tailscale-auth-banner" class="hidden" style="background:linear-gradient(135deg,rgba(34,211,238,0.1) 0%,rgba(14,165,233,0.06) 100%);border:1px solid rgba(34,211,238,0.3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:18px;text-align:center;">
-                <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;">🔐 Tailscale Authentication Required</h3>
+                <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Tailscale Authentication Required</h3>
                 <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">Click the link below to authenticate your VPS.</p>
-                <a id="tailscale-auth-link" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;text-decoration:none;border-radius:999px;font-weight:800;font-size:0.9rem;">🔗 Login to Tailscale</a>
-                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">⚠️ After logging in, wait 10-30 seconds.</p>
+                <a id="tailscale-auth-link" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;text-decoration:none;border-radius:999px;font-weight:800;font-size:0.9rem;display:inline-flex;align-items:center;gap:6px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Login to Tailscale</a>
+                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> After logging in, wait 10-30 seconds.</p>
               </div>
 
               <div class="panel">
-                <div class="panel-header"><h3 class="panel-title">Deployment Logs</h3></div>
-                <div class="log-box" id="logs"></div>
+                <div class="panel-header"><h3 class="panel-title">Deployment Status</h3></div>
+                <div class="log-box" id="logs" style="height:auto;min-height:100px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:0.9rem;color:var(--text-secondary);">Ready to deploy.</div>
               </div>
 
               <div class="panel">
@@ -542,14 +537,14 @@
             <div class="panel-header">
               <h2 class="panel-title">Account Settings</h2>
             </div>
-            <button id="btn-forget-token" class="btn btn-secondary">🔑 Quên GitHub Token đã lưu</button>
+            <button id="btn-forget-token" class="btn btn-secondary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Quên GitHub Token đã lưu</button>
             <p class="specs-footnote" style="margin-top:10px;">Xoá token GitHub khỏi trình duyệt này.</p>
           </div>
           <div class="panel">
             <div class="panel-header">
               <h2 class="panel-title">Application Data</h2>
             </div>
-            <button id="btn-clear-data" class="btn btn-danger">🗑️ Clear All Local Data</button>
+            <button id="btn-clear-data" class="btn btn-danger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> Clear All Local Data</button>
             <p class="specs-footnote" style="text-align:center;margin-top:10px;">Removes all saved history and settings.</p>
           </div>
         </div>
@@ -558,7 +553,7 @@
         <div id="view-admin" class="hidden">
           <div class="panel">
             <div class="panel-header">
-              <h2 class="panel-title">🛡️ Admin Panel</h2>
+              <h2 class="panel-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Admin Panel</h2>
             </div>
             <p style="margin-bottom:16px;">Truy cập trang Admin Panel đầy đủ:</p>
             <a href="admin.html" class="btn">Mở Admin Panel →</a>
@@ -582,7 +577,7 @@
 <div id="confirm-modal" class="modal hidden">
   <div class="modal-backdrop"></div>
   <div class="modal-dialog">
-    <h3 class="modal-title" id="confirm-title">🗑️ Confirm</h3>
+    <h3 class="modal-title" id="confirm-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Confirm</h3>
     <p class="confirm-text" id="confirm-text">Are you sure?</p>
     <div class="confirm-actions">
       <button class="confirm-btn cancel" id="confirm-cancel-btn">Cancel</button>
@@ -595,7 +590,7 @@
   <div class="modal-backdrop"></div>
   <div class="modal-dialog" style="text-align:center;max-width:380px;">
     <button class="modal-close" id="captcha-close">&times;</button>
-    <div style="font-size:3.5rem;margin-bottom:12px;">🤖</div>
+    <div style="font-size:3.5rem;margin-bottom:12px;display:flex;justify-content:center;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></div>
     <h3 class="modal-title" style="justify-content:center;margin-bottom:10px;">Bạn có phải robot không?</h3>
     <p class="confirm-text" style="margin-bottom:24px;">Vui lòng xác minh bạn là con người</p>
     <div style="display:flex;justify-content:center;">
@@ -649,10 +644,11 @@
   let toastTimer = null;
   window.showToast = function(msg, type = 'info') {
     const toast = $('#toast');
+    const icons = { success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><polyline points="20 6 9 17 4 12"/></svg>', error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>', info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' };
     toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
     toast.classList.add('toast-' + type);
     $('#toast-message').textContent = msg;
-    $('#toast-icon').innerHTML = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    $('#toast-icon').innerHTML = icons[type] || icons.info;
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
   };
@@ -704,14 +700,15 @@
   
   function updateTimeDisplay() {
     const timeDisplay = $('#user-time-display');
+    const icon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
     if (userTimeMinutes <= 0) {
-      timeDisplay.textContent = '⏱️ Hết thời gian!';
+      timeDisplay.innerHTML = `${icon} Hết thời gian!`;
       timeDisplay.style.color = 'var(--error)';
     } else if (userTimeMinutes < 30) {
-      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.innerHTML = `${icon} ${formatTime(userTimeMinutes)}`;
       timeDisplay.style.color = 'var(--warning)';
     } else {
-      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.innerHTML = `${icon} ${formatTime(userTimeMinutes)}`;
       timeDisplay.style.color = 'var(--success)';
     }
     const statEl = $('#stat-remaining-time');
@@ -768,13 +765,9 @@
   };
 
   function log(msg, type = 'info') {
-    const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
-    const row = document.createElement('div');
-    row.className = 'log-entry ' + type;
-    row.innerHTML = `<span class="time">${time}</span>${msg}`;
-    const logs = $('#logs');
-    logs.appendChild(row);
-    logs.scrollTop = logs.scrollHeight;
+    // Replace log appending with status description update
+    const statusBox = $('#logs');
+    statusBox.innerHTML = `<div style="padding:20px;font-weight:600;color:var(--text-primary)">${msg}</div>`;
   }
 
   function clearLogs() { $('#logs').innerHTML = ''; }
@@ -991,7 +984,7 @@
     $('#repo-name').value = session.repo;
     showProgressPanel();
     updateProgress({ progress: 50, status: 'in_progress', message: 'Resuming session...' });
-    log('🔄 Resuming previous session...', 'info');
+    log('Resuming previous session...', 'info');
     
     startElapsedTimer();
     pollInterval = setInterval(pollForLink, 10000);
@@ -1013,12 +1006,12 @@
       updateProgress(data);
       if (data.tailscaleAuthUrl) { log(`🔐 Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
       if (data.found && data.vpsLink) {
-        log('✅ VPS ready!', 'success'); log(`🔗 ${data.vpsLink}`, 'success'); hideTailscaleAuthBanner();
+        log('VPS is ready!', 'success'); hideTailscaleAuthBanner();
         currentDeployment.vpsLink = data.vpsLink; if (data.vpsPassword) currentDeployment.vpsPassword = data.vpsPassword;
         updateConnInfo(currentDeployment); updateHistoryWithLink(currentDeployment.repo, data.vpsLink);
         stopPolling(); clearDeploymentSession(); showToast('VPS is ready!', 'success');
         isDeploying = false;
-      } else { log(`⏳ ${data.message || 'Waiting...'}`, 'pending'); saveDeploymentSession(); }
+      } else { log(`${data.message || 'Waiting...'}`, 'pending'); saveDeploymentSession(); }
     } catch(err) { log(`⚠️ ${err.message}`, 'error'); }
   }
 
@@ -1070,11 +1063,9 @@
       btn.innerHTML = '<span class="spinner"></span> Deploying...';
       
       clearLogs(); showProgressPanel(); updateProgress({ progress: 5, status: 'pending', message: 'Sending request...' });
-      log(`📤 Creating VPS (${actualDuration}m, ${selectedSpecs})...`, 'info');
-      log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
+      log(`Creating Server (${actualDuration}m, ${selectedSpecs})...`, 'info');
       
       try {
-        const oneTimeCode = $('#one-time-code')?.value?.trim() || '';
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
@@ -1085,8 +1076,7 @@
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            oneTimeCode: oneTimeCode,
-            // githubToken omitted: server will use saved token pool or code
+            // githubToken omitted: server will use saved token pool
             username: currentUser?.username || ''
           }) 
         });
@@ -1094,20 +1084,18 @@
         
         if (!data.success) {
           if (data.timeout) {
-            log('❌ Workflow không khởi động trong 60 giây!', 'error');
-            log('⚠️ Vui lòng thử lại hoặc kiểm tra GitHub Actions', 'error');
+            log('Workflow timeout. Please try again.', 'error');
           }
           throw new Error(data.message || 'Unknown error');
         }
         
         await deductTime(actualDuration);
-        log(`💳 Đã trừ ${actualDuration} phút. Còn lại: ${formatTime(userTimeMinutes)}`, 'info');
+        log(`Allocated ${actualDuration} minutes.`, 'info');
         
         updateProgress({ progress: 15, status: 'in_progress', message: 'Repository created' });
-        log('✅ Repository created', 'success');
-        if (data.dispatched) { log('✅ Workflow triggered', 'success'); updateProgress({ progress: 25, status: 'in_progress', message: 'Workflow started' }); }
-        else log('⚠️ Manual trigger needed', 'pending');
-        log(`📂 ${data.repoUrl}`, 'info');
+        log('Server initialized.', 'success');
+        if (data.dispatched) { log('Starting workflow...', 'success'); updateProgress({ progress: 25, status: 'in_progress', message: 'Workflow started' }); }
+        else log('Manual trigger needed', 'pending');
         
         // Server will use stored token for polling; client does not hold token
         currentDeployment = { token: null, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null, owner: data.owner };
@@ -1115,11 +1103,11 @@
         updateConnInfo(currentDeployment);
         saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
         startElapsedTimer(); saveDeploymentSession();
-        log('🔄 Auto-checking every 10s...', 'info');
+        log('Waiting for connection...', 'info');
         pollInterval = setInterval(pollForLink, 10000); setTimeout(pollForLink, 15000);
         showToast('VPS deployment started!', 'success');
       } catch(err) { 
-        log('❌ ' + err.message, 'error'); 
+        log('Error: ' + err.message, 'error'); 
         showToast('Error: ' + err.message, 'error'); 
         updateProgress({ progress: 0, status: 'error', message: err.message }); 
         hideProgressPanel(); 
@@ -1156,7 +1144,7 @@
       <div class="info-row"><span class="info-label">Password</span><span class="info-value"><span style="user-select:all;">${vpsPass}</span><button class="copy-btn" onclick="copyToClipboard('${vpsPass}', this)">Copy</button></span></div>
       ${isTailscale ? '<div class="info-row"><span class="info-label">Username</span><span class="info-value">runneradmin</span></div>' : ''}
       <div class="info-row"><span class="info-label">Duration</span><span class="info-value">${displayDuration} min</span></div>
-      <div class="info-row" style="border:0;padding-top:8px;"><span class="info-label">GitHub</span><span class="info-value" style="background:transparent;gap:5px;">${data.repoUrl ? `<a href="${data.repoUrl}" target="_blank" class="btn-small-link">Repo ↗</a>` : ''}${data.actionsUrl ? `<a href="${data.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}</span></div>
+      <!-- GitHub links removed as requested -->
     `;
   }
 
@@ -1184,12 +1172,12 @@
       const maxDuration = item.duration || 60, remainingMinutes = Math.max(0, maxDuration - runningMinutes);
       const isExpired = remainingMinutes <= 0, isWarning = remainingMinutes > 0 && remainingMinutes <= 30;
       const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
-      let timeDisplay = `⏱️ ${runningMinutes}m/${maxDuration}m`;
-      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">⏱️ ${remainingMinutes}m left</span>`;
+      let timeDisplay = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${runningMinutes}m/${maxDuration}m`;
+      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${remainingMinutes}m left</span>`;
       // extract owner from repoUrl if available
       let ownerAttr = '';
       try { if (item.repoUrl) { const parts = item.repoUrl.split('/'); ownerAttr = parts[parts.length - 2]; } } catch(e) { ownerAttr = ''; }
-      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${ownerAttr}">Delete</button></div>`;
+      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${ownerAttr}">Delete</button></div>`;
       container.appendChild(el);
     });
     container.querySelectorAll('.btn-del').forEach(btn => btn.onclick = () => {

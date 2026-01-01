@@ -444,34 +444,12 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = req.body || {};
-    const { planId, durationMinutes, githubToken: clientGithubToken, repoName, ngrokToken, repoVisibility, ngrokRegion, oneTimeCode } = body;
+    const { planId, durationMinutes, githubToken: clientGithubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    // Use one-time code if provided (redeem from Upstash), otherwise client-provided token, otherwise saved pool
+    // Use client-provided token if present, otherwise select one from saved pool
     let githubToken = clientGithubToken;
-    if (oneTimeCode && typeof oneTimeCode === 'string' && oneTimeCode.trim()) {
-      try {
-        const code = oneTimeCode.trim();
-        if (!code.startsWith('vmmc_')) return res.status(400).json({ success: false, message: 'Invalid code format' });
-        const codeId = code.slice(5);
-        const codeRaw = await upstash('GET', `gh_code:${codeId}`);
-        if (!codeRaw) return res.status(404).json({ success: false, message: 'Code not found or expired' });
-        const parsedCode = JSON.parse(codeRaw);
-        if (parsedCode.status === 'used') return res.status(400).json({ success: false, message: 'Code already used or expired' });
-        const secretRaw = await upstash('GET', `gh_secret:${parsedCode.secretId}`);
-        if (!secretRaw) return res.status(500).json({ success: false, message: 'Associated secret missing' });
-        const secret = JSON.parse(secretRaw);
-        // mark code used immediately (one-time)
-        parsedCode.status = 'used'; parsedCode.usedAt = new Date().toISOString();
-        await upstash('SET', `gh_code:${codeId}`, JSON.stringify(parsedCode));
-        githubToken = secret.token;
-      } catch (e) {
-        console.error('[VPS] Error redeeming code', e);
-        return res.status(500).json({ success: false, message: 'Error redeeming code' });
-      }
-    }
-
     if (!githubToken || typeof githubToken !== 'string' || githubToken.length < 10) {
       // try load from Upstash stored tokens (legacy)
       const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
