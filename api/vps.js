@@ -1,4 +1,5 @@
-// VPS API - User provides their own GitHub Token
+// VPS API - Server-managed GitHub Token Pool
+// Auto-saves deployment info for cleanup
 
 const YAML_TEMPLATES = {
   ubuntu_web: `name: Linux NoVNC
@@ -213,7 +214,7 @@ jobs:
         Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile "tailscale.msi" -UseBasicParsing
         Write-Host "Installing Tailscale..."
         \$process = Start-Process msiexec.exe -ArgumentList '/i', 'tailscale.msi', '/quiet', '/norestart' -Wait -PassThru
-        Write-Host "Installer exit code: \$($process.ExitCode)"
+        Write-Host "Installer exit code: \$(\$process.ExitCode)"
         Start-Sleep -Seconds 15
         \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
         if (Test-Path \$tsPath) {
@@ -350,6 +351,21 @@ function isValidRepoName(name) {
   return true;
 }
 
+async function upstash(command, ...args) {
+  const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+  const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
+  try {
+    const r = await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([command, ...args])
+    });
+    const d = await r.json();
+    return d.result;
+  } catch (e) { console.error('Upstash error:', e); return null; }
+}
+
 async function ghFetch(url, method, token, body, retries = 3) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -406,6 +422,53 @@ async function waitForWorkflowStart(repoPath, token, timeoutMs = 60000) {
   return { success: false, error: 'Workflow không khởi động trong 60 giây' };
 }
 
+function getClientIP(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
+}
+
+// Get a live token from the pool
+async function getLiveToken() {
+  const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
+  if (!ids || ids.length === 0) return null;
+  
+  for (const id of ids) {
+    const raw = await upstash('GET', `gh_token:${id}`);
+    if (!raw) continue;
+    try {
+      const parsed = JSON.parse(raw);
+      const meta = parsed.meta || {};
+      if (meta.status === 'live' && parsed.token) {
+        return { id, token: parsed.token, owner: meta.owner };
+      }
+    } catch (e) { continue; }
+  }
+  return null;
+}
+
+// Save active VPS for auto-cleanup
+async function saveActiveVps(data) {
+  const { owner, repo, tokenId, durationMinutes, createdAt } = data;
+  const expiresAt = new Date(new Date(createdAt).getTime() + durationMinutes * 60 * 1000).toISOString();
+  
+  const vpsData = {
+    owner,
+    repo,
+    tokenId,
+    durationMinutes,
+    createdAt,
+    expiresAt
+  };
+  
+  const key = `active_vps:${owner}:${repo}`;
+  await upstash('SET', key, JSON.stringify(vpsData));
+  // Also add to a list for easy scanning
+  await upstash('SADD', 'active_vps_keys', key);
+  
+  console.log(`[VPS] Saved active VPS: ${owner}/${repo}, expires at ${expiresAt}`);
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -420,56 +483,25 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-  const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  async function upstash(command, ...args) {
-    if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
-    try {
-      const r = await fetch(UPSTASH_URL, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify([command, ...args])
-      });
-      const d = await r.json();
-      return d.result;
-    } catch (e) { console.error('Upstash error:', e); return null; }
-  }
-
-  function getClientIP(req) {
-    const forwarded = req.headers['x-forwarded-for'];
-    if (forwarded) return forwarded.split(',')[0].trim();
-    return req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
-  }
-
   try {
     const body = req.body || {};
     const { planId, durationMinutes, githubToken: clientGithubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    // Use client-provided token if present, otherwise select one from saved pool
+    // Get token from pool
     let githubToken = clientGithubToken;
+    let usedTokenId = null;
+    
     if (!githubToken || typeof githubToken !== 'string' || githubToken.length < 10) {
-      // try load from Upstash stored tokens (legacy)
-      const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
-      if (!ids || ids.length === 0) {
-        return res.status(500).json({ success: false, message: 'No saved GitHub tokens available. Contact admin.' });
+      const tokenData = await getLiveToken();
+      if (!tokenData) {
+        return res.status(500).json({ success: false, message: 'No live GitHub tokens available. Contact admin.' });
       }
-      let found = null;
-      for (const id of ids) {
-        const raw = await upstash('GET', `gh_token:${id}`);
-        if (!raw) continue;
-        try {
-          const parsed = JSON.parse(raw);
-          const meta = parsed.meta || {};
-          if (meta.status === 'live' && parsed.token) { found = { id, token: parsed.token, owner: meta.owner }; break; }
-        } catch (e) { continue; }
-      }
-      if (!found) return res.status(500).json({ success: false, message: 'No live GitHub tokens available.' });
-      githubToken = found.token;
-      // note: we will use 'found.owner' as login after verification
+      githubToken = tokenData.token;
+      usedTokenId = tokenData.id;
     }
+    
     if (!repoName || typeof repoName !== "string") {
       return res.status(400).json({ success: false, message: "Thiếu tên Repository" });
     }
@@ -625,13 +657,27 @@ module.exports = async function handler(req, res) {
 
     const repoUrl = `https://github.com/${login}/${repoName}`;
     const actionsUrl = `${repoUrl}/actions`;
+    const createdAt = new Date().toISOString();
 
     console.log("[VPS] Complete! dispatched=", dispatched);
 
+    // Save active VPS for auto-cleanup
+    if (usedTokenId) {
+      await saveActiveVps({
+        owner: login,
+        repo: repoName,
+        tokenId: usedTokenId,
+        durationMinutes: duration,
+        createdAt
+      });
+    }
+
+    // Log deployment
     try {
       const clientIP = getClientIP(req);
       const deployLog = {
-        createdAt: new Date().toISOString(),
+        type: 'vps_created',
+        createdAt,
         githubLogin: login,
         username: body.username || login,
         durationMinutes: duration,
@@ -641,9 +687,11 @@ module.exports = async function handler(req, res) {
         vpsPassword: password,
         clientIP,
         ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
-        ua: req.headers['user-agent'] || null
+        ua: req.headers['user-agent'] || null,
+        tokenId: usedTokenId
       };
-      await upstash('LPUSH', 'deployments', JSON.stringify(deployLog));
+      await upstash('LPUSH', 'userlogs', JSON.stringify(deployLog));
+      await upstash('LTRIM', 'userlogs', '0', '499');
     } catch (e) { console.error('Failed to log deployment:', e); }
 
     return res.status(200).json({
@@ -662,7 +710,7 @@ module.exports = async function handler(req, res) {
       specs,
       repoVisibility: isPrivate ? "private" : "public",
       owner: login,
-      startedAt: new Date().toISOString(),
+      startedAt: createdAt,
       requiresTailscaleAuth: planId === "win_tailscale"
     });
 

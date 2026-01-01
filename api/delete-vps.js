@@ -1,5 +1,6 @@
 // Delete VPS Repo - Vercel Serverless Function
 // Uses Upstash Redis for token storage (NO filesystem)
+// Also removes from active_vps tracking
 
 async function upstash(command, ...args) {
   const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
@@ -108,6 +109,14 @@ async function findTokenForOwner(owner) {
   return null;
 }
 
+// Remove from active_vps tracking
+async function removeFromActiveVps(owner, repo) {
+  const key = `active_vps:${owner}:${repo}`;
+  await upstash('DEL', key);
+  await upstash('SREM', 'active_vps_keys', key);
+  console.log(`[delete-vps] Removed ${key} from active tracking`);
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -148,6 +157,8 @@ module.exports = async function handler(req, res) {
     );
 
     if (checkRepo.status === 404) {
+      // Repo doesn't exist, but still remove from tracking
+      await removeFromActiveVps(owner, repo);
       return res.json({
         success: true,
         message: "Repository không tồn tại hoặc đã bị xoá"
@@ -171,6 +182,20 @@ module.exports = async function handler(req, res) {
     );
 
     if (deleteResult.status === 204) {
+      // Remove from active_vps tracking
+      await removeFromActiveVps(owner, repo);
+      
+      // Log the manual deletion
+      const logEntry = {
+        type: 'vps_manual_deleted',
+        at: new Date().toISOString(),
+        owner,
+        repo,
+        cancelledWorkflows: cancelledCount
+      };
+      await upstash('LPUSH', 'userlogs', JSON.stringify(logEntry));
+      await upstash('LTRIM', 'userlogs', '0', '499');
+      
       return res.json({
         success: true,
         message: `✅ Đã xoá repository${cancelledCount > 0 ? ` và huỷ ${cancelledCount} workflows` : ''}`
@@ -191,6 +216,7 @@ module.exports = async function handler(req, res) {
     }
 
     if (deleteResult.status === 404) {
+      await removeFromActiveVps(owner, repo);
       return res.json({ success: true, message: "Repository đã được xoá" });
     }
 

@@ -1,4 +1,4 @@
-// API endpoint to fetch system logs from Upstash Redis
+// API endpoint to fetch active VPS list from Upstash Redis
 
 async function upstash(command, ...args) {
   const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
@@ -29,27 +29,33 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    // Fetch last 200 logs
-    const logs = await upstash('LRANGE', 'userlogs', '0', '199');
+    // Get all active VPS keys
+    const keys = await upstash('SMEMBERS', 'active_vps_keys');
     
-    if (!logs || logs.length === 0) {
+    if (!keys || keys.length === 0) {
       return res.json({ success: true, items: [] });
     }
 
     const items = [];
-    for (const raw of logs) {
+    for (const key of keys) {
       try {
-        const parsed = JSON.parse(raw);
-        items.push(parsed);
+        const raw = await upstash('GET', key);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          items.push(parsed);
+        }
       } catch (e) {
         // Skip malformed entries
         continue;
       }
     }
 
+    // Sort by createdAt descending
+    items.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
     return res.json({ success: true, items });
   } catch (err) {
-    console.error('[logs] error:', err);
+    console.error('[active-vps] error:', err);
     return res.status(500).json({ success: false, message: String(err) });
   }
 };
