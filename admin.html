@@ -75,6 +75,7 @@
     .stat-card.highlight::before{opacity:1}
     .stat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
     .stat-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+    .stat-icon svg{width:22px;height:22px;color:white}
     .stat-icon.users{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
     .stat-icon.time{background:linear-gradient(135deg,#10b981,#14b8a6)}
     .stat-icon.active{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
@@ -95,6 +96,7 @@
     
     .tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;background:var(--bg-card);padding:6px;border-radius:999px;border:1px solid var(--border-light)}
     .tab{padding:10px 18px;border-radius:999px;border:none;background:transparent;color:var(--text-muted);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px;position:relative}
+    .tab svg{width:16px;height:16px}
     .tab:hover{color:var(--text-primary);background:var(--accent-soft)}
     .tab.active{background:var(--gradient-accent);color:white}
     .tab-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--error);color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
@@ -112,6 +114,7 @@
     textarea.input{resize:vertical;min-height:80px}
     
     .btn{padding:12px 20px;border-radius:999px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn svg{width:16px;height:16px}
     .btn:hover:not(:disabled){transform:translateY(-2px)}
     .btn:disabled{opacity:0.6;cursor:not-allowed}
     .btn-primary{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md)}
@@ -131,6 +134,7 @@
     .user-table-wrapper{max-height:500px;overflow-y:auto;border-radius:var(--radius-md);border:1px solid var(--border-light)}
     
     .badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+    .badge svg{width:12px;height:12px}
     .badge-success{background:var(--success-soft);color:var(--success)}
     .badge-warning{background:var(--warning-soft);color:var(--warning)}
     .badge-error{background:var(--error-soft);color:var(--error)}
@@ -156,6 +160,7 @@
     .toast.toast-success .toast-inner{border-left:4px solid var(--success)}
     .toast.toast-error .toast-inner{border-left:4px solid var(--error)}
     .toast.toast-info .toast-inner{border-left:4px solid var(--accent)}
+    .toast-icon svg{width:20px;height:20px}
     
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
     .spinner-dark{border-color:var(--border-light);border-top-color:var(--accent)}
@@ -213,6 +218,7 @@
     .empty-state p{font-size:0.85rem}
 
     .last-updated{font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+    .icon-svg{width:16px;height:16px;display:inline-block;vertical-align:middle}
   </style>
 </head>
 <body>
@@ -232,7 +238,7 @@
     </div>
     <div class="header-actions">
       <div class="admin-badge"><span class="online-indicator"></span> <span id="admin-name">Admin</span></div>
-      <button id="auto-refresh-btn" class="auto-refresh-toggle active" title="Auto Refresh">🔄 Auto: <span id="auto-refresh-status">ON</span></button>
+      <button id="auto-refresh-btn" class="auto-refresh-toggle active" title="Auto Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Auto: <span id="auto-refresh-status">ON</span></button>
       <span class="last-updated">Cập nhật: <span id="last-updated-time">--:--</span></span>
       <a href="index.html" class="btn-back">← Dashboard</a>
     </div>
@@ -241,37 +247,37 @@
   <div class="container">
     <div class="stats-grid">
       <div class="stat-card" style="animation-delay:0.1s">
-        <div class="stat-header"><div class="stat-icon users">👥</div></div>
+        <div class="stat-header"><div class="stat-icon users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div></div>
         <div class="stat-label">Tổng Users</div>
         <div class="stat-value" id="stat-total-users">0</div>
         <div class="stat-sub" id="stat-new-users">+0 hôm nay</div>
       </div>
       <div class="stat-card" style="animation-delay:0.15s">
-        <div class="stat-header"><div class="stat-icon time">⏱️</div></div>
+        <div class="stat-header"><div class="stat-icon time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
         <div class="stat-label">Tổng Thời Gian</div>
         <div class="stat-value" id="stat-total-time">0h</div>
         <div class="stat-sub">Tất cả users</div>
       </div>
       <div class="stat-card" style="animation-delay:0.2s">
-        <div class="stat-header"><div class="stat-icon active">✨</div></div>
+        <div class="stat-header"><div class="stat-icon active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div></div>
         <div class="stat-label">Đang Hoạt Động</div>
         <div class="stat-value" id="stat-active-users">0</div>
         <div class="stat-sub">Có time > 0</div>
       </div>
       <div class="stat-card" style="animation-delay:0.25s">
-        <div class="stat-header"><div class="stat-icon banned">🚫</div></div>
+        <div class="stat-header"><div class="stat-icon banned"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div></div>
         <div class="stat-label">Đã Bị Ban</div>
         <div class="stat-value" id="stat-banned-users">0</div>
         <div class="stat-sub">Users bị khóa</div>
       </div>
       <div class="stat-card highlight" style="animation-delay:0.3s">
-        <div class="stat-header"><div class="stat-icon vps">🖥️</div></div>
+        <div class="stat-header"><div class="stat-icon vps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div></div>
         <div class="stat-label">VPS Đang Chạy</div>
         <div class="stat-value" id="stat-active-vps">-</div>
         <div class="stat-sub">Tổng instances</div>
       </div>
       <div class="stat-card" style="animation-delay:0.35s">
-        <div class="stat-header"><div class="stat-icon tokens">🔑</div></div>
+        <div class="stat-header"><div class="stat-icon tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div></div>
         <div class="stat-label">GitHub Tokens</div>
         <div class="stat-value" id="stat-tokens">0</div>
         <div class="stat-sub" id="stat-tokens-sub">Live tokens</div>
@@ -279,12 +285,12 @@
     </div>
     
     <div class="tabs">
-      <button class="tab active" data-tab="users">👥 Users</button>
-      <button class="tab" data-tab="time">⏱️ Thời Gian</button>
-      <button class="tab" data-tab="bulk">📦 Bulk Actions</button>
-      <button class="tab" data-tab="tokens">🔑 Tokens</button>
-      <button class="tab" data-tab="logs">📋 Logs</button>
-      <button class="tab" data-tab="system">⚙️ System</button>
+      <button class="tab active" data-tab="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Users</button>
+      <button class="tab" data-tab="time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Thời Gian</button>
+      <button class="tab" data-tab="bulk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Bulk Actions</button>
+      <button class="tab" data-tab="tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Tokens</button>
+      <button class="tab" data-tab="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Logs</button>
+      <button class="tab" data-tab="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> System</button>
     </div>
     
     <!-- Tab: Users -->
@@ -296,8 +302,8 @@
             <p class="panel-desc">Quản lý tài khoản, ban/unban, cộng thời gian</p>
           </div>
           <div class="panel-actions">
-            <button id="btn-export-csv" class="btn btn-secondary btn-sm">📥 Export CSV</button>
-            <button id="btn-refresh" class="btn btn-secondary btn-sm">🔄 Làm mới</button>
+            <button id="btn-export-csv" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
+            <button id="btn-refresh" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
           </div>
         </div>
         
@@ -367,7 +373,7 @@
         </div>
         
         <div style="margin-top:20px">
-          <h4 style="font-size:0.9rem;margin-bottom:12px">⚡ Quick Add</h4>
+          <h4 style="font-size:0.9rem;margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Quick Add</h4>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
             <button class="btn btn-success btn-sm quick-time-btn" data-minutes="30">+30m</button>
             <button class="btn btn-success btn-sm quick-time-btn" data-minutes="60">+1h</button>
@@ -385,7 +391,7 @@
         <div class="panel-header"><h2 class="panel-title">Bulk Actions</h2><p class="panel-desc">Thực hiện hành động hàng loạt</p></div>
         
         <div class="setting-item" style="margin-bottom:16px">
-          <h4>🎁 Cộng thời gian cho TẤT CẢ users</h4>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Cộng thời gian cho TẤT CẢ users</h4>
           <p>Cộng thời gian cho tất cả users đang hoạt động (không bị ban)</p>
           <div style="display:flex;gap:10px;align-items:end;margin-top:12px">
             <div class="form-group" style="margin:0">
@@ -397,7 +403,7 @@
         </div>
         
         <div class="setting-item">
-          <h4>🚫 Ban users đã chọn</h4>
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban users đã chọn</h4>
           <p>Chọn users từ tab Users trước, sau đó quay lại đây</p>
           <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
             <span id="bulk-selected-info">0 users đã chọn</span>
@@ -423,7 +429,7 @@
         <div style="margin-top:20px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
             <h4 style="font-size:0.9rem">Saved Tokens</h4>
-            <button id="btn-refresh-tokens" class="btn btn-secondary btn-sm">🔄 Làm mới</button>
+            <button id="btn-refresh-tokens" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
           </div>
           <div id="token-list" style="border:1px solid var(--border-light);border-radius:var(--radius-md);max-height:400px;overflow:auto">Đang tải...</div>
         </div>
@@ -435,7 +441,7 @@
       <div class="panel">
         <div class="panel-header">
           <div><h2 class="panel-title">System Logs</h2><p class="panel-desc">Nhật ký hoạt động hệ thống</p></div>
-          <button id="btn-refresh-logs" class="btn btn-secondary btn-sm">🔄 Làm mới</button>
+          <button id="btn-refresh-logs" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
         </div>
         
         <div class="search-box">
@@ -496,7 +502,7 @@
       <div class="panel">
         <div class="panel-header"><h2 class="panel-title">Manual Actions</h2></div>
         <div style="display:flex;gap:12px;flex-wrap:wrap">
-          <button id="btn-run-cron" class="btn btn-warning">🔄 Chạy Cron thủ công</button>
+          <button id="btn-run-cron" class="btn btn-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Chạy Cron thủ công</button>
         </div>
       </div>
     </div>
@@ -508,7 +514,7 @@
   <div class="modal-backdrop"></div>
   <div class="modal-dialog">
     <button class="modal-close" id="ban-modal-close">×</button>
-    <h3 class="modal-title">🚫 Ban User: <span id="ban-username"></span></h3>
+    <h3 class="modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban User: <span id="ban-username"></span></h3>
     <div class="form-group">
       <label class="label">Thời gian ban</label>
       <select id="ban-duration" class="input">
@@ -541,7 +547,7 @@
   </div>
 </div>
 
-<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-message"></span></div></div>
+<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-icon"></span><span id="toast-message"></span></div></div>
 
 <script>
 (function() {
@@ -582,9 +588,11 @@
   let toastTimer = null;
   function showToast(msg, type = 'info') {
     const toast = $('toast');
+    const icons = { success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>', error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>', info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' };
     toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
     toast.classList.add('toast-' + type);
     $('toast-message').textContent = msg;
+    $('toast-icon').innerHTML = icons[type] || icons.info;
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
   }
@@ -761,7 +769,7 @@
         <div class="user-detail-item"><div class="label">IP Login cuối</div><div class="value">${user.lastLoginIP || 'N/A'}</div></div>
         <div class="user-detail-item"><div class="label">Ngày tạo</div><div class="value">${formatDateTime(user.createdAt)}</div></div>
         <div class="user-detail-item"><div class="label">Login cuối</div><div class="value">${formatDateTime(user.lastLoginAt)}</div></div>
-        <div class="user-detail-item"><div class="label">Trạng thái</div><div class="value">${user.isBanned ? '🚫 Đã ban' : '✅ OK'}</div></div>
+        <div class="user-detail-item"><div class="label">Trạng thái</div><div class="value">${user.isBanned ? '<span class="badge badge-error">🚫 Đã ban</span>' : '<span class="badge badge-success">✅ OK</span>'}</div></div>
         ${user.isBanned ? `<div class="user-detail-item"><div class="label">Lý do ban</div><div class="value">${user.banReason || 'N/A'}</div></div>` : ''}
       </div>
     `;
@@ -864,7 +872,7 @@
     for (const [k, v] of entries) {
       let valStr;
       if (v === null || v === undefined) valStr = '<span style="color:var(--text-muted)">—</span>';
-      else if (typeof v === 'boolean') valStr = v ? '<span style="color:var(--success)">✓</span>' : '<span style="color:var(--error)">✗</span>';
+      else if (typeof v === 'boolean') valStr = v ? '<span style="color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><polyline points="20 6 9 17 4 12"/></svg></span>' : '<span style="color:var(--error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
       else if (typeof v === 'object') valStr = JSON.stringify(v);
       else valStr = String(v);
       const keyName = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
