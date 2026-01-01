@@ -3,114 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#020617">
-  <title>Admin Panel - CodeCloud</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <meta name="theme-color" content="#0B0E14">
+  <title>Admin - CodeCloud</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.8); --bg-card: rgba(30,41,59,0.5); 
-      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
-      --border: rgba(148,163,184,0.1);
-      --accent: #818cf8; --accent-glow: rgba(129,140,248,0.25);
-      --success: #34d399; --error: #f87171; --warning: #fbbf24; --info: #60a5fa;
-      --radius: 12px;
+      /* Cosmic Glass Theme - Dark Mode Only for Admin */
+      --bg-base: #02040a;
+      --glass-surface: rgba(18, 24, 38, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-highlight: rgba(255, 255, 255, 0.05);
+      --text-main: #f8fafc; --text-sec: #94a3b8;
+      --primary: #818cf8; --primary-glow: rgba(129, 140, 248, 0.3);
+      --accent: #c084fc; --error: #f87171; --success: #4ade80;
+      --radius: 16px;
+      --shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+      --font-sans: 'Inter', sans-serif;
     }
-    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;font-size:14px}
-    
-    .bg-effects{position:fixed;inset:0;z-index:-1;pointer-events:none}
-    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 50% 50%, rgba(99,102,241,0.15), transparent 70%);animation:pulse 10s ease-in-out infinite}
-    @keyframes pulse{0%,100%{transform:scale(1);opacity:0.5}50%{transform:scale(1.1);opacity:0.8}}
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: var(--font-sans); background: var(--bg-base); color: var(--text-main); min-height: 100vh; overflow-x: hidden; }
 
-    .layout{max-width:1400px;margin:0 auto;padding:20px;display:grid;grid-template-columns:240px 1fr;gap:24px;min-height:100vh}
-    @media(max-width:1024px){.layout{grid-template-columns:1fr}}
+    .bg-aurora { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at 50% -20%, #1e1b4b, #020617 80%); }
+    .aurora-glow { position: absolute; width: 100vw; height: 100vh; background: radial-gradient(circle at 80% 20%, rgba(129, 140, 248, 0.15), transparent 50%); filter: blur(60px); animation: pulse 10s infinite alternate; }
+    @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 0.8; transform: scale(1.05); } }
+
+    /* Layout */
+    .layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+    @media(max-width: 1024px) { .layout { grid-template-columns: 1fr; } }
 
     /* Sidebar */
-    .sidebar{display:flex;flex-direction:column;gap:8px;position:sticky;top:20px;height:fit-content}
-    .brand{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius)}
-    .brand-icon{width:36px;height:36px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:white}
-    .brand h1{font-size:1.1rem;font-weight:800}
-    
-    .nav-btn{padding:12px 16px;border-radius:var(--radius);border:1px solid transparent;background:transparent;color:var(--text-secondary);text-align:left;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;transition:0.2s}
-    .nav-btn:hover{background:var(--bg-card);color:var(--text-primary)}
-    .nav-btn.active{background:rgba(99,102,241,0.15);color:var(--accent);border-color:rgba(99,102,241,0.3)}
-    .nav-btn svg{width:18px;height:18px}
+    .sidebar {
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-border);
+      padding: 24px; display: flex; flex-direction: column; gap: 8px;
+      position: sticky; top: 0; height: 100vh;
+    }
+    @media(max-width: 1024px) { .sidebar { display: none; } }
 
-    .back-btn{margin-top:auto;background:var(--bg-card);border:1px solid var(--border)}
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 0 12px; }
+    .brand-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 8px; }
+    .brand h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: -0.5px; }
 
-    /* Content */
-    .main{display:flex;flex-direction:column;gap:20px}
-    .header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);backdrop-filter:blur(10px)}
-    .page-title{font-size:1.25rem;font-weight:700}
-    .user-badge{font-size:0.85rem;padding:4px 12px;background:rgba(16,185,129,0.1);color:var(--success);border-radius:20px;border:1px solid rgba(16,185,129,0.2)}
+    .nav-btn {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      border-radius: 12px; color: var(--text-sec); font-weight: 600; cursor: pointer;
+      transition: 0.2s; background: transparent; border: none; font-family: inherit;
+    }
+    .nav-btn:hover { background: var(--glass-highlight); color: var(--text-main); }
+    .nav-btn.active { background: rgba(129, 140, 248, 0.1); color: var(--primary); border: 1px solid rgba(129, 140, 248, 0.2); }
+    .nav-btn svg { width: 20px; height: 20px; }
 
-    .card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;overflow:hidden}
-    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-    .card-title{font-size:1rem;font-weight:700;color:var(--text-primary)}
+    /* Main */
+    .main { padding: 32px; max-width: 1400px; width: 100%; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .title { font-size: 1.8rem; font-weight: 800; }
+    .badge-admin { padding: 6px 12px; background: rgba(129, 140, 248, 0.15); color: var(--primary); border-radius: 20px; font-size: 0.8rem; font-weight: 700; border: 1px solid rgba(129, 140, 248, 0.3); }
+
+    /* Cards */
+    .card {
+      background: var(--glass-surface); backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border); border-radius: var(--radius);
+      padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow);
+    }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-title { font-size: 1.1rem; font-weight: 700; }
 
     /* Stats */
-    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:8px}
-    .stat-box{background:var(--bg-card);padding:16px;border-radius:var(--radius);border:1px solid var(--border);display:flex;align-items:center;gap:16px}
-    .stat-icon{width:40px;height:40px;border-radius:10px;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;color:var(--accent)}
-    .stat-val{font-size:1.5rem;font-weight:800;line-height:1}
-    .stat-label{font-size:0.8rem;color:var(--text-muted);margin-top:4px}
+    .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .stat { background: var(--glass-surface); border: 1px solid var(--glass-border); padding: 20px; border-radius: var(--radius); display: flex; align-items: center; gap: 16px; }
+    .stat-icon { width: 48px; height: 48px; background: rgba(255,255,255,0.05); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: var(--primary); }
+    .stat-val { font-size: 1.5rem; font-weight: 800; }
+    .stat-label { color: var(--text-sec); font-size: 0.85rem; }
 
-    /* Tables */
-    .table-responsive{overflow-x:auto}
-    table{width:100%;border-collapse:collapse;font-size:0.9rem}
-    th{text-align:left;padding:12px 16px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
-    td{padding:14px 16px;border-bottom:1px solid var(--border);color:var(--text-secondary)}
-    tr:last-child td{border-bottom:none}
-    tr:hover td{background:rgba(255,255,255,0.02)}
+    /* Table */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th { text-align: left; padding: 16px; color: var(--text-sec); font-size: 0.75rem; text-transform: uppercase; border-bottom: 1px solid var(--glass-border); }
+    td { padding: 16px; border-bottom: 1px solid var(--glass-border); color: var(--text-main); font-size: 0.9rem; }
+    tr:hover td { background: var(--glass-highlight); }
 
-    /* Badges */
-    .badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:0.75rem;font-weight:600;border:1px solid transparent}
-    .badge-blue{background:rgba(96,165,250,0.15);color:#93c5fd;border-color:rgba(96,165,250,0.3)}
-    .badge-green{background:rgba(52,211,153,0.15);color:#6ee7b7;border-color:rgba(52,211,153,0.3)}
-    .badge-red{background:rgba(248,113,113,0.15);color:#fca5a5;border-color:rgba(248,113,113,0.3)}
-    .badge-orange{background:rgba(251,191,36,0.15);color:#fcd34d;border-color:rgba(251,191,36,0.3)}
-    .badge-gray{background:rgba(148,163,184,0.15);color:#cbd5e1;border-color:rgba(148,163,184,0.3)}
+    /* Elements */
+    .btn {
+      padding: 8px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+      transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; box-shadow: 0 4px 12px var(--primary-glow); }
+    .btn-danger { background: rgba(248, 113, 113, 0.15); color: var(--error); border: 1px solid rgba(248, 113, 113, 0.3); }
+    .btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; background: var(--glass-highlight); color: var(--text-sec); }
+    .btn-icon:hover { color: var(--text-main); background: rgba(255,255,255,0.1); }
 
-    /* Forms & Buttons */
-    .input{background:var(--bg-card);border:1px solid var(--border);color:white;padding:10px 14px;border-radius:8px;font-size:0.9rem;outline:none;transition:0.2s}
-    .input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(129,140,248,0.2)}
-    
-    .btn{padding:8px 16px;border-radius:8px;border:none;font-weight:600;cursor:pointer;font-size:0.85rem;display:inline-flex;align-items:center;gap:6px;transition:0.2s}
-    .btn-primary{background:var(--accent);color:white}
-    .btn-primary:hover{background:#6366f1}
-    .btn-danger{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
-    .btn-danger:hover{background:rgba(239,68,68,0.3)}
-    .btn-sm{padding:6px 12px;font-size:0.8rem}
-    .btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;background:var(--bg-card);color:var(--text-muted);border:1px solid var(--border)}
-    .btn-icon:hover{border-color:var(--accent);color:var(--accent)}
+    .input {
+      background: var(--glass-highlight); border: 1px solid var(--glass-border); color: white;
+      padding: 10px 14px; border-radius: 10px; outline: none; transition: 0.2s;
+    }
+    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-glow); }
 
-    .hidden{display:none}
-    
-    .toast{position:fixed;bottom:24px;right:24px;padding:12px 24px;border-radius:8px;background:#1e293b;border:1px solid var(--border);box-shadow:0 10px 30px rgba(0,0,0,0.5);transform:translateY(100px);opacity:0;transition:0.3s;z-index:999}
-    .toast.active{transform:translateY(0);opacity:1}
-    .toast-success{border-left:4px solid var(--success)}
-    .toast-error{border-left:4px solid var(--error)}
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+    .bg-green { background: rgba(74, 222, 128, 0.15); color: #4ade80; }
+    .bg-red { background: rgba(248, 113, 113, 0.15); color: #f87171; }
+    .bg-blue { background: rgba(129, 140, 248, 0.15); color: #818cf8; }
+
+    .hidden { display: none; }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 24px; background: #1e293b; border: 1px solid var(--glass-border); border-radius: 12px; box-shadow: var(--shadow); transform: translateY(100px); transition: 0.3s; opacity: 0; }
+    .toast.active { transform: translateY(0); opacity: 1; }
   </style>
 </head>
 <body>
-  <div class="bg-effects"><div class="aurora"></div></div>
+  <div class="bg-aurora"><div class="aurora-glow"></div></div>
 
   <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="brand-text">
-          <h1>Admin Panel</h1>
-        </div>
+        <div class="brand-icon"></div>
+        <h1>Admin Panel</h1>
       </div>
-      
       <button class="nav-btn active" data-tab="vps">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         Running VPS
       </button>
       <button class="nav-btn" data-tab="users">
@@ -118,41 +127,40 @@
         Users
       </button>
       <button class="nav-btn" data-tab="logs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         System Logs
       </button>
       <button class="nav-btn" data-tab="tokens">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><path d="M7 10h10"/></svg>
         Tokens
       </button>
-
-      <a href="index.html" class="nav-btn back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <a href="index.html" class="nav-btn" style="margin-top:auto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/></svg>
         Back to App
       </a>
     </aside>
 
-    <!-- Main Content -->
+    <!-- Content -->
     <main class="main">
       <header class="header">
-        <h2 class="page-title" id="page-header">Dashboard</h2>
-        <div class="user-badge" id="admin-name">Admin</div>
+        <h2 class="title" id="page-title">Dashboard</h2>
+        <div class="badge-admin" id="admin-name">Admin</div>
       </header>
 
-      <!-- VPS TAB -->
-      <div id="tab-vps" class="view-section">
-        <div class="stats-grid">
-          <div class="stat-box">
+      <!-- VPS View -->
+      <div id="tab-vps" class="view">
+        <div class="stats-row">
+          <div class="stat">
             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><activity/></svg></div>
-            <div><div class="stat-val" id="total-active-vps">0</div><div class="stat-label">Active Instances</div></div>
+            <div><div class="stat-val" id="total-vps">0</div><div class="stat-label">Active Instances</div></div>
           </div>
         </div>
         <div class="card">
-          <div class="card-header">
+          <div class="card-head">
             <div class="card-title">Running Instances</div>
-            <button class="btn-icon" onclick="loadActiveVPS()" title="Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+            <button class="btn-icon" onclick="loadVPS()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
           </div>
-          <div class="table-responsive">
+          <div class="table-wrap">
             <table id="vps-table">
               <thead><tr><th>User</th><th>Repo</th><th>Plan</th><th>Started</th><th>Expires</th><th>Action</th></tr></thead>
               <tbody id="vps-list"></tbody>
@@ -161,22 +169,22 @@
         </div>
       </div>
 
-      <!-- USERS TAB -->
-      <div id="tab-users" class="view-section hidden">
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-header"><div class="card-title">Quick Add Time</div></div>
-          <div style="display:flex;gap:10px;align-items:center">
-            <input type="text" id="time-username" class="input" placeholder="Username" style="width:200px">
-            <input type="number" id="time-minutes" class="input" value="60" style="width:100px">
-            <button class="btn btn-primary" onclick="addTimeToUser()">Add Time</button>
+      <!-- Users View -->
+      <div id="tab-users" class="view hidden">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Quick Add Time</div></div>
+          <div style="display:flex;gap:12px">
+            <input id="time-user" class="input" placeholder="Username" style="width:200px">
+            <input id="time-amt" type="number" class="input" value="60" style="width:100px">
+            <button class="btn btn-primary" onclick="addTime()">Add Time</button>
           </div>
         </div>
         <div class="card">
-          <div class="card-header">
-            <div class="card-title">All Users</div>
+          <div class="card-head">
+            <div class="card-title">User Management</div>
             <button class="btn-icon" onclick="loadUsers()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
           </div>
-          <div class="table-responsive">
+          <div class="table-wrap">
             <table id="users-table">
               <thead><tr><th>User</th><th>Role</th><th>Balance</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
               <tbody id="users-list"></tbody>
@@ -185,14 +193,14 @@
         </div>
       </div>
 
-      <!-- LOGS TAB -->
-      <div id="tab-logs" class="view-section hidden">
+      <!-- Logs View -->
+      <div id="tab-logs" class="view hidden">
         <div class="card">
-          <div class="card-header">
+          <div class="card-head">
             <div class="card-title">System Events</div>
             <button class="btn-icon" onclick="loadLogs()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
           </div>
-          <div class="table-responsive">
+          <div class="table-wrap">
             <table id="logs-table">
               <thead><tr><th>Time</th><th>Type</th><th>Details</th></tr></thead>
               <tbody id="logs-list"></tbody>
@@ -201,225 +209,87 @@
         </div>
       </div>
 
-      <!-- TOKENS TAB -->
-      <div id="tab-tokens" class="view-section hidden">
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-header"><div class="card-title">Add GitHub Token</div></div>
-          <div style="display:flex;gap:10px">
-            <input type="password" id="new-token" class="input" placeholder="ghp_..." style="flex:1">
-            <button class="btn btn-primary" onclick="addToken()">Add</button>
+      <!-- Tokens View -->
+      <div id="tab-tokens" class="view hidden">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Add GitHub Token</div></div>
+          <div style="display:flex;gap:12px">
+            <input id="new-token" type="password" class="input" placeholder="ghp_..." style="flex:1">
+            <button class="btn btn-primary" onclick="addToken()">Add Token</button>
           </div>
         </div>
         <div class="card">
-          <div class="card-header">
+          <div class="card-head">
             <div class="card-title">Token Pool</div>
             <button class="btn-icon" onclick="loadTokens()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
           </div>
-          <div class="table-responsive">
-            <table id="tokens-table">
-              <thead><tr><th>Owner</th><th>Token</th><th>Status</th><th>Action</th></tr></thead>
-              <tbody id="tokens-list"></tbody>
-            </table>
+          <div class="table-wrap">
+            <tbody id="tokens-list"></tbody>
           </div>
         </div>
       </div>
+
     </main>
   </div>
-
   <div id="toast" class="toast"></div>
 
   <script>
-    const CURRENT_USER_KEY = 'cc_current_user';
-    const ADMIN_USERS = ['vanmanh', 'depchai'];
-
-    // --- UTILS ---
     const $ = s => document.querySelector(s);
     const $$ = s => document.querySelectorAll(s);
-    const showToast = (msg, type='success') => {
-      const t = $('#toast'); t.innerHTML = msg; t.className = `toast toast-${type} active`;
-      setTimeout(() => t.classList.remove('active'), 3000);
-    };
+    const showToast = (m) => { const t=$('#toast'); t.textContent=m; t.classList.add('active'); setTimeout(()=>t.classList.remove('active'),3000); };
+    
+    // Check Admin
+    try {
+      const u = JSON.parse(localStorage.getItem('cc_current_user'));
+      if(!u || !['vanmanh','depchai'].includes(u.username)) location.href='index.html';
+      $('#admin-name').textContent = u.username;
+    } catch{ location.href='login.html'; }
 
-    // --- AUTH ---
-    function checkAdmin() {
-      try {
-        const u = JSON.parse(localStorage.getItem(CURRENT_USER_KEY));
-        if (!u || !ADMIN_USERS.includes(u.username.toLowerCase())) return location.href = 'index.html';
-        $('#admin-name').textContent = u.username;
-      } catch { location.href = 'login.html'; }
-    }
-    checkAdmin();
-
-    // --- NAVIGATION ---
-    $$('.nav-btn[data-tab]').forEach(btn => {
-      btn.onclick = () => {
-        $$('.nav-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        $$('.view-section').forEach(s => s.classList.add('hidden'));
-        $(`#tab-${btn.dataset.tab}`).classList.remove('hidden');
-        $('#page-header').textContent = btn.textContent.trim();
-        
-        if(btn.dataset.tab === 'vps') loadActiveVPS();
-        if(btn.dataset.tab === 'users') loadUsers();
-        if(btn.dataset.tab === 'logs') loadLogs();
-        if(btn.dataset.tab === 'tokens') loadTokens();
-      };
+    // Tabs
+    $$('.nav-btn[data-tab]').forEach(b => b.onclick = () => {
+      $$('.nav-btn').forEach(n => n.classList.remove('active')); b.classList.add('active');
+      $$('.view').forEach(v => v.classList.add('hidden'));
+      $(`#tab-${b.dataset.tab}`).classList.remove('hidden');
+      $('#page-title').textContent = b.textContent.trim();
+      if(b.dataset.tab === 'vps') loadVPS();
+      if(b.dataset.tab === 'users') loadUsers();
+      if(b.dataset.tab === 'logs') loadLogs();
+      if(b.dataset.tab === 'tokens') loadTokens();
     });
 
-    // --- VPS MANAGER ---
-    async function loadActiveVPS() {
-      try {
-        const res = await fetch('/api/active-vps');
-        const data = await res.json();
-        $('#total-active-vps').textContent = data.items.length;
-        const tbody = $('#vps-list'); tbody.innerHTML = '';
-        
-        if(!data.items.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px">No running VPS</td></tr>'; return; }
-
-        data.items.forEach(v => {
-          const expires = new Date(v.expiresAt);
-          const timeLeft = Math.max(0, Math.round((expires - Date.now())/60000));
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td><b>${v.owner}</b></td>
-            <td>${v.repo}</td>
-            <td><span class="badge badge-blue">${v.planId || 'Standard'}</span></td>
-            <td>${new Date(v.createdAt).toLocaleTimeString()}</td>
-            <td><span class="badge badge-gray">${timeLeft}m left</span></td>
-            <td><button class="btn btn-danger btn-sm" onclick="deleteVPS('${v.owner}', '${v.repo}')">Kill</button></td>
-          `;
-          tbody.appendChild(row);
-        });
-      } catch(e) { console.error(e); }
-    }
-
-    async function deleteVPS(owner, repo) {
-      if(!confirm(`Force delete ${repo}?`)) return;
-      try {
-        const res = await fetch('/api/delete-vps', { 
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({owner, repo})
-        });
-        const d = await res.json();
-        if(d.success) { showToast('Deleted VPS'); loadActiveVPS(); }
-        else showToast(d.message, 'error');
-      } catch(e) { showToast(e.message, 'error'); }
-    }
-
-    // --- USERS ---
-    async function loadUsers() {
-      try {
-        const res = await fetch('/api/auth', { method: 'POST', body: JSON.stringify({action:'getAllUsers'}) });
-        const data = await res.json();
-        const tbody = $('#users-list'); tbody.innerHTML = '';
-        
-        // Merge hardcoded admins
-        const admins = ADMIN_USERS.map(u => ({ username: u, isAdmin: true, timeMinutes: 9999, createdAt: new Date().toISOString() }));
-        const dbUsers = data.users || [];
-        const all = [...admins.filter(a => !dbUsers.find(d => d.username===a.username)), ...dbUsers];
-
-        all.forEach(u => {
-          const isAdmin = u.isAdmin || ADMIN_USERS.includes(u.username);
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td><b>${u.username}</b></td>
-            <td>${isAdmin ? '<span class="badge badge-blue">ADMIN</span>' : '<span class="badge badge-gray">USER</span>'}</td>
-            <td>${isAdmin ? '∞' : `<span style="color:var(--success)">${u.timeMinutes}m</span>`}</td>
-            <td>${u.isBanned ? '<span class="badge badge-red">BANNED</span>' : '<span class="badge badge-green">ACTIVE</span>'}</td>
-            <td>${new Date(u.createdAt).toLocaleDateString()}</td>
-            <td>
-              <button class="btn btn-primary btn-sm" onclick="updateTime('${u.username}', 60)">+60m</button>
-              ${!isAdmin ? `<button class="btn btn-danger btn-sm" onclick="banUser('${u.username}')">${u.isBanned?'Unban':'Ban'}</button>` : ''}
-            </td>
-          `;
-          tbody.appendChild(row);
-        });
-      } catch(e) {}
-    }
-
-    async function addTimeToUser() {
-      const u = $('#time-username').value; const m = parseInt($('#time-minutes').value);
-      if(u) updateTime(u, m);
-    }
-
-    async function updateTime(username, minutes) {
-      const res = await fetch('/api/auth', { method: 'POST', body: JSON.stringify({action:'updateTime', username, minutes, operation:'add'}) });
-      if((await res.json()).success) { showToast(`Added ${minutes}m`); loadUsers(); }
-    }
-
-    async function banUser(username) {
-      // Simple toggle for now
-      const action = confirm('Ban/Unban this user?') ? 'banUser' : null;
-      if(!action) return;
-      // Implementation simplified for UI demo - assumes backend toggle or separate calls
-      // In real app, check isBanned state first. Here we just call ban for demo.
-      const res = await fetch('/api/auth', { method: 'POST', body: JSON.stringify({action:'banUser', targetUsername: username, banDuration: 999, banUnit: 'permanent'}) });
-      if((await res.json()).success) { showToast('User banned'); loadUsers(); }
-    }
-
-    // --- LOGS (REDESIGNED) ---
-    async function loadLogs() {
-      try {
-        const res = await fetch('/api/logs');
-        const data = await res.json();
-        const tbody = $('#logs-list'); tbody.innerHTML = '';
-        
-        (data.items || []).forEach(l => {
-          let badge = 'badge-gray';
-          if(l.type.includes('error') || l.type === 'ban') badge = 'badge-red';
-          if(l.type === 'login') badge = 'badge-blue';
-          if(l.type === 'vps_created') badge = 'badge-green';
-          if(l.type === 'register') badge = 'badge-orange';
-
-          let details = l.type === 'vps_created' ? `Created <b>${l.repo}</b> (${l.durationMinutes}m) - ${l.username}` 
-                      : l.type === 'login' ? `User <b>${l.username}</b> login from ${l.ip}`
-                      : JSON.stringify(l).replace(/["{}]/g,' ').slice(0, 100);
-
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td style="font-family:monospace;font-size:0.8rem">${new Date(l.at).toLocaleString()}</td>
-            <td><span class="badge ${badge}">${l.type.toUpperCase()}</span></td>
-            <td style="color:var(--text-secondary)">${details}</td>
-          `;
-          tbody.appendChild(row);
-        });
-      } catch(e) {}
-    }
-
-    // --- TOKENS ---
-    async function loadTokens() {
-      const res = await fetch('/api/tokens', {method:'POST', body:JSON.stringify({action:'list'})});
+    // Functions (Simplified)
+    async function loadVPS() {
+      const res = await fetch('/api/active-vps');
       const data = await res.json();
-      const tbody = $('#tokens-list'); tbody.innerHTML = '';
-      (data.items || []).forEach(t => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${t.owner}</td>
-          <td style="font-family:monospace">${t.masked}</td>
-          <td><span class="badge ${t.status==='live'?'badge-green':'badge-red'}">${t.status}</span></td>
-          <td><button class="btn btn-danger btn-sm" onclick="delToken('${t.id}')">Del</button></td>
-        `;
-        tbody.appendChild(row);
+      $('#total-vps').textContent = data.items.length;
+      const tb = $('#vps-list'); tb.innerHTML='';
+      data.items.forEach(v => {
+        tb.innerHTML += `<tr><td><b>${v.owner}</b></td><td>${v.repo}</td><td><span class="badge bg-blue">${v.planId||'Std'}</span></td><td>${new Date(v.createdAt).toLocaleTimeString()}</td><td>${Math.max(0,Math.round((new Date(v.expiresAt)-Date.now())/60000))}m</td><td><button class="btn btn-danger" onclick="delVPS('${v.owner}','${v.repo}')">Kill</button></td></tr>`;
       });
     }
-
-    async function addToken() {
-      const t = $('#new-token').value;
-      if(!t) return;
-      const res = await fetch('/api/tokens', {method:'POST', body:JSON.stringify({action:'add', token:t})});
+    async function delVPS(o,r) { if(confirm('Kill?')) await fetch('/api/delete-vps',{method:'POST',body:JSON.stringify({owner:o,repo:r})}); loadVPS(); }
+    
+    async function loadUsers() {
+      const res = await fetch('/api/auth',{method:'POST',body:JSON.stringify({action:'getAllUsers'})});
       const d = await res.json();
-      showToast(d.message, d.success?'success':'error');
-      if(d.success) { $('#new-token').value=''; loadTokens(); }
+      const tb = $('#users-list'); tb.innerHTML='';
+      (d.users||[]).forEach(u => {
+        tb.innerHTML += `<tr><td><b>${u.username}</b></td><td>${u.isAdmin?'Admin':'User'}</td><td>${u.timeMinutes}m</td><td>${u.isBanned?'<span class="badge bg-red">BAN</span>':'<span class="badge bg-green">OK</span>'}</td><td>${new Date(u.createdAt).toLocaleDateString()}</td><td><button class="btn btn-primary" onclick="addTime('${u.username}')">+60m</button></td></tr>`;
+      });
+    }
+    async function addTime(u) { 
+      const user = u || $('#time-user').value; const m = u ? 60 : $('#time-amt').value;
+      await fetch('/api/auth',{method:'POST',body:JSON.stringify({action:'updateTime',username:user,minutes:parseInt(m),operation:'add'})});
+      showToast('Added time'); loadUsers();
     }
 
-    async function delToken(id) {
-      if(!confirm('Delete token?')) return;
-      await fetch('/api/tokens', {method:'POST', body:JSON.stringify({action:'delete', id})});
-      loadTokens();
+    async function loadLogs() {
+      const res = await fetch('/api/logs'); const d = await res.json();
+      $('#logs-list').innerHTML = d.items.map(l => `<tr><td style="font-family:monospace">${new Date(l.at).toLocaleTimeString()}</td><td><span class="badge bg-blue">${l.type}</span></td><td style="color:#94a3b8">${JSON.stringify(l).slice(0,80)}...</td></tr>`).join('');
     }
 
     // Init
-    loadActiveVPS();
+    loadVPS();
   </script>
 </body>
 </html>

@@ -4,387 +4,159 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Login - CodeCloud</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #020617;
-      --bg-card: rgba(30, 41, 59, 0.4);
-      --text-primary: #f1f5f9;
-      --text-secondary: #cbd5e1;
-      --text-muted: #94a3b8;
-      --border-light: rgba(139, 92, 246, 0.12);
-      --accent: #818cf8;
-      --accent-soft: rgba(129, 140, 248, 0.12);
-      --accent-glow: rgba(129, 140, 248, 0.3);
-      --success: #34d399;
-      --success-soft: rgba(52, 211, 153, 0.12);
-      --error: #f87171;
-      --error-soft: rgba(248, 113, 113, 0.12);
-      --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-      --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
-      --shadow-glow: 0 0 50px rgba(129, 140, 248, 0.2);
-      --radius-md: 14px;
-      --radius-xl: 28px;
-      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      --bg-base: #02040a;
+      --primary: #6366f1; --accent: #a855f7;
+      --glass: rgba(18, 24, 38, 0.6);
+      --border: rgba(255, 255, 255, 0.1);
+      --text: #f8fafc;
     }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .bg-effects { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-    .aurora { position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(from 0deg at 50% 50%, transparent 0deg, var(--accent-soft) 60deg, transparent 120deg, rgba(34, 211, 238, 0.08) 180deg, transparent 240deg, var(--accent-glow) 300deg, transparent 360deg); animation: auroraRotate 60s linear infinite; }
-    @keyframes auroraRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-base); min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text); }
     
-    .auth-card {
-      position: relative; z-index: 1; width: 100%; max-width: 420px;
-      background: var(--bg-surface); backdrop-filter: blur(40px);
-      border-radius: var(--radius-xl); padding: 40px 32px;
-      border: 1px solid var(--border-light);
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7), var(--shadow-glow);
-      animation: scaleIn 0.4s ease-out;
-    }
-    .auth-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      background: var(--gradient-primary);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    }
-    
-    .auth-logo { display: flex; justify-content: center; margin-bottom: 24px; }
-    .auth-logo-inner {
-      width: 80px; height: 80px; border-radius: 24px;
-      background: var(--gradient-primary);
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: var(--shadow-glow); animation: float 4s ease-in-out infinite;
-    }
-    .auth-logo-inner svg { width: 44px; height: 44px; color: white; }
-    
-    .auth-title {
-      text-align: center; font-size: 1.5rem; font-weight: 900; margin-bottom: 8px;
-      background: var(--gradient-primary); -webkit-background-clip: text;
-      background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .auth-subtitle { text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-bottom: 28px; }
-    
-    .auth-tabs {
-      display: flex; gap: 8px; margin-bottom: 24px;
-      background: var(--bg-card); padding: 6px; border-radius: 999px;
-    }
-    .auth-tab {
-      flex: 1; padding: 12px 16px; border: none; background: transparent;
-      color: var(--text-muted); font-weight: 700; font-size: 0.9rem;
-      border-radius: 999px; cursor: pointer; transition: var(--transition);
-    }
-    .auth-tab.active { background: var(--gradient-primary); color: white; }
-    .auth-tab:hover:not(.active) { color: var(--text-primary); background: var(--accent-soft); }
-    
-    .auth-form { display: flex; flex-direction: column; gap: 16px; }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
-    .input {
-      width: 100%; background: var(--bg-card); border-radius: var(--radius-md);
-      border: 2px solid var(--border-light); padding: 14px 16px;
-      font-size: 0.95rem; color: var(--text-primary); transition: var(--transition); font-family: inherit; backdrop-filter: blur(10px);
-    }
-    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
-    .input::placeholder { color: var(--text-muted); }
-    
-    .btn {
-      width: 100%; padding: 16px; border-radius: 999px; border: none;
-      background: var(--gradient-primary); color: white; font-weight: 800; font-size: 1rem;
-      cursor: pointer; transition: var(--transition); margin-top: 8px;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-    }
-    .btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: var(--shadow-glow); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    
-    .auth-error, .auth-success {
-      padding: 12px 16px; border-radius: var(--radius-md);
-      font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 8px;
-    }
-    .auth-error { background: var(--error-soft); color: var(--error); }
-    .auth-success { background: var(--success-soft); color: var(--success); }
-    .hidden { display: none !important; }
-    
-    .spinner {
-      display: inline-block; width: 16px; height: 16px;
-      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
-      border-radius: 50%; animation: spin 0.6s linear infinite;
-    }
+    .aurora-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% -20%, #1e1b4b, #000 70%); z-index: -1; }
+    .orb { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,102,241,0.15), transparent 70%); border-radius: 50%; animation: float 10s infinite alternate; }
+    @keyframes float { 0% { transform: translate(-20%, -20%); } 100% { transform: translate(20%, 20%); } }
 
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-    
-    @media (max-width: 480px) {
-      body { padding: 16px; }
-      .auth-card { padding: 24px 20px; }
-      .auth-logo-inner { width: 60px; height: 60px; }
-      .auth-logo-inner svg { width: 32px; height: 32px; }
-      .auth-title { font-size: 1.25rem; }
-      .input { font-size: 16px; padding: 12px; }
-      .btn { padding: 14px; }
+    .login-box {
+      width: 100%; max-width: 400px; padding: 40px;
+      background: var(--glass); backdrop-filter: blur(24px);
+      border: 1px solid var(--border); border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+      animation: slideUp 0.5s ease-out;
     }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .logo { width: 60px; height: 60px; background: linear-gradient(135deg, var(--primary), var(--accent)); border-radius: 16px; margin: 0 auto 24px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 30px rgba(99,102,241,0.3); }
+    .logo svg { width: 32px; height: 32px; color: white; }
+
+    h1 { text-align: center; font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+    p.sub { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 32px; }
+
+    .tabs { display: flex; background: rgba(255,255,255,0.05); padding: 4px; border-radius: 12px; margin-bottom: 24px; }
+    .tab { flex: 1; padding: 10px; border: none; background: transparent; color: #94a3b8; font-weight: 600; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+    .tab.active { background: rgba(255,255,255,0.1); color: white; }
+
+    .input-group { margin-bottom: 16px; }
+    .input-label { display: block; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; }
+    .input {
+      width: 100%; padding: 12px 16px; background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      border-radius: 12px; color: white; font-size: 0.95rem; outline: none; transition: 0.2s;
+    }
+    .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.2); background: rgba(255,255,255,0.1); }
+
+    .btn {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none; border-radius: 12px; color: white; font-weight: 700; font-size: 1rem; cursor: pointer;
+      transition: 0.2s; margin-top: 8px; box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,0.4); }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .msg { padding: 12px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 16px; display: none; text-align: center; }
+    .msg.error { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+    .msg.success { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+
+    .hidden { display: none; }
   </style>
 </head>
 <body>
+  <div class="aurora-bg"><div class="orb"></div></div>
 
-<div class="bg-effects"><div class="aurora"></div></div>
-
-<div class="auth-card">
-  <div class="auth-logo">
-    <div class="auth-logo-inner">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
-      </svg>
+  <div class="login-box">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
     </div>
+    <h1>Welcome Back</h1>
+    <p class="sub">Enter your credentials to access CodeCloud</p>
+
+    <div class="tabs">
+      <button class="tab active" id="t-login">Login</button>
+      <button class="tab" id="t-reg">Register</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <form id="form-login">
+      <div class="input-group">
+        <label class="input-label">Username</label>
+        <input type="text" id="l-user" class="input" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input type="password" id="l-pass" class="input" required>
+      </div>
+      <button type="submit" class="btn">Sign In</button>
+    </form>
+
+    <form id="form-reg" class="hidden">
+      <div class="input-group">
+        <label class="input-label">Username</label>
+        <input type="text" id="r-user" class="input" placeholder="3-20 characters" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Password</label>
+        <input type="password" id="r-pass" class="input" placeholder="Min 6 chars" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Confirm Password</label>
+        <input type="password" id="r-conf" class="input" required>
+      </div>
+      <button type="submit" class="btn">Create Account</button>
+    </form>
   </div>
-  
-  <h1 class="auth-title">CodeCloud</h1>
-  <p class="auth-subtitle">Đăng nhập để tiếp tục</p>
-  
-  <div class="auth-tabs">
-    <button class="auth-tab active" id="tab-login">Đăng nhập</button>
-    <button class="auth-tab" id="tab-register">Đăng ký</button>
-  </div>
-  
-  <div id="error-box" class="auth-error hidden"></div>
-  <div id="success-box" class="auth-success hidden"></div>
-  
-  <form id="login-form" class="auth-form">
-    <div class="form-group">
-      <label class="label">Tên đăng nhập</label>
-      <input type="text" id="login-username" class="input" placeholder="username" required autocomplete="username" />
-    </div>
-    <div class="form-group">
-      <label class="label">Mật khẩu</label>
-      <input type="password" id="login-password" class="input" placeholder="••••••••" required autocomplete="current-password" />
-    </div>
-    <button type="submit" class="btn" id="login-btn">Đăng nhập</button>
-  </form>
-  
-  <form id="register-form" class="auth-form hidden">
-    <div class="form-group">
-      <label class="label">Tên đăng nhập</label>
-      <input type="text" id="register-username" class="input" placeholder="username (3-20 ký tự)" required autocomplete="username" />
-    </div>
-    <div class="form-group">
-      <label class="label">Mật khẩu</label>
-      <input type="password" id="register-password" class="input" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password" />
-    </div>
-    <div class="form-group">
-      <label class="label">Xác nhận mật khẩu</label>
-      <input type="password" id="register-confirm" class="input" placeholder="Nhập lại mật khẩu" required autocomplete="new-password" />
-    </div>
-    <button type="submit" class="btn" id="register-btn">Đăng ký</button>
-  </form>
-</div>
 
-<script>
-(function() {
-  'use strict';
-  
-  const CURRENT_USER_KEY = 'cc_current_user';
-  const USER_TIME_KEY = 'cc_user_time';
-  const API_URL = '/api/auth';  // Vercel serverless function
-  
-  const $ = id => document.getElementById(id);
-  
-  // Check if already logged in
-  const currentUser = localStorage.getItem(CURRENT_USER_KEY);
-  if (currentUser && !sessionStorage.getItem('loginPageVisited')) {
-    sessionStorage.setItem('loginPageVisited', 'true');
-    window.location.href = 'index.html';
-    return;
-  }
-  
-  // Tab switching
-  $('tab-login').onclick = () => {
-    $('tab-login').classList.add('active');
-    $('tab-register').classList.remove('active');
-    $('login-form').classList.remove('hidden');
-    $('register-form').classList.add('hidden');
-    hideMessages();
-  };
-  
-  $('tab-register').onclick = () => {
-    $('tab-register').classList.add('active');
-    $('tab-login').classList.remove('active');
-    $('register-form').classList.remove('hidden');
-    $('login-form').classList.add('hidden');
-    hideMessages();
-  };
-  
-  function showError(msg) {
-    $('error-box').textContent = '❌ ' + msg;
-    $('error-box').classList.remove('hidden');
-    $('success-box').classList.add('hidden');
-  }
-  
-  function showSuccess(msg) {
-    $('success-box').textContent = '✅ ' + msg;
-    $('success-box').classList.remove('hidden');
-    $('error-box').classList.add('hidden');
-  }
-  
-  function hideMessages() {
-    $('error-box').classList.add('hidden');
-    $('success-box').classList.add('hidden');
-  }
-  
-  // API call function
-  async function callAPI(data) {
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
-      
-      const json = await res.json();
-      return { success: true, data: json, status: res.status };
-    } catch (e) {
-      console.error('API call failed:', e);
-      return { success: false, error: e.message };
+  <script>
+    const $ = s => document.querySelector(s);
+    const API = '/api/auth';
+    
+    if(localStorage.getItem('cc_current_user')) location.href='index.html';
+
+    $('#t-login').onclick = () => { toggle(true); };
+    $('#t-reg').onclick = () => { toggle(false); };
+
+    function toggle(isLogin) {
+      $('#t-login').classList.toggle('active', isLogin);
+      $('#t-reg').classList.toggle('active', !isLogin);
+      $('#form-login').classList.toggle('hidden', !isLogin);
+      $('#form-reg').classList.toggle('hidden', isLogin);
+      $('#msg').style.display = 'none';
     }
-  }
-  
-  // Login
-  $('login-form').onsubmit = async (e) => {
-    e.preventDefault();
-    hideMessages();
-    
-    const username = $('login-username').value.trim();
-    const password = $('login-password').value;
-    const btn = $('login-btn');
-    
-    if (!username || !password) {
-      showError('Vui lòng nhập đầy đủ thông tin');
-      return;
+
+    function showMsg(txt, type) {
+      const m = $('#msg'); m.textContent = txt; m.className = 'msg ' + type; m.style.display = 'block';
     }
-    
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
-    
-    try {
-      const result = await callAPI({ action: 'login', username, password });
+
+    async function auth(action, body) {
+      const btn = $(action === 'login' ? '#form-login button' : '#form-reg button');
+      const original = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Processing...';
       
-      if (!result.success) {
-        showError('Lỗi kết nối: ' + result.error);
-        btn.disabled = false;
-        btn.textContent = 'Đăng nhập';
-        return;
+      try {
+        const res = await fetch(API, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({...body, action}) });
+        const data = await res.json();
+        if(!data.success) throw new Error(data.message);
+        
+        localStorage.setItem('cc_current_user', JSON.stringify(data.user));
+        showMsg('Success! Redirecting...', 'success');
+        setTimeout(() => location.href = 'index.html', 800);
+      } catch(e) {
+        showMsg(e.message, 'error');
+        btn.disabled = false; btn.textContent = original;
       }
-      
-      const data = result.data;
-      
-      if (!data.success) {
-        showError(data.message || 'Đăng nhập thất bại');
-        btn.disabled = false;
-        btn.textContent = 'Đăng nhập';
-        return;
-      }
-      
-      // Save user info
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(data.user));
-      localStorage.setItem(USER_TIME_KEY + '_' + data.user.username, String(data.timeMinutes || 0));
-      sessionStorage.setItem('loginPageVisited', 'true');
-      
-      showSuccess('Đăng nhập thành công!');
-      setTimeout(() => window.location.href = 'index.html', 500);
-      
-    } catch (err) {
-      console.error('Login error:', err);
-      showError('Lỗi: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = 'Đăng nhập';
     }
-  };
-  
-  // Register
-  $('register-form').onsubmit = async (e) => {
-    e.preventDefault();
-    hideMessages();
-    
-    const username = $('register-username').value.trim();
-    const password = $('register-password').value;
-    const confirmPassword = $('register-confirm').value;
-    const btn = $('register-btn');
-    
-    if (!username || !password || !confirmPassword) {
-      showError('Vui lòng nhập đầy đủ thông tin');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      showError('Mật khẩu xác nhận không khớp');
-      return;
-    }
-    
-    if (username.length < 3 || username.length > 20) {
-      showError('Tên đăng nhập phải từ 3-20 ký tự');
-      return;
-    }
-    
-    if (password.length < 6) {
-      showError('Mật khẩu phải từ 6 ký tự trở lên');
-      return;
-    }
-    
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
-    
-    try {
-      const result = await callAPI({ action: 'register', username, password, confirmPassword });
-      
-      if (!result.success) {
-        showError('Lỗi kết nối: ' + result.error);
-        btn.disabled = false;
-        btn.textContent = 'Đăng ký';
-        return;
-      }
-      
-      const data = result.data;
-      
-      if (!data.success) {
-        showError(data.message || 'Đăng ký thất bại');
-        btn.disabled = false;
-        btn.textContent = 'Đăng ký';
-        return;
-      }
-      
-      // Save user info
-      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(data.user));
-      localStorage.setItem(USER_TIME_KEY + '_' + data.user.username, String(data.timeMinutes || 0));
-      sessionStorage.setItem('loginPageVisited', 'true');
-      
-      showSuccess('Đăng ký thành công! Bạn được tặng 30 phút miễn phí.');
-      setTimeout(() => window.location.href = 'index.html', 1000);
-      
-    } catch (err) {
-      console.error('Register error:', err);
-      showError('Lỗi: ' + err.message);
-      btn.disabled = false;
-      btn.textContent = 'Đăng ký';
-    }
-  };
-})();
-</script>
+
+    $('#form-login').onsubmit = e => {
+      e.preventDefault();
+      auth('login', { username: $('#l-user').value, password: $('#l-pass').value });
+    };
+
+    $('#form-reg').onsubmit = e => {
+      e.preventDefault();
+      auth('register', { username: $('#r-user').value, password: $('#r-pass').value, confirmPassword: $('#r-conf').value });
+    };
+  </script>
 </body>
 </html>
