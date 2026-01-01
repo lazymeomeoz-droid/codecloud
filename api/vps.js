@@ -74,7 +74,13 @@ jobs:
       shell: pwsh
       run: |
         \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-        Set-LocalUser -Name "runneradmin" -Password \$pw
+        Set-LocalUser -Name "codecloud" -Password \$pw -ErrorAction SilentlyContinue
+        if (\$?) { Write-Host "Password set for codecloud" }
+        else {
+          New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
+          Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
+          Set-LocalUser -Name "runneradmin" -Password \$pw
+        }
         Write-Host "Password set successfully"
     - name: Install TightVNC
       shell: cmd
@@ -147,7 +153,13 @@ jobs:
       shell: pwsh
       run: |
         \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-        Set-LocalUser -Name "runneradmin" -Password \$pw
+        Set-LocalUser -Name "codecloud" -Password \$pw -ErrorAction SilentlyContinue
+        if (\$?) { Write-Host "Password set for codecloud" }
+        else {
+          New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
+          Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
+          Set-LocalUser -Name "runneradmin" -Password \$pw
+        }
     - name: Enable RDP
       shell: pwsh
       run: |
@@ -199,10 +211,15 @@ jobs:
       run: |
         try {
           \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-          Set-LocalUser -Name "runneradmin" -Password \$pw
-          Write-Host "Password set successfully"
+          # Try to create codecloud user
+          New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
+          Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
+          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "codecloud" -ErrorAction SilentlyContinue
+          # Also set runneradmin as backup
+          Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
+          Write-Host "Users configured successfully"
         } catch {
-          Write-Host "Warning: Failed to set password - \$_"
+          Write-Host "Warning: User setup issue - \$_"
         }
         Set-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
@@ -463,7 +480,6 @@ async function saveActiveVps(data) {
   
   const key = `active_vps:${owner}:${repo}`;
   await upstash('SET', key, JSON.stringify(vpsData));
-  // Also add to a list for easy scanning
   await upstash('SADD', 'active_vps_keys', key);
   
   console.log(`[VPS] Saved active VPS: ${owner}/${repo}, expires at ${expiresAt}`);
