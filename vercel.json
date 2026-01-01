@@ -1,23 +1,19 @@
 {
   "version": 2,
-  "buildCommand": "",
-  "outputDirectory": ".",
-  "framework": null,
-  "installCommand": "npm install",
-  "functions": {
-    "api/*.js": {
-      "maxDuration": 60
-    }
-  },
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/admin", "destination": "/admin.html" }
-  ],
   "crons": [
     {
       "path": "/api/cron",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 */6 * * *"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
+      ]
     }
   ]
 }
