@@ -5,7 +5,7 @@
   "description": "CodeCloud VPS - Free VPS using GitHub Actions",
   "scripts": {
     "dev": "vercel dev",
-    "build": "echo 'No build step required'",
+    "build": "echo 'Static site - no build needed'",
     "start": "vercel dev"
   },
   "dependencies": {

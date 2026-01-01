@@ -1,10 +1,19 @@
 {
   "version": 2,
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "framework": null,
+  "installCommand": "npm install",
   "functions": {
     "api/*.js": {
       "maxDuration": 60
     }
   },
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
   "crons": [
     {
       "path": "/api/cron",
