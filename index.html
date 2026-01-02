@@ -116,81 +116,6 @@
     /* Layout */
     .layout { display: flex; min-height: 100vh; }
 
-    /* Sidebar */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--bg-card);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-right: 1px solid var(--border-subtle);
-      padding: 28px 20px;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0; left: 0; bottom: 0;
-      z-index: 100;
-      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    @media (max-width: 1024px) {
-      .sidebar { transform: translateX(-100%); }
-      .sidebar.open { transform: translateX(0); box-shadow: var(--shadow); }
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 0 12px;
-      margin-bottom: 40px;
-    }
-
-    .brand-icon {
-      width: 46px; height: 46px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.35);
-    }
-
-    .brand-icon svg { width: 24px; height: 24px; color: white; }
-
-    .brand-text h1 {
-      font-size: 1.3rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-text span {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-    }
-
     .nav-item:hover {
       background: rgba(255, 255, 255, 0.04);
       color: var(--text-primary);
@@ -821,16 +746,7 @@
                 <input type="range" id="duration-slider" min="30" max="330" step="30" value="60" style="width:100%;accent-color:var(--primary)">
               </div>
 
-                <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
-                  <select id="preset-select" class="input" style="flex:1;max-width:220px">
-                    <option value="">Presets</option>
-                  </select>
-                  <input id="preset-name" class="input" placeholder="Preset name" style="max-width:160px">
-                  <button class="btn btn-ghost" id="btn-save-preset" title="Save preset">Save</button>
-                  <button class="btn btn-secondary" id="btn-quick-deploy" title="Quick deploy from preset">Quick</button>
-                </div>
-
-                <button class="btn btn-primary" id="btn-deploy">
+              <button class="btn btn-primary" id="btn-deploy">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 Deploy Now
               </button>
@@ -931,8 +847,8 @@
   const ADMINS = ['vanmanh', 'depchai'];
 
   // Helpers
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
+  window.$ = s => document.querySelector(s);
+  window.$$ = s => document.querySelectorAll(s);
 
   function showToast(msg, type = 'success') {
     const t = $('#toast');
@@ -1071,20 +987,6 @@
       if (!data.success) throw new Error(data.message);
 
       addLog('Repository created: ' + data.repoUrl, 'success');
-
-      // Update local cached user time using server-approved duration (server already deducted)
-      try {
-        const deducted = data.duration || parseInt($('#duration-slider').value) || 0;
-        const USER_TIME_KEY = 'cc_user_time';
-        const timeKey = USER_TIME_KEY + '_' + (currentUser?.username || '');
-        const prev = parseInt(localStorage.getItem(timeKey) || '0') || 0;
-        const updated = Math.max(0, prev - deducted);
-        localStorage.setItem(timeKey, String(updated));
-        // If a remaining-time element exists, update it
-        const statEl = document.getElementById('stat-remaining-time');
-        if (statEl) statEl.textContent = `${updated}m`;
-        showToast(`Đã trừ ${deducted}m. Còn ${updated}m`, 'success');
-      } catch (e) { console.error('Failed to update local time cache:', e); }
       $('#progress-fill').style.width = '50%';
       $('#progress-percent').textContent = '50%';
 
@@ -1194,98 +1096,6 @@
     });
   }
 
-  // Presets: save/load from localStorage
-  function loadPresets() {
-    try {
-      const presets = JSON.parse(localStorage.getItem('cc_presets') || '[]');
-      const sel = document.getElementById('preset-select');
-      sel.innerHTML = '<option value="">Presets</option>';
-      presets.forEach((p, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = `${p.name} • ${p.planId} • ${p.duration}m`;
-        sel.appendChild(opt);
-      });
-    } catch (e) { console.error('loadPresets', e); }
-  }
-
-  function savePreset() {
-    const name = (document.getElementById('preset-name').value || '').trim();
-    if (!name) { showToast('Enter preset name', 'error'); return; }
-    const preset = {
-      name,
-      planId: selectedPlan.id,
-      duration: parseInt(document.getElementById('duration-slider').value) || 60,
-      ngrokToken: document.getElementById('ngrok-token') ? document.getElementById('ngrok-token').value : '',
-      repoVisibility: 'public'
-    };
-    const presets = JSON.parse(localStorage.getItem('cc_presets') || '[]');
-    presets.push(preset);
-    localStorage.setItem('cc_presets', JSON.stringify(presets));
-    loadPresets();
-    showToast('Preset saved');
-  }
-
-  function applyPreset(idx) {
-    const presets = JSON.parse(localStorage.getItem('cc_presets') || '[]');
-    const p = presets[idx];
-    if (!p) return;
-    const plan = PLANS.find(x => x.id === p.planId);
-    if (plan) {
-      selectedPlan = plan;
-      $$('.plan-card').forEach(c => c.classList.remove('active'));
-      document.querySelector(`.plan-card:nth-child(${PLANS.indexOf(plan)+1})`)?.classList.add('active');
-    }
-    document.getElementById('duration-slider').value = p.duration;
-    document.getElementById('duration-display').textContent = p.duration + 'm';
-    if (document.getElementById('ngrok-token')) document.getElementById('ngrok-token').value = p.ngrokToken || '';
-  }
-
-  function quickDeployFromPreset(idx) {
-    applyPreset(idx);
-    // small delay to ensure UI updated
-    setTimeout(() => startDeploy(), 150);
-  }
-
-  // Usage history & export
-  async function loadUsageHistory() {
-    try {
-      const res = await fetch('/api/logs');
-      const j = await res.json();
-      if (!j.success) { showToast('Failed to load logs', 'error'); return; }
-      const rows = j.items || [];
-      const mine = rows.filter(r => r.type === 'vps_created' && r.githubLogin === currentUser.username);
-      const container = document.getElementById('history-grid');
-      if (!container) return;
-      if (mine.length === 0) { container.innerHTML = '<p>No history found</p>'; return; }
-      let html = '<table class="table" style="width:100%;border-collapse:collapse"><thead><tr><th>Time</th><th>Repo</th><th>Plan</th><th>Duration</th></tr></thead><tbody>';
-      mine.forEach(m => {
-        html += `<tr><td>${m.createdAt || m.at || ''}</td><td>${m.repo || m.repoUrl || ''}</td><td>${m.planName || m.planId || ''}</td><td>${m.durationMinutes || m.duration || ''}m</td></tr>`;
-      });
-      html += '</tbody></table><div style="margin-top:8px"><button class="btn" id="btn-export-history">Export CSV</button></div>';
-      container.innerHTML = html;
-      document.getElementById('btn-export-history').onclick = () => exportHistoryCsv(mine);
-    } catch (e) { console.error('loadUsageHistory', e); showToast('Error loading history', 'error'); }
-  }
-
-  function exportHistoryCsv(items) {
-    if (!Array.isArray(items) || items.length === 0) { showToast('No items', 'error'); return; }
-    const rows = [['time','repo','plan','durationMinutes']];
-    items.forEach(it => {
-      rows.push([it.createdAt || it.at || '', (it.repo || it.repoUrl || '').replace(/\n/g,' '), it.planName || it.planId || '', String(it.durationMinutes || it.duration || '')]);
-    });
-    const csv = rows.map(r => r.map(c => '"' + String(c).replace(/"/g,'""') + '"').join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `usage_history_${currentUser.username}_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
   window.deleteVps = async (idx, owner, repo) => {
     if (!confirm('Delete this VPS?')) return;
     try {
@@ -1321,3 +1131,4 @@
 
 </body>
 </html>
+
