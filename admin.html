@@ -329,6 +329,7 @@
               <tr>
                 <th style="width:40px"><div class="checkbox" id="select-all-users"></div></th>
                 <th>Username</th>
+                <th>Role</th>
                 <th>Thời Gian</th>
                 <th>IP Đăng Ký</th>
                 <th>Ngày Tạo</th>
@@ -337,7 +338,7 @@
               </tr>
             </thead>
             <tbody id="user-table-body">
-              <tr><td colspan="7" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span> Đang tải...</td></tr>
+              <tr><td colspan="8" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span> Đang tải...</td></tr>
             </tbody>
           </table>
         </div>
@@ -635,6 +636,21 @@
     const data = await callAPI({ action: 'getAllUsers' });
     if (data.success) {
       allUsers = data.users || [];
+      
+      // Merge hardcoded admins if not present
+      ADMIN_USERS.forEach(admin => {
+        if (!allUsers.find(u => u.username.toLowerCase() === admin.toLowerCase())) {
+          allUsers.push({
+            username: admin,
+            timeMinutes: 0,
+            isAdmin: true,
+            createdAt: new Date().toISOString(),
+            registerIP: 'System',
+            isBanned: false
+          });
+        }
+      });
+      
       updateStats();
       renderUserTable();
       updateUserDatalist();
@@ -692,13 +708,14 @@
     $('user-count-display').textContent = filtered.length;
     
     if (filtered.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Không tìm thấy user</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">Không tìm thấy user</td></tr>';
       return;
     }
     
     tbody.innerHTML = filtered.map(u => {
       const time = u.timeMinutes || 0;
       const isSelected = selectedUsers.has(u.username);
+      const isAdmin = ADMIN_USERS.includes(u.username.toLowerCase()) || u.isAdmin;
       let statusBadge = '';
       if (u.isBanned) {
         statusBadge = u.banType === 'permanent' ? '<span class="badge badge-error">Vĩnh viễn</span>' : '<span class="badge badge-warning">Đã ban</span>';
@@ -709,6 +726,7 @@
       return `<tr class="${isSelected ? 'selected' : ''}" data-username="${u.username}">
         <td><div class="checkbox ${isSelected ? 'checked' : ''}" data-user="${u.username}"></div></td>
         <td><strong style="cursor:pointer;color:var(--accent)" onclick="showUserDetail('${u.username}')">${u.username}</strong></td>
+        <td>${isAdmin ? '<span class="badge badge-info">ADMIN</span>' : '<span class="badge" style="background:rgba(255,255,255,0.1);color:var(--text-muted)">USER</span>'}</td>
         <td><span class="badge ${time > 60 ? 'badge-success' : time > 0 ? 'badge-warning' : 'badge-error'}">${formatTime(time)}</span></td>
         <td><span class="ip-text">${u.registerIP || 'N/A'}</span></td>
         <td style="font-size:0.75rem;color:var(--text-muted)">${formatDateShort(u.createdAt)}</td>
