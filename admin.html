@@ -565,6 +565,7 @@
   let banTargetUser = null;
   let autoRefresh = true;
   let autoRefreshInterval = null;
+  let localUserCache = JSON.parse(localStorage.getItem('cc_admin_cache') || '{}');
   
   function checkAdmin() {
     try {
@@ -575,6 +576,10 @@
         alert('Không có quyền truy cập!');
         window.location.href = 'index.html';
         return false;
+      }
+      // Sync current user time to cache if not present
+      if (localUserCache[currentUser.username] === undefined && currentUser.timeMinutes !== undefined) {
+        localUserCache[currentUser.username] = currentUser.timeMinutes;
       }
       return true;
     } catch(e) { window.location.href = 'login.html'; return false; }
@@ -642,7 +647,7 @@
         if (!allUsers.find(u => u.username.toLowerCase() === admin.toLowerCase())) {
           allUsers.push({
             username: admin,
-            timeMinutes: 0,
+            timeMinutes: localUserCache[admin] !== undefined ? localUserCache[admin] : 0,
             isAdmin: true,
             createdAt: new Date().toISOString(),
             registerIP: 'System',
@@ -987,8 +992,13 @@
   };
   
   window.quickAddTime = async function(username) {
-    const result = await callAPI({ action: 'updateTime', username, minutes: 60, operation: 'add' });
-    if (result.success) { showToast(`+1h cho ${username}`, 'success'); await fetchAllUsers(); }
+    const minutes = 60;
+    const result = await callAPI({ action: 'updateTime', username, minutes, operation: 'add' });
+    if (result.success) { 
+      showToast(`+1h cho ${username}`, 'success');
+      updateLocalCache(username, minutes, 'add');
+      await fetchAllUsers(); 
+    }
     else showToast(result.message || 'Lỗi!', 'error');
   };
   
@@ -1004,7 +1014,9 @@
     if (result.success) {
       const opText = { add: 'Cộng', deduct: 'Trừ', set: 'Đặt' }[operation];
       showToast(`${opText} ${formatTime(minutes)} cho ${username}`, 'success');
-      $('time-username').value = ''; await fetchAllUsers();
+      updateLocalCache(username, minutes, operation);
+      $('time-username').value = ''; 
+      await fetchAllUsers();
     } else showToast(result.message || 'Lỗi!', 'error');
   };
   
@@ -1014,11 +1026,34 @@
       if (!username) { showToast('Nhập tên user trước!', 'error'); return; }
       const minutes = parseInt(btn.dataset.minutes);
       callAPI({ action: 'updateTime', username, minutes, operation: 'add' }).then(result => {
-        if (result.success) { showToast(`+${formatTime(minutes)} cho ${username}`, 'success'); fetchAllUsers(); }
+        if (result.success) { 
+          showToast(`+${formatTime(minutes)} cho ${username}`, 'success'); 
+          updateLocalCache(username, minutes, 'add');
+          fetchAllUsers(); 
+        }
         else showToast(result.message || 'Lỗi!', 'error');
       });
     };
   });
+
+  function updateLocalCache(username, minutes, operation) {
+    // Find current time
+    const user = allUsers.find(u => u.username === username);
+    let current = user ? (user.timeMinutes || 0) : 0;
+    
+    if (operation === 'add') current += minutes;
+    else if (operation === 'deduct') current = Math.max(0, current - minutes);
+    else if (operation === 'set') current = minutes;
+    
+    localUserCache[username] = current;
+    localStorage.setItem('cc_admin_cache', JSON.stringify(localUserCache));
+    
+    // Update current user in localStorage if it's me
+    if (currentUser && currentUser.username === username) {
+      currentUser.timeMinutes = current;
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(currentUser));
+    }
+  }
   
   $('btn-bulk-add-time').onclick = async () => {
     const minutes = parseInt($('bulk-time-minutes').value) || 0;
