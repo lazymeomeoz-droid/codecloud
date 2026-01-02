@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0B0E14">
+  <meta name="theme-color" content="#06080d">
   <title>CodeCloud VPS</title>
   <script>
     (function() {
-      var theme = localStorage.getItem('cc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const theme = localStorage.getItem('cc_theme') || 'dark';
       document.documentElement.setAttribute('data-theme', theme);
       if (!localStorage.getItem('cc_current_user')) {
         window.location.href = 'login.html';
@@ -16,640 +16,1193 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
     :root {
-      /* Cosmic Glass Theme - Light */
-      --bg-base: #eef2f6;
-      --bg-grad-start: #eef2f6; --bg-grad-end: #e2e8f0;
-      --glass-surface: rgba(255, 255, 255, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.6);
-      --glass-highlight: rgba(255, 255, 255, 0.8);
-      --text-main: #1e293b; --text-sec: #64748b; --text-muted: #94a3b8;
-      --primary: #6366f1; --primary-glow: rgba(99, 102, 241, 0.4);
-      --accent: #8b5cf6; --accent-glow: rgba(139, 92, 246, 0.4);
-      --success: #10b981; --error: #ef4444; --warning: #f59e0b;
-      --radius-sm: 8px; --radius-md: 16px; --radius-lg: 24px;
-      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-      --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      --sidebar-w: 260px;
-      --font-sans: 'Inter', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
+      --bg-base: #06080d;
+      --bg-card: rgba(15, 20, 35, 0.75);
+      --bg-card-hover: rgba(20, 28, 50, 0.85);
+      --bg-input: rgba(25, 35, 60, 0.5);
+      --border: rgba(99, 102, 241, 0.15);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --primary: #818cf8;
+      --primary-rgb: 129, 140, 248;
+      --primary-dim: rgba(129, 140, 248, 0.12);
+      --accent: #a78bfa;
+      --accent-rgb: 167, 139, 250;
+      --success: #34d399;
+      --success-dim: rgba(52, 211, 153, 0.12);
+      --error: #f87171;
+      --error-dim: rgba(248, 113, 113, 0.12);
+      --warning: #fbbf24;
+      --warning-dim: rgba(251, 191, 36, 0.12);
+      --info: #60a5fa;
+      --radius: 18px;
+      --radius-sm: 12px;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      --sidebar-w: 280px;
     }
 
-    [data-theme="dark"] {
-      /* Cosmic Glass Theme - Dark */
-      --bg-base: #02040a;
-      --bg-grad-start: #02040a; --bg-grad-end: #0f172a;
-      --glass-surface: rgba(18, 24, 38, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-highlight: rgba(255, 255, 255, 0.05);
-      --text-main: #f8fafc; --text-sec: #94a3b8; --text-muted: #64748b;
-      --primary: #818cf8; --primary-glow: rgba(129, 140, 248, 0.25);
-      --accent: #a78bfa; --accent-glow: rgba(167, 139, 250, 0.25);
-      --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-      --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    [data-theme="light"] {
+      --bg-base: #f1f5f9;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --bg-card-hover: rgba(255, 255, 255, 0.95);
+      --bg-input: rgba(241, 245, 249, 0.8);
+      --border-subtle: rgba(0, 0, 0, 0.08);
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-rgb: 99, 102, 241;
+      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { 
-      font-family: var(--font-sans); background: var(--bg-base); color: var(--text-main); 
-      min-height: 100vh; overflow-x: hidden; -webkit-font-smoothing: antialiased; 
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* --- Background Aurora --- */
-    .bg-effects { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: radial-gradient(circle at top center, #1e1b4b 0%, #020617 100%); }
-    [data-theme="light"] .bg-effects { background: radial-gradient(circle at top center, #e0e7ff 0%, #f1f5f9 100%); }
-    
-    .aurora {
-      position: absolute; width: 140%; height: 140%; top: -20%; left: -20%;
-      background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.15), transparent 60%),
-                  radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.1), transparent 50%);
-      filter: blur(80px); animation: auroraMove 20s infinite alternate ease-in-out;
+    /* Aurora Background */
+    .bg-aurora {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(135deg, #06080d 0%, #0c1222 50%, #0a0a1a 100%);
     }
-    @keyframes auroraMove { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(-5%, 5%) scale(1.1); } }
 
-    /* --- Layout --- */
-    .app-layout { display: flex; min-height: 100vh; }
-    
-    /* --- Sidebar --- */
+    [data-theme="light"] .bg-aurora {
+      background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 50%, #dbeafe 100%);
+    }
+
+    .aurora-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.5;
+      animation: float 25s ease-in-out infinite;
+    }
+
+    .orb-1 {
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(var(--primary-rgb), 0.3), transparent 70%);
+      top: -250px; left: -150px;
+    }
+
+    .orb-2 {
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.25), transparent 70%);
+      bottom: -200px; right: -150px;
+      animation-delay: -12s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(40px, -40px) scale(1.05); }
+      50% { transform: translate(-20px, 30px) scale(0.98); }
+      75% { transform: translate(30px, 20px) scale(1.02); }
+    }
+
+    /* Layout */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
     .sidebar {
-      width: var(--sidebar-w); background: var(--glass-surface);
-      backdrop-filter: blur(24px); border-right: 1px solid var(--glass-border);
-      display: flex; flex-direction: column; padding: 24px;
-      position: fixed; top: 0; bottom: 0; left: 0; z-index: 50;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      width: var(--sidebar-w);
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-right: 1px solid var(--border-subtle);
+      padding: 28px 20px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @media(max-width: 1024px) { .sidebar { transform: translateX(-100%); box-shadow: var(--shadow-lg); } .sidebar.active { transform: translateX(0); } }
 
-    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding-left: 8px; }
-    .logo-box { 
-      width: 40px; height: 40px; border-radius: 12px; 
+    @media (max-width: 1024px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: var(--shadow); }
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 0 12px;
+      margin-bottom: 40px;
+    }
+
+    .brand-icon {
+      width: 46px; height: 46px;
       background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 20px var(--primary-glow);
-      color: white;
+      box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.35);
     }
-    .brand h1 { font-size: 1.25rem; font-weight: 800; background: linear-gradient(to right, var(--text-main), var(--text-sec)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    .nav-menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .brand-icon svg { width: 24px; height: 24px; color: white; }
+
+    .brand-text h1 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
     .nav-item {
-      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-      border-radius: 12px; color: var(--text-sec); font-weight: 600; font-size: 0.9rem;
-      cursor: pointer; transition: all 0.2s; border: 1px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
       background: transparent;
+      width: 100%;
+      text-align: left;
     }
-    .nav-item:hover { background: var(--glass-highlight); color: var(--text-main); transform: translateX(2px); }
-    .nav-item.active { 
-      background: rgba(99, 102, 241, 0.1); color: var(--primary); 
-      border-color: rgba(99, 102, 241, 0.2); 
-    }
-    .nav-item svg { width: 20px; height: 20px; }
 
-    .user-card {
-      margin-top: auto; padding: 16px; background: var(--glass-highlight);
-      border-radius: 16px; border: 1px solid var(--glass-border);
-      display: flex; gap: 12px; align-items: center;
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      transform: translateX(4px);
     }
-    .user-avatar { 
-      width: 36px; height: 36px; border-radius: 10px; 
+
+    .nav-item.active {
+      background: var(--primary-dim);
+      color: var(--primary);
+      border-color: rgba(var(--primary-rgb), 0.2);
+    }
+
+    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+    /* User Card */
+    .user-card {
+      margin-top: auto;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: var(--radius);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .user-avatar {
+      width: 42px; height: 42px;
+      border-radius: 12px;
       background: linear-gradient(135deg, var(--accent), var(--primary));
       display: flex; align-items: center; justify-content: center;
-      color: white; font-weight: 700; font-size: 0.9rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
     }
-    .user-meta h4 { font-size: 0.85rem; font-weight: 700; }
-    .user-meta p { font-size: 0.75rem; color: var(--text-sec); }
 
-    /* --- Main Content --- */
-    .main-content { flex: 1; margin-left: var(--sidebar-w); padding: 32px; max-width: 1600px; width: 100%; }
-    @media(max-width: 1024px) { .main-content { margin-left: 0; padding: 20px; } }
+    .user-meta h4 { font-size: 0.9rem; font-weight: 700; }
+    .user-meta p { font-size: 0.8rem; color: var(--text-muted); }
 
-    .top-header { 
-      display: flex; justify-content: space-between; align-items: center; 
-      margin-bottom: 32px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); 
+    .btn-logout {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
     }
-    .page-title { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; }
-    .menu-toggle { display: none; background: none; border: none; color: var(--text-main); cursor: pointer; }
-    @media(max-width: 1024px) { .menu-toggle { display: block; } }
 
-    /* --- Theme Toggle --- */
-    .theme-btn {
-      width: 44px; height: 44px; border-radius: 12px;
-      background: var(--glass-surface); border: 1px solid var(--glass-border);
-      color: var(--text-sec); cursor: pointer; display: flex; align-items: center; justify-content: center;
-      transition: 0.2s;
+    .btn-logout:hover {
+      background: var(--error-dim);
+      color: var(--error);
+      border-color: rgba(248, 113, 113, 0.25);
     }
-    .theme-btn:hover { background: var(--glass-highlight); color: var(--primary); transform: translateY(-2px); }
 
-    /* --- Cards & Panels --- */
-    .panel {
-      background: var(--glass-surface); backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border); border-radius: var(--radius-lg);
-      padding: 28px; margin-bottom: 24px;
-      box-shadow: var(--shadow-sm);
-      transition: transform 0.3s, box-shadow 0.3s;
+    /* Main Content */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-w);
+      padding: 32px;
+      max-width: 100%;
     }
-    .panel:hover { box-shadow: var(--shadow-lg); border-color: rgba(255,255,255,0.15); }
-    
-    .panel-header { margin-bottom: 24px; }
-    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
-    .panel-title::before { content: ''; width: 4px; height: 18px; background: var(--primary); border-radius: 4px; }
-    .panel-desc { font-size: 0.85rem; color: var(--text-sec); margin-top: 4px; margin-left: 12px; }
 
-    /* --- Grid Layouts --- */
-    .grid-2 { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; }
-    @media(max-width: 1100px) { .grid-2 { grid-template-columns: 1fr; } }
+    @media (max-width: 1024px) {
+      .main { margin-left: 0; padding: 20px; }
+    }
 
-    /* --- Selection Cards --- */
-    .selection-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    .select-card {
-      background: var(--glass-highlight); border: 2px solid transparent;
-      border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.2s;
-      display: flex; align-items: center; gap: 12px;
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
     }
-    .select-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.03); }
-    .select-card.active {
-      background: rgba(99, 102, 241, 0.08); border-color: var(--primary);
-      box-shadow: 0 0 20px var(--primary-glow);
-    }
-    .card-icon { 
-      width: 42px; height: 42px; border-radius: 10px; 
-      background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem;
-    }
-    .card-info h4 { font-size: 0.9rem; font-weight: 700; }
-    .card-info p { font-size: 0.75rem; color: var(--text-sec); }
 
-    /* --- Form Elements --- */
-    .form-group { margin-bottom: 20px; }
-    .label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-sec); margin-bottom: 8px; }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-btn {
+      display: none;
+      width: 46px; height: 46px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 1024px) {
+      .menu-btn { display: flex; }
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-icon {
+      width: 44px; height: 44px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-card-hover);
+      color: var(--primary);
+      border-color: var(--border);
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 26px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title::before {
+      content: '';
+      width: 4px; height: 20px;
+      background: linear-gradient(180deg, var(--primary), var(--accent));
+      border-radius: 4px;
+    }
+
+    .card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .card-body { padding: 26px; }
+
+    /* Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* Plan Cards */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+    }
+
+    .plan-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 2px solid transparent;
+      border-radius: 16px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .plan-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateY(-3px);
+    }
+
+    .plan-card.active {
+      background: var(--primary-dim);
+      border-color: var(--primary);
+      box-shadow: 0 0 32px rgba(var(--primary-rgb), 0.2);
+    }
+
+    .plan-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+    }
+
+    .plan-info h4 { font-size: 0.95rem; font-weight: 700; }
+    .plan-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
+
+    /* Form Elements */
+    .form-group { margin-bottom: 22px; }
+
+    .label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
     .input {
-      width: 100%; background: var(--glass-highlight); border: 1px solid var(--glass-border);
-      padding: 14px 16px; border-radius: 12px; color: var(--text-main); font-family: inherit;
-      transition: 0.2s;
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: inherit;
+      transition: all 0.2s;
+      outline: none;
     }
-    .input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); background: rgba(255,255,255,0.05); }
-    
-    /* --- Buttons --- */
+
+    .input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.12);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .flex-between {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Buttons */
     .btn {
-      width: 100%; padding: 16px; border-radius: 12px; border: none;
-      font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      position: relative; overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 24px;
+      border-radius: var(--radius-sm);
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border: none;
+      font-family: inherit;
+      width: 100%;
     }
-    .btn-primary { 
-      background: linear-gradient(135deg, var(--primary), var(--accent)); color: white;
-      box-shadow: 0 8px 16px -4px var(--primary-glow);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -4px var(--primary-glow); filter: brightness(1.1); }
-    .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.2); }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.25); transform: translateY(-2px); }
-    .btn-ghost { background: transparent; color: var(--text-sec); }
-    .btn-ghost:hover { color: var(--text-main); background: var(--glass-highlight); }
 
-    /* --- Logs & Terminal --- */
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(var(--primary-rgb), 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      padding: 12px 16px;
+      width: auto;
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+    }
+
+    .btn-danger {
+      background: var(--error-dim);
+      color: var(--error);
+      border: 1px solid rgba(248, 113, 113, 0.2);
+    }
+
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.2);
+    }
+
+    .btn-sm {
+      padding: 10px 16px;
+      font-size: 0.85rem;
+    }
+
+    /* Progress */
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 14px 0;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 10px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+
+    /* Terminal */
     .terminal {
-      background: #0f172a; border-radius: 16px; padding: 20px;
-      font-family: var(--font-mono); font-size: 0.85rem; color: #cbd5e1;
-      height: 300px; overflow-y: auto; border: 1px solid var(--glass-border);
-      box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+      background: #0c1222;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      height: 300px;
+      overflow-y: auto;
+      color: #94a3b8;
     }
-    .log-entry { display: flex; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .log-time { color: #64748b; font-size: 0.75rem; min-width: 70px; }
+
+    .log-entry {
+      display: flex;
+      gap: 12px;
+      padding: 7px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      min-width: 70px;
+    }
+
     .log-msg { flex: 1; word-break: break-word; }
-    .log-info { color: #60a5fa; } .log-success { color: #34d399; } .log-error { color: #f87171; } .log-warn { color: #fbbf24; }
+    .log-info { color: #60a5fa; }
+    .log-success { color: #34d399; }
+    .log-error { color: #f87171; }
+    .log-warn { color: #fbbf24; }
 
-    /* --- Progress --- */
-    .progress-wrap { height: 8px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; margin: 16px 0; }
-    .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); width: 0%; transition: width 0.5s ease; }
-
-    /* --- Utils --- */
-    .hidden { display: none !important; }
-    .text-center { text-align: center; }
-    .flex-between { display: flex; justify-content: space-between; align-items: center; }
-    
-    /* --- Toast --- */
-    .toast { 
-      position: fixed; bottom: 30px; right: 30px; padding: 16px 24px; 
-      background: var(--glass-surface); backdrop-filter: blur(24px);
-      border: 1px solid var(--glass-border); border-radius: 12px;
-      box-shadow: var(--shadow-lg); z-index: 100; transform: translateY(100px); opacity: 0;
-      transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      display: flex; align-items: center; gap: 12px; font-weight: 600;
+    /* Connection Info */
+    .conn-empty {
+      text-align: center;
+      padding: 36px;
+      color: var(--text-muted);
     }
-    .toast.active { transform: translateY(0); opacity: 1; }
-    .toast-success { color: var(--success); border-left: 4px solid var(--success); }
-    .toast-error { color: var(--error); border-left: 4px solid var(--error); }
 
-    /* --- Scrollbar --- */
+    .conn-field { margin-bottom: 14px; }
+
+    /* Instance Cards */
+    .instances-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .instance-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .instance-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: var(--success-dim);
+      color: var(--success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .instance-info { flex: 1; }
+    .instance-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .instance-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Views */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      padding: 16px 24px;
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow);
+      z-index: 1000;
+      transform: translateY(120px);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+    }
+
+    .toast.active { transform: translateY(0); opacity: 1; }
+    .toast-success { border-left: 4px solid var(--success); color: var(--success); }
+    .toast-error { border-left: 4px solid var(--error); color: var(--error); }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(8px);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 36px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-content h3 { margin-bottom: 24px; font-size: 1.2rem; }
+
+    /* Overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 99;
+    }
+
+    .overlay.active { display: block; }
+
+    /* Hidden */
+    .hidden { display: none !important; }
+
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
   </style>
 </head>
 <body>
 
-  <div class="bg-effects"><div class="aurora"></div></div>
+<div class="bg-aurora">
+  <div class="aurora-orb orb-1"></div>
+  <div class="aurora-orb orb-2"></div>
+</div>
 
-  <div class="app-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="logo-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
-        </div>
-        <h1>CodeCloud</h1>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
       </div>
+      <div class="brand-text">
+        <h1>CodeCloud</h1>
+        <span>Free VPS Platform</span>
+      </div>
+    </div>
 
-      <nav class="nav-menu">
-        <button class="nav-item active" data-target="create">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          Deploy VPS
-        </button>
-        <button class="nav-item" data-target="manager">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          Instances
-        </button>
-        <button class="nav-item" data-target="settings">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Settings
-        </button>
-        <button class="nav-item hidden" id="nav-admin" onclick="window.location.href='admin.html'">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Admin Panel
-        </button>
-      </nav>
+    <nav class="nav-menu">
+      <button class="nav-item active" data-view="deploy">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Deploy VPS
+      </button>
+      <button class="nav-item" data-view="instances">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        My Instances
+      </button>
+      <button class="nav-item" data-view="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </button>
+      <button class="nav-item hidden" id="nav-admin" onclick="location.href='admin.html'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Admin Panel
+      </button>
+    </nav>
 
-      <div class="user-card">
+    <div class="user-card">
+      <div class="user-info">
         <div class="user-avatar" id="user-avatar">U</div>
         <div class="user-meta">
-          <h4 id="user-display-name">User</h4>
-          <p id="user-time-display">Loading...</p>
+          <h4 id="user-name">User</h4>
+          <p id="user-balance">Loading...</p>
         </div>
       </div>
-      
-      <button class="btn btn-ghost" id="logout-btn" style="margin-top: 12px;">
+      <button class="btn-logout" id="btn-logout">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         Sign Out
       </button>
-    </aside>
+    </div>
+  </aside>
 
-    <!-- Main -->
-    <main class="main-content">
-      <header class="top-header">
-        <div style="display:flex;align-items:center;gap:16px">
-          <button class="menu-toggle" id="menu-toggle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
-          <h2 class="page-title" id="page-title">Deploy VPS</h2>
-        </div>
-        <button class="theme-btn" id="theme-toggle">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  <!-- Main Content -->
+  <main class="main">
+    <header class="header">
+      <div class="header-left">
+        <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
         </button>
-      </header>
+        <h1 class="page-title" id="page-title">Deploy VPS</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="theme-toggle" title="Toggle Theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </header>
 
-      <!-- CREATE VIEW -->
-      <div id="view-create">
-        <div class="grid-2">
-          <!-- Left Column -->
-          <div style="display:flex;flex-direction:column;gap:24px">
-            
-            <div class="panel">
-              <div class="panel-header">
-                <h3 class="panel-title">1. Select Environment</h3>
-                <p class="panel-desc">Choose operating system and connection method</p>
+    <!-- Deploy View -->
+    <div id="view-deploy" class="view active">
+      <div class="grid-2">
+        <!-- Left Column -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">1. Select Environment</h3>
+                <p class="card-desc">Choose operating system and connection type</p>
               </div>
-              <div class="selection-grid" id="plans-container"></div>
             </div>
+            <div class="card-body">
+              <div class="plans-grid" id="plans-grid"></div>
+            </div>
+          </div>
 
-            <div class="panel">
-              <div class="panel-header">
-                 <h3 class="panel-title">2. Configuration</h3>
-                 <p class="panel-desc">Set your server details</p>
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">2. Configuration</h3>
+                <p class="card-desc">Customize your server settings</p>
               </div>
+            </div>
+            <div class="card-body">
               <div class="form-group">
                 <label class="label">Server Name</label>
-                <div style="display:flex;gap:10px">
+                <div class="input-row">
                   <input type="text" id="repo-name" class="input" readonly>
-                  <button class="btn btn-ghost" style="width:auto" id="btn-regenerate" title="Regenerate">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  <button class="btn-icon" id="btn-regenerate" title="Regenerate">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                   </button>
                 </div>
               </div>
 
               <div class="form-group hidden" id="ngrok-group">
                 <label class="label">Ngrok Token</label>
-                <input type="password" id="ngrok-token" class="input" placeholder="Enter your Ngrok Authtoken">
+                <input type="password" id="ngrok-token" class="input" placeholder="Enter your Ngrok authtoken">
               </div>
 
               <div class="form-group">
                 <div class="flex-between">
                   <label class="label">Duration</label>
-                  <span style="font-weight:700;color:var(--primary)" id="duration-val">60m</span>
+                  <span style="font-weight:700;color:var(--primary)" id="duration-display">60m</span>
                 </div>
-                <input type="range" id="duration" min="30" max="330" step="30" value="60" style="width:100%;accent-color:var(--primary)">
+                <input type="range" id="duration-slider" min="30" max="330" step="30" value="60" style="width:100%;accent-color:var(--primary)">
               </div>
 
               <button class="btn btn-primary" id="btn-deploy">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 Deploy Now
               </button>
             </div>
           </div>
+        </div>
 
-          <!-- Right Column -->
-          <div style="display:flex;flex-direction:column;gap:24px">
-            
-            <div class="panel hidden" id="progress-panel">
-               <div class="panel-header">
-                 <h3 class="panel-title">Deployment Status</h3>
-               </div>
-               <div class="flex-between">
-                 <span style="font-weight:600" id="progress-status-text">Initializing...</span>
-                 <span style="color:var(--primary);font-weight:700" id="progress-percent">0%</span>
-               </div>
-               <div class="progress-wrap">
-                 <div class="progress-bar" id="progress-bar-fill"></div>
-               </div>
-               <div class="terminal" id="logs"></div>
-            </div>
-
-            <div class="panel">
-              <div class="panel-header">
-                <h3 class="panel-title">Connection Info</h3>
-              </div>
-              <div id="conn-info" style="display:flex;flex-direction:column;gap:12px">
-                <div class="text-center" style="color:var(--text-sec);padding:20px">No active deployment</div>
+        <!-- Right Column -->
+        <div>
+          <div class="card hidden" id="progress-card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title">Deployment Status</h3>
               </div>
             </div>
+            <div class="card-body">
+              <div class="flex-between">
+                <span id="progress-text" style="font-weight:600">Initializing...</span>
+                <span id="progress-percent" style="color:var(--primary);font-weight:700">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+              <div class="terminal" id="logs"></div>
+            </div>
+          </div>
 
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Connection Info</h3>
+            </div>
+            <div class="card-body">
+              <div id="conn-info">
+                <div class="conn-empty">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.3;margin-bottom:12px"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                  <p>Deploy a VPS to see connection details</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-
-      <!-- MANAGER VIEW -->
-      <div id="view-manager" class="hidden">
-        <div class="panel">
-          <div class="panel-header"><h3 class="panel-title">Active Instances</h3></div>
-          <div id="vps-list" class="selection-grid"></div>
-        </div>
-      </div>
-
-      <!-- SETTINGS VIEW -->
-      <div id="view-settings" class="hidden">
-        <div class="panel">
-          <div class="panel-header"><h3 class="panel-title">Settings</h3></div>
-          <button class="btn btn-danger" id="btn-clear-data">Clear Local Data</button>
-        </div>
-      </div>
-
-    </main>
-  </div>
-
-  <div id="toast" class="toast"></div>
-  
-  <!-- Captcha Modal -->
-  <div id="captcha-modal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px)">
-    <div class="panel" style="width:100%;max-width:400px;text-align:center">
-      <h3 style="margin-bottom:20px">Security Check</h3>
-      <div class="h-captcha" data-sitekey="a044fd58-a078-46ca-9f5e-71a6ecbcd500" data-callback="onCaptchaSuccess"></div>
-      <button class="btn btn-ghost" onclick="document.getElementById('captcha-modal').classList.add('hidden')" style="margin-top:10px">Cancel</button>
     </div>
+
+    <!-- Instances View -->
+    <div id="view-instances" class="view">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Active Instances</h3>
+          <button class="btn-icon" onclick="renderInstances()" title="Refresh">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="instances-grid" id="instances-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="view-settings" class="view">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Settings</h3>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-danger" id="btn-clear-data" style="max-width:320px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Clear Local Data
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<!-- Captcha Modal -->
+<div class="modal" id="captcha-modal">
+  <div class="modal-content">
+    <h3>Security Verification</h3>
+    <div class="h-captcha" data-sitekey="a044fd58-a078-46ca-9f5e-71a6ecbcd500" data-callback="onCaptchaSuccess"></div>
+    <button class="btn btn-ghost" onclick="$('#captcha-modal').classList.remove('active')" style="margin-top:18px;width:auto">Cancel</button>
   </div>
+</div>
 
-  <script>
-    // --- CORE LOGIC (Preserved from original) ---
-    const PLANS = [
-      { id: 'ubuntu_web', name: 'Ubuntu', desc: 'XFCE Desktop' },
-      { id: 'win_web', name: 'Windows Web', desc: 'In-Browser' },
-      { id: 'win_rdp', name: 'Windows RDP', desc: 'Remote Desktop' },
-      { id: 'win_tailscale', name: 'Tailscale', desc: 'Private Network' }
-    ];
+<script>
+  // Constants
+  const PLANS = [
+    { id: 'ubuntu_web', name: 'Ubuntu', desc: 'XFCE Desktop', icon: '🐧' },
+    { id: 'win_web', name: 'Windows Web', desc: 'In-Browser', icon: '🪟' },
+    { id: 'win_rdp', name: 'Windows RDP', desc: 'Remote Desktop', icon: '🖥️' },
+    { id: 'win_tailscale', name: 'Tailscale', desc: 'Private Network', icon: '🔒' }
+  ];
+  const ADMINS = ['vanmanh', 'depchai'];
 
-    // UI Helpers
-    const $ = s => document.querySelector(s);
-    const $$ = s => document.querySelectorAll(s);
-    const showToast = (msg, type='success') => {
-      const t = $('#toast'); t.innerHTML = msg; t.className = `toast toast-${type} active`;
-      setTimeout(() => t.classList.remove('active'), 3000);
-    };
+  // Helpers
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
 
-    // Render Plans
-    const planContainer = $('#plans-container');
-    let selectedPlan = PLANS[0];
-    PLANS.forEach(p => {
-      const el = document.createElement('div');
-      el.className = `select-card ${p.id === selectedPlan.id ? 'active' : ''}`;
-      el.innerHTML = `
-        <div class="card-icon">${p.name[0]}</div>
-        <div class="card-info"><h4>${p.name}</h4><p>${p.desc}</p></div>
-      `;
-      el.onclick = () => {
-        $$('.select-card').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-        selectedPlan = p;
-        if(p.id === 'win_rdp') $('#ngrok-group').classList.remove('hidden');
-        else $('#ngrok-group').classList.add('hidden');
-      };
-      planContainer.appendChild(el);
-    });
+  function showToast(msg, type = 'success') {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.className = `toast toast-${type} active`;
+    setTimeout(() => t.classList.remove('active'), 3500);
+  }
 
-    // Navigation
-    $$('.nav-item[data-target]').forEach(b => {
-      b.onclick = () => {
-        $$('.nav-item').forEach(n => n.classList.remove('active'));
-        b.classList.add('active');
-        $('#view-create').classList.add('hidden');
-        $('#view-manager').classList.add('hidden');
-        $('#view-settings').classList.add('hidden');
-        $(`#view-${b.dataset.target}`).classList.remove('hidden');
-        $('#page-title').textContent = b.textContent.trim();
-        if(window.innerWidth < 1024) $('#sidebar').classList.remove('active');
-        if(b.dataset.target === 'manager') renderManager();
-      }
-    });
+  function toggleSidebar() {
+    $('#sidebar').classList.toggle('open');
+    $('#overlay').classList.toggle('active');
+  }
 
-    // Sidebar Toggle
-    $('#menu-toggle').onclick = () => $('#sidebar').classList.add('active');
-    document.addEventListener('click', e => {
-      if(window.innerWidth < 1024 && !e.target.closest('.sidebar') && !e.target.closest('#menu-toggle')) {
-        $('#sidebar').classList.remove('active');
-      }
-    });
+  function generateRepoName() {
+    return 'vps-' + Math.floor(Math.random() * 100000);
+  }
 
-    // Theme Toggle
-    $('#theme-toggle').onclick = () => {
-      const current = document.documentElement.getAttribute('data-theme');
-      const next = current === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      localStorage.setItem('cc_theme', next);
-    };
-
-    // Mock Data for UI Demo
-    $('#repo-name').value = 'vps-' + Math.floor(Math.random()*10000);
-    $('#btn-regenerate').onclick = () => $('#repo-name').value = 'vps-' + Math.floor(Math.random()*10000);
-    $('#duration').oninput = (e) => $('#duration-val').textContent = e.target.value + 'm';
-
-    // Auth Check
-    const user = JSON.parse(localStorage.getItem('cc_current_user') || '{}');
-    if(user.username) {
-      $('#user-display-name').textContent = user.username;
-      $('#user-avatar').textContent = user.username[0].toUpperCase();
-      if(['vanmanh','depchai'].includes(user.username)) $('#nav-admin').classList.remove('hidden');
+  // Auth Check
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem('cc_current_user'));
+    if (!currentUser) throw new Error();
+    $('#user-name').textContent = currentUser.username;
+    $('#user-avatar').textContent = currentUser.username[0].toUpperCase();
+    $('#user-balance').textContent = currentUser.isAdmin ? 'Administrator' : 'Free Plan';
+    if (ADMINS.includes(currentUser.username.toLowerCase()) || currentUser.isAdmin) {
+      $('#nav-admin').classList.remove('hidden');
     }
+  } catch {
+    location.href = 'login.html';
+  }
 
-    $('#logout-btn').onclick = () => {
-      localStorage.removeItem('cc_current_user');
-      location.href = 'login.html';
+  // Logout
+  $('#btn-logout').onclick = () => {
+    localStorage.removeItem('cc_current_user');
+    location.href = 'login.html';
+  };
+
+  // Theme Toggle
+  $('#theme-toggle').onclick = () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('cc_theme', next);
+  };
+
+  // Navigation
+  $$('.nav-item[data-view]').forEach(btn => {
+    btn.onclick = () => {
+      $$('.nav-item').forEach(n => n.classList.remove('active'));
+      btn.classList.add('active');
+      $$('.view').forEach(v => v.classList.remove('active'));
+      $(`#view-${btn.dataset.view}`).classList.add('active');
+      $('#page-title').textContent = btn.textContent.trim();
+      if (window.innerWidth <= 1024) toggleSidebar();
+      if (btn.dataset.view === 'instances') renderInstances();
+    };
+  });
+
+  // Render Plans
+  let selectedPlan = PLANS[0];
+  const plansGrid = $('#plans-grid');
+  PLANS.forEach(plan => {
+    const el = document.createElement('div');
+    el.className = `plan-card ${plan.id === selectedPlan.id ? 'active' : ''}`;
+    el.innerHTML = `
+      <div class="plan-icon">${plan.icon}</div>
+      <div class="plan-info">
+        <h4>${plan.name}</h4>
+        <p>${plan.desc}</p>
+      </div>
+    `;
+    el.onclick = () => {
+      $$('.plan-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      selectedPlan = plan;
+      if (plan.id === 'win_rdp') $('#ngrok-group').classList.remove('hidden');
+      else $('#ngrok-group').classList.add('hidden');
+    };
+    plansGrid.appendChild(el);
+  });
+
+  // Repo Name
+  $('#repo-name').value = generateRepoName();
+  $('#btn-regenerate').onclick = () => $('#repo-name').value = generateRepoName();
+
+  // Duration
+  $('#duration-slider').oninput = e => $('#duration-display').textContent = e.target.value + 'm';
+
+  // Deploy
+  let isDeploying = false;
+  $('#btn-deploy').onclick = () => {
+    if (isDeploying) return;
+    $('#captcha-modal').classList.add('active');
+  };
+
+  window.onCaptchaSuccess = () => {
+    $('#captcha-modal').classList.remove('active');
+    startDeploy();
+  };
+
+  async function startDeploy() {
+    isDeploying = true;
+    $('#progress-card').classList.remove('hidden');
+    const btn = $('#btn-deploy');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/></svg> Deploying...';
+    btn.disabled = true;
+
+    const logs = $('#logs');
+    logs.innerHTML = '';
+    const addLog = (msg, type = 'info') => {
+      logs.innerHTML += `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-msg log-${type}">${msg}</span></div>`;
+      logs.scrollTop = logs.scrollHeight;
     };
 
-    // --- DEPLOY LOGIC (Simplified for UI) ---
-    let isDeploying = false;
-    $('#btn-deploy').onclick = () => {
-      if(isDeploying) return;
-      $('#captcha-modal').classList.remove('hidden');
-    };
+    addLog('Starting deployment...', 'info');
+    $('#progress-fill').style.width = '20%';
+    $('#progress-percent').textContent = '20%';
 
-    window.onCaptchaSuccess = () => {
-      $('#captcha-modal').classList.add('hidden');
-      startDeploy();
-    };
-
-    async function startDeploy() {
-      isDeploying = true;
-      $('#progress-panel').classList.remove('hidden');
-      const btn = $('#btn-deploy');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = 'Deploying...';
-      btn.disabled = true;
-
-      const logs = $('#logs');
-      const addLog = (msg, type='info') => logs.innerHTML += `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-msg log-${type}">${msg}</span></div>`;
-      
-      addLog('Starting deployment...', 'info');
-      $('#progress-bar-fill').style.width = '20%';
-      $('#progress-percent').textContent = '20%';
-
-      try {
-        // Real API Call
-        const res = await fetch('/api/vps', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            planId: selectedPlan.id,
-            durationMinutes: parseInt($('#duration').value),
-            repoName: $('#repo-name').value,
-            ngrokToken: $('#ngrok-token').value,
-            repoVisibility: 'public',
-            username: user.username
-          })
-        });
-        const data = await res.json();
-        
-        if(!data.success) throw new Error(data.message);
-
-        addLog('Repo created: ' + data.repoUrl, 'success');
-        $('#progress-bar-fill').style.width = '50%';
-        $('#progress-percent').textContent = '50%';
-        
-        // Poll for link
-        addLog('Waiting for VPS to start...', 'warn');
-        let checks = 0;
-        const poll = setInterval(async () => {
-          checks++;
-          if(checks > 30) { clearInterval(poll); addLog('Timeout waiting for link', 'error'); btn.disabled=false; btn.innerHTML=originalText; }
-          
-          try {
-            const findRes = await fetch('/api/find-link', {
-              method: 'POST',
-              headers: {'Content-Type':'application/json'},
-              body: JSON.stringify({owner: data.owner, repoName: data.repoUrl.split('/').pop()})
-            });
-            const findData = await findRes.json();
-            
-            if(findData.found) {
-              clearInterval(poll);
-              $('#progress-bar-fill').style.width = '100%';
-              $('#progress-percent').textContent = '100%';
-              addLog('VPS Ready!', 'success');
-              showToast('VPS Deployed Successfully!');
-              
-              $('#conn-info').innerHTML = `
-                <div class="form-group">
-                   <label class="label">Connect URL</label>
-                   <input class="input" readonly value="${findData.vpsLink}" onclick="this.select()">
-                </div>
-                <div class="form-group">
-                   <label class="label">Password</label>
-                   <input class="input" readonly value="${findData.vpsPassword}" onclick="this.select()">
-                </div>
-              `;
-              
-              // Save to local manager
-              const vpsList = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-              vpsList.push({ repo: data.repoUrl.split('/').pop(), owner: data.owner, plan: selectedPlan.name, created: new Date().toLocaleString() });
-              localStorage.setItem('cc_vps_list', JSON.stringify(vpsList));
-              
-              btn.disabled = false; 
-              btn.innerHTML = originalText;
-              isDeploying = false;
-            }
-          } catch(e) {}
-        }, 5000);
-
-      } catch(e) {
-        addLog(e.message, 'error');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        isDeploying = false;
-      }
-    }
-
-    function renderManager() {
-      const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-      const container = $('#vps-list');
-      container.innerHTML = '';
-      if(list.length === 0) container.innerHTML = '<div class="text-center" style="grid-column:1/-1;padding:20px;color:var(--text-sec)">No active instances</div>';
-      
-      list.forEach((v, i) => {
-        const el = document.createElement('div');
-        el.className = 'select-card';
-        el.style.cursor = 'default';
-        el.innerHTML = `
-          <div class="card-icon" style="background:rgba(16, 185, 129, 0.1);color:var(--success)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-          </div>
-          <div class="card-info" style="flex:1">
-            <h4>${v.repo}</h4>
-            <p>${v.plan} • ${v.created}</p>
-          </div>
-          <button class="btn btn-danger" style="width:auto;padding:8px 12px;font-size:0.8rem" onclick="deleteVps(${i}, '${v.owner}', '${v.repo}')">Del</button>
-        `;
-        container.appendChild(el);
+    try {
+      const res = await fetch('/api/vps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: selectedPlan.id,
+          durationMinutes: parseInt($('#duration-slider').value),
+          repoName: $('#repo-name').value,
+          ngrokToken: $('#ngrok-token').value,
+          repoVisibility: 'public',
+          username: currentUser.username
+        })
       });
+      const data = await res.json();
+
+      if (!data.success) throw new Error(data.message);
+
+      addLog('Repository created: ' + data.repoUrl, 'success');
+      $('#progress-fill').style.width = '50%';
+      $('#progress-percent').textContent = '50%';
+
+      addLog('Waiting for VPS to start...', 'warn');
+      let checks = 0;
+      const poll = setInterval(async () => {
+        checks++;
+        if (checks > 45) {
+          clearInterval(poll);
+          addLog('Timeout waiting for VPS link', 'error');
+          btn.disabled = false;
+          btn.innerHTML = originalHTML;
+          isDeploying = false;
+          return;
+        }
+
+        try {
+          const findRes = await fetch('/api/find-link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ owner: data.owner, repoName: data.repoUrl.split('/').pop() })
+          });
+          const findData = await findRes.json();
+
+          if (findData.found) {
+            clearInterval(poll);
+            $('#progress-fill').style.width = '100%';
+            $('#progress-percent').textContent = '100%';
+            addLog('VPS Ready!', 'success');
+            showToast('VPS Deployed Successfully!');
+
+            $('#conn-info').innerHTML = `
+              <div class="conn-field">
+                <label class="label">Connect URL</label>
+                <input class="input" readonly value="${findData.vpsLink}" onclick="this.select();document.execCommand('copy');showToast('Copied!')">
+              </div>
+              <div class="conn-field">
+                <label class="label">Password</label>
+                <input class="input" readonly value="${findData.vpsPassword || data.vpsPassword}" onclick="this.select();document.execCommand('copy');showToast('Copied!')">
+              </div>
+              <p style="font-size:0.8rem;color:var(--text-muted);margin-top:12px;text-align:center">Click to copy</p>
+            `;
+
+            // Save to local storage
+            const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
+            list.push({
+              repo: data.repoUrl.split('/').pop(),
+              owner: data.owner,
+              plan: selectedPlan.name,
+              created: new Date().toLocaleString()
+            });
+            localStorage.setItem('cc_vps_list', JSON.stringify(list));
+
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+            isDeploying = false;
+          } else if (findData.message) {
+            $('#progress-text').textContent = findData.message.slice(0, 55);
+            if (findData.progress) {
+              $('#progress-fill').style.width = findData.progress + '%';
+              $('#progress-percent').textContent = findData.progress + '%';
+            }
+          }
+        } catch (e) {
+          // Ignore polling errors
+        }
+      }, 5000);
+
+    } catch (e) {
+      addLog(e.message, 'error');
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      isDeploying = false;
+    }
+  }
+
+  // Instances
+  function renderInstances() {
+    const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
+    const grid = $('#instances-grid');
+    grid.innerHTML = '';
+
+    if (list.length === 0) {
+      grid.innerHTML = `
+        <div class="conn-empty" style="grid-column:1/-1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.3;margin-bottom:12px"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          <p>No active instances</p>
+        </div>
+      `;
+      return;
     }
 
-    window.deleteVps = async (idx, owner, repo) => {
-      if(!confirm('Delete this VPS?')) return;
-      try {
-        await fetch('/api/delete-vps', {
-          method: 'POST', headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({owner, repo})
-        });
-        const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-        list.splice(idx, 1);
-        localStorage.setItem('cc_vps_list', JSON.stringify(list));
-        renderManager();
-        showToast('VPS Deleted');
-      } catch(e) { showToast('Error deleting', 'error'); }
-    };
-    
-    $('#btn-clear-data').onclick = () => {
-      if(confirm('Clear all local data?')) {
-        localStorage.clear();
-        location.reload();
-      }
-    };
-  </script>
+    list.forEach((vps, idx) => {
+      const el = document.createElement('div');
+      el.className = 'instance-card';
+      el.innerHTML = `
+        <div class="instance-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="instance-info">
+          <h4>${vps.repo}</h4>
+          <p>${vps.plan} • ${vps.created}</p>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteVps(${idx}, '${vps.owner}', '${vps.repo}')">Delete</button>
+      `;
+      grid.appendChild(el);
+    });
+  }
+
+  window.deleteVps = async (idx, owner, repo) => {
+    if (!confirm('Delete this VPS?')) return;
+    try {
+      await fetch('/api/delete-vps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ owner, repo })
+      });
+      const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
+      list.splice(idx, 1);
+      localStorage.setItem('cc_vps_list', JSON.stringify(list));
+      renderInstances();
+      showToast('VPS Deleted');
+    } catch (e) {
+      showToast('Error deleting VPS', 'error');
+    }
+  };
+
+  // Settings
+  $('#btn-clear-data').onclick = () => {
+    if (confirm('Clear all local data? You will be logged out.')) {
+      localStorage.clear();
+      location.reload();
+    }
+  };
+</script>
+
+<style>
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+
 </body>
 </html>
