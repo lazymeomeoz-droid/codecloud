@@ -3,1479 +3,1106 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#0a0a0f">
   <title>Admin Panel - CodeCloud</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-base: #06080d;
-      --bg-card: rgba(15, 20, 35, 0.8);
-      --bg-card-hover: rgba(20, 28, 50, 0.9);
-      --bg-input: rgba(25, 35, 60, 0.6);
-      --border: rgba(99, 102, 241, 0.15);
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --primary: #818cf8;
-      --primary-dim: rgba(129, 140, 248, 0.15);
-      --accent: #a78bfa;
-      --success: #34d399;
-      --success-dim: rgba(52, 211, 153, 0.15);
-      --error: #f87171;
-      --error-dim: rgba(248, 113, 113, 0.15);
-      --warning: #fbbf24;
-      --warning-dim: rgba(251, 191, 36, 0.15);
-      --info: #60a5fa;
-      --info-dim: rgba(96, 165, 250, 0.15);
-      --radius: 16px;
-      --radius-sm: 10px;
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      --sidebar-w: 280px;
+      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.85); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
+      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+      --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
+      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
+      --success: #34d399; --success-soft: rgba(52,211,153,0.12);
+      --error: #f87171; --error-soft: rgba(248,113,113,0.12);
+      --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
+      --info: #38bdf8; --info-soft: rgba(56,189,248,0.12);
+      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#d946ef 100%);
+      --gradient-accent: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+      --gradient-success: linear-gradient(135deg,#10b981 0%,#14b8a6 100%);
+      --gradient-warning: linear-gradient(135deg,#f59e0b 0%,#fbbf24 100%);
+      --gradient-error: linear-gradient(135deg,#ef4444 0%,#f87171 100%);
+      --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    .hidden{display:none!important}
     
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Aurora Background */
-    .bg-aurora {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      overflow: hidden;
-      background: linear-gradient(135deg, #06080d 0%, #0c1222 50%, #0a0a1a 100%);
-    }
+    .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,var(--accent-soft) 60deg,transparent 120deg,rgba(34,211,238,0.08) 180deg,transparent 240deg,var(--accent-glow) 300deg,transparent 360deg);animation:auroraRotate 60s linear infinite}
+    @keyframes auroraRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    @keyframes countUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
     
-    .aurora-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.5;
-      animation: float 20s ease-in-out infinite;
-    }
+    .app-container{min-height:100vh;position:relative;z-index:1;padding:20px}
     
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.3), transparent 70%);
-      top: -200px; left: -100px;
-    }
+    .header{max-width:1600px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:56px;height:56px;border-radius:16px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-glow);animation:float 4s ease-in-out infinite}
+    .logo svg{width:32px;height:32px;color:white}
+    .brand-text h1{font-size:1.5rem;font-weight:900;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .brand-text p{font-size:0.8rem;color:var(--text-muted)}
     
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(139, 92, 246, 0.25), transparent 70%);
-      bottom: -150px; right: -100px;
-      animation-delay: -10s;
-    }
+    .header-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .admin-badge{padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:white;font-weight:700;font-size:0.8rem;display:flex;align-items:center;gap:6px}
+    .online-indicator{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+    .btn-back{padding:10px 20px;border-radius:999px;border:2px solid var(--border-light);background:var(--bg-card);color:var(--text-primary);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);text-decoration:none;display:flex;align-items:center;gap:6px}
+    .btn-back:hover{border-color:var(--accent);background:var(--accent-soft);transform:translateY(-2px)}
+    .auto-refresh-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--bg-card);border:1px solid var(--border-light);font-size:0.8rem;color:var(--text-muted);cursor:pointer;transition:var(--transition)}
+    .auto-refresh-toggle.active{background:var(--success-soft);border-color:var(--success);color:var(--success)}
     
-    .orb-3 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      animation-delay: -5s;
-    }
+    .container{max-width:1600px;margin:0 auto}
     
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(30px, -30px) scale(1.05); }
-      66% { transform: translate(-20px, 20px) scale(0.95); }
-    }
-
-    /* Layout */
-    .layout {
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: var(--sidebar-w);
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      border-right: 1px solid var(--border-subtle);
-      padding: 28px 20px;
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 100;
-      transition: transform 0.3s ease;
-    }
-
-    @media (max-width: 1024px) {
-      .sidebar {
-        transform: translateX(-100%);
-      }
-      .sidebar.open {
-        transform: translateX(0);
-        box-shadow: var(--shadow);
-      }
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 0 12px;
-      margin-bottom: 36px;
-    }
-
-    .brand-icon {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 24px rgba(129, 140, 248, 0.3);
-    }
-
-    .brand-icon svg {
-      width: 24px;
-      height: 24px;
-      color: white;
-    }
-
-    .brand-text h1 {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .brand-text span {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .nav-section {
-      margin-bottom: 8px;
-    }
-
-    .nav-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 0 16px;
-      margin-bottom: 12px;
-    }
-
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-    }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-primary);
-    }
-
-    .nav-item.active {
-      background: var(--primary-dim);
-      color: var(--primary);
-      border-color: rgba(129, 140, 248, 0.2);
-    }
-
-    .nav-item svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-
-    .nav-item .badge {
-      margin-left: auto;
-      background: var(--primary);
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 10px;
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-subtle);
-    }
-
-    /* Main Content */
-    .main {
-      flex: 1;
-      margin-left: var(--sidebar-w);
-      padding: 32px;
-      max-width: 100%;
-    }
-
-    @media (max-width: 1024px) {
-      .main {
-        margin-left: 0;
-        padding: 20px;
-      }
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .menu-btn {
-      display: none;
-      width: 44px;
-      height: 44px;
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-    }
-
-    @media (max-width: 1024px) {
-      .menu-btn {
-        display: flex;
-      }
-    }
-
-    .page-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .admin-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 18px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 50px;
-    }
-
-    .admin-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
-    .admin-name {
-      font-weight: 700;
-      font-size: 0.9rem;
-    }
-
-    /* Stats Grid */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 20px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius);
-      padding: 24px;
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      transition: all 0.3s ease;
-    }
-
-    .stat-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border);
-      transform: translateY(-2px);
-    }
-
-    .stat-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .stat-icon.blue { background: var(--info-dim); color: var(--info); }
-    .stat-icon.green { background: var(--success-dim); color: var(--success); }
-    .stat-icon.purple { background: var(--primary-dim); color: var(--primary); }
-    .stat-icon.orange { background: var(--warning-dim); color: var(--warning); }
-
-    .stat-icon svg {
-      width: 24px;
-      height: 24px;
-    }
-
-    .stat-content {
-      flex: 1;
-    }
-
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 800;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .stat-label {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* Cards */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius);
-      margin-bottom: 24px;
-      overflow: hidden;
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-title::before {
-      content: '';
-      width: 4px;
-      height: 20px;
-      background: linear-gradient(180deg, var(--primary), var(--accent));
-      border-radius: 4px;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .card-body {
-      padding: 24px;
-    }
-
-    .card-body.no-padding {
-      padding: 0;
-    }
-
-    /* Tables */
-    .table-wrap {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 700px;
-    }
-
-    th {
-      text-align: left;
-      padding: 14px 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      background: rgba(0, 0, 0, 0.2);
-      border-bottom: 1px solid var(--border-subtle);
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 16px 20px;
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      border-bottom: 1px solid var(--border-subtle);
-      vertical-align: middle;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    td strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .badge-green { background: var(--success-dim); color: var(--success); }
-    .badge-red { background: var(--error-dim); color: var(--error); }
-    .badge-blue { background: var(--info-dim); color: var(--info); }
-    .badge-purple { background: var(--primary-dim); color: var(--primary); }
-    .badge-orange { background: var(--warning-dim); color: var(--warning); }
-    .badge-gray { background: rgba(100, 116, 139, 0.15); color: var(--text-muted); }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: var(--radius-sm);
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: none;
-      font-family: inherit;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: white;
-      box-shadow: 0 4px 14px rgba(129, 140, 248, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(129, 140, 248, 0.4);
-    }
-
-    .btn-danger {
-      background: var(--error-dim);
-      color: var(--error);
-      border: 1px solid rgba(248, 113, 113, 0.2);
-    }
-
-    .btn-danger:hover {
-      background: rgba(248, 113, 113, 0.25);
-    }
-
-    .btn-success {
-      background: var(--success-dim);
-      color: var(--success);
-      border: 1px solid rgba(52, 211, 153, 0.2);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-    }
-
-    .btn-icon {
-      width: 38px;
-      height: 38px;
-      padding: 0;
-      border-radius: var(--radius-sm);
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-    }
-
-    .btn-icon:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--primary);
-      border-color: var(--border);
-    }
-
-    .btn-sm {
-      padding: 6px 12px;
-      font-size: 0.8rem;
-    }
-
-    /* Inputs */
-    .input {
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      color: var(--text-primary);
-      font-size: 0.9rem;
-      font-family: inherit;
-      transition: all 0.2s ease;
-      outline: none;
-    }
-
-    .input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
-    }
-
-    .input::placeholder {
-      color: var(--text-muted);
-    }
-
-    /* Form Row */
-    .form-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    /* Time remaining bar */
-    .time-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 8px;
-    }
-
-    .time-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--success), var(--warning));
-      border-radius: 10px;
-      transition: width 0.3s ease;
-    }
-
-    /* Views */
-    .view {
-      display: none;
-    }
-
-    .view.active {
-      display: block;
-    }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      padding: 16px 24px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 600;
-      backdrop-filter: blur(20px);
-    }
-
-    .toast.active {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    .toast-success {
-      border-left: 4px solid var(--success);
-    }
-
-    .toast-error {
-      border-left: 4px solid var(--error);
-    }
-
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 48px 20px;
-      color: var(--text-muted);
-    }
-
-    .empty-state svg {
-      width: 48px;
-      height: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
-    }
-
-    /* Monospace */
-    .mono {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .form-row {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .form-row .input {
-        width: 100%;
-      }
-    }
-
-    /* Overlay */
-    .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 99;
-    }
-
-    .overlay.active {
-      display: block;
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    .stats-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-bottom:24px}
+    @media(max-width:1400px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+    @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:600px){.stats-grid{grid-template-columns:1fr}}
+    
+    .stat-card{background:var(--bg-surface);backdrop-filter:blur(20px);border-radius:var(--radius-lg);padding:20px;border:1px solid var(--border-light);transition:var(--transition);animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--gradient-accent);opacity:0;transition:var(--transition)}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg)}
+    .stat-card:hover::before{opacity:1}
+    .stat-card.highlight{border-color:var(--accent)}
+    .stat-card.highlight::before{opacity:1}
+    .stat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .stat-icon{width:44px;height:44px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+    .stat-icon svg{width:22px;height:22px;color:white}
+    .stat-icon.users{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+    .stat-icon.time{background:linear-gradient(135deg,#10b981,#14b8a6)}
+    .stat-icon.active{background:linear-gradient(135deg,#f59e0b,#fbbf24)}
+    .stat-icon.banned{background:linear-gradient(135deg,#ef4444,#dc2626)}
+    .stat-icon.vps{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}
+    .stat-icon.tokens{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
+    .stat-label{font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px}
+    .stat-value{font-size:1.8rem;font-weight:900;color:var(--text-primary);animation:countUp 0.5s ease-out}
+    .stat-sub{font-size:0.72rem;color:var(--text-muted);margin-top:4px}
+    
+    .panel{background:var(--bg-surface);backdrop-filter:blur(30px);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
+    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-light),transparent);opacity:0.5}
+    .panel-header{margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .panel-title{font-size:1.1rem;font-weight:800;color:var(--text-primary);display:flex;align-items:center;gap:10px}
+    .panel-title::before{content:'';width:4px;height:24px;background:var(--gradient-accent);border-radius:2px}
+    .panel-desc{color:var(--text-muted);font-size:0.8rem;margin-top:4px}
+    .panel-actions{display:flex;gap:8px;flex-wrap:wrap}
+    
+    .tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;background:var(--bg-card);padding:6px;border-radius:999px;border:1px solid var(--border-light)}
+    .tab{padding:10px 18px;border-radius:999px;border:none;background:transparent;color:var(--text-muted);font-weight:600;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:flex;align-items:center;gap:6px;position:relative}
+    .tab svg{width:16px;height:16px}
+    .tab:hover{color:var(--text-primary);background:var(--accent-soft)}
+    .tab.active{background:var(--gradient-accent);color:white}
+    .tab-badge{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;border-radius:999px;background:var(--error);color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px}
+    
+    .tab-content{display:none}
+    .tab-content.active{display:block;animation:fadeIn 0.3s ease-out}
+    
+    .form-group{margin-bottom:16px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:16px}
+    @media(max-width:600px){.form-row{grid-template-columns:1fr}}
+    .label{font-size:0.8rem;font-weight:600;color:var(--text-secondary);display:block;margin-bottom:6px}
+    .input{width:100%;background:var(--bg-card);border-radius:var(--radius-md);border:2px solid var(--border-light);padding:12px 14px;font-size:0.9rem;color:var(--text-primary);transition:var(--transition);font-family:inherit}
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+    select.input{cursor:pointer;appearance:none;-webkit-appearance:none;padding-right:32px;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");background-repeat:no-repeat;background-position:right 10px center;background-size:16px}
+    textarea.input{resize:vertical;min-height:80px}
+    
+    .btn{padding:12px 20px;border-radius:999px;border:none;font-weight:700;font-size:0.85rem;cursor:pointer;transition:var(--transition);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .btn svg{width:16px;height:16px}
+    .btn:hover:not(:disabled){transform:translateY(-2px)}
+    .btn:disabled{opacity:0.6;cursor:not-allowed}
+    .btn-primary{background:var(--gradient-accent);color:white;box-shadow:var(--shadow-md)}
+    .btn-success{background:var(--gradient-success);color:white}
+    .btn-danger{background:var(--gradient-error);color:white}
+    .btn-warning{background:var(--gradient-warning);color:#000}
+    .btn-secondary{background:var(--bg-card);color:var(--text-primary);border:2px solid var(--border-light)}
+    .btn-sm{padding:8px 14px;font-size:0.78rem}
+    .btn-xs{padding:5px 10px;font-size:0.72rem}
+    .btn-full{width:100%}
+    
+    .user-table{width:100%;border-collapse:collapse}
+    .user-table th,.user-table td{padding:14px 12px;text-align:left;border-bottom:1px solid var(--border-light);font-size:0.82rem}
+    .user-table th{background:var(--bg-card);font-weight:700;color:var(--text-muted);position:sticky;top:0;text-transform:uppercase;font-size:0.72rem;letter-spacing:0.5px;z-index:10}
+    .user-table tr:hover{background:rgba(255,255,255,0.03)}
+    .user-table tr.selected{background:var(--accent-soft)}
+    .user-table-wrapper{max-height:500px;overflow-y:auto;border-radius:var(--radius-md);border:1px solid var(--border-light)}
+    
+    .badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+    .badge svg{width:12px;height:12px}
+    .badge-success{background:var(--success-soft);color:var(--success)}
+    .badge-warning{background:var(--warning-soft);color:var(--warning)}
+    .badge-error{background:var(--error-soft);color:var(--error)}
+    .badge-info{background:var(--accent-soft);color:var(--accent)}
+    .badge-cyan{background:var(--info-soft);color:var(--info)}
+    
+    .action-badge{padding:5px 10px;border-radius:var(--radius-sm);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.3px}
+    .action-badge.login{background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(139,92,246,0.2));color:#a5b4fc;border:1px solid rgba(139,92,246,0.3)}
+    .action-badge.register{background:linear-gradient(135deg,rgba(16,185,129,0.2),rgba(20,184,166,0.2));color:#6ee7b7;border:1px solid rgba(16,185,129,0.3)}
+    .action-badge.ban{background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(220,38,38,0.2));color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+    .action-badge.unban{background:linear-gradient(135deg,rgba(34,211,238,0.2),rgba(14,165,233,0.2));color:#67e8f9;border:1px solid rgba(34,211,238,0.3)}
+    .action-badge.vps{background:linear-gradient(135deg,rgba(251,191,36,0.2),rgba(245,158,11,0.2));color:#fcd34d;border:1px solid rgba(251,191,36,0.3)}
+    .action-badge.time{background:linear-gradient(135deg,rgba(168,85,247,0.2),rgba(139,92,246,0.2));color:#c4b5fd;border:1px solid rgba(168,85,247,0.3)}
+    .action-badge.admin{background:linear-gradient(135deg,rgba(236,72,153,0.2),rgba(219,39,119,0.2));color:#f9a8d4;border:1px solid rgba(236,72,153,0.3)}
+    .action-badge.delete{background:linear-gradient(135deg,rgba(239,68,68,0.2),rgba(185,28,28,0.2));color:#fca5a5;border:1px solid rgba(239,68,68,0.3)}
+    
+    .search-box{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+    .search-box .input{flex:1;min-width:200px}
+    
+    .toast{position:fixed;bottom:20px;right:20px;z-index:300;animation:slideUp 0.3s ease-out}
+    .toast.hidden{display:none}
+    .toast-inner{min-width:280px;max-width:420px;padding:16px 20px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:12px;font-size:0.9rem;font-weight:600;box-shadow:var(--shadow-lg);background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border-light)}
+    .toast.toast-success .toast-inner{border-left:4px solid var(--success)}
+    .toast.toast-error .toast-inner{border-left:4px solid var(--error)}
+    .toast.toast-info .toast-inner{border-left:4px solid var(--accent)}
+    .toast-icon svg{width:20px;height:20px}
+    
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
+    .spinner-dark{border-color:var(--border-light);border-top-color:var(--accent)}
+    
+    .ip-text{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--text-muted);background:var(--bg-card);padding:2px 6px;border-radius:4px}
+    
+    .modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center}
+    .modal.hidden{display:none}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(10px)}
+    .modal-dialog{position:relative;z-index:1;width:100%;max-width:500px;margin:16px;background:var(--bg-elevated);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-lg);animation:slideUp 0.3s ease-out;max-height:90vh;overflow-y:auto}
+    .modal-dialog.wide{max-width:700px}
+    .modal-title{font-size:1.1rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-card);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition);font-size:1.2rem}
+    .modal-close:hover{background:var(--error-soft);color:var(--error);transform:rotate(90deg)}
+    
+    .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+    @media(max-width:800px){.settings-grid{grid-template-columns:1fr}}
+    .setting-item{background:var(--bg-card);border-radius:var(--radius-md);padding:16px;border:1px solid var(--border-light)}
+    .setting-item h4{font-size:0.9rem;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+    .setting-item p{font-size:0.75rem;color:var(--text-muted);margin-bottom:12px}
+
+    .detail-card{background:var(--bg-card);border-radius:var(--radius-sm);padding:10px 12px;border:1px solid var(--border-light);min-width:200px;max-width:320px}
+    .detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;border-bottom:1px dashed var(--border-light);gap:12px}
+    .detail-row:last-child{border-bottom:none}
+    .detail-key{font-size:0.7rem;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:0.3px;flex-shrink:0}
+    .detail-val{font-size:0.75rem;color:var(--text-secondary);font-family:'JetBrains Mono',monospace;text-align:right;word-break:break-all}
+    .detail-empty{color:var(--text-muted);font-style:italic;font-size:0.72rem;padding:8px;text-align:center}
+
+    .user-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .user-detail-item{background:var(--bg-card);padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border-light)}
+    .user-detail-item .label{font-size:0.7rem;color:var(--text-muted);margin-bottom:4px}
+    .user-detail-item .value{font-size:0.9rem;font-weight:600;color:var(--text-primary);word-break:break-all}
+
+    .checkbox-wrapper{display:flex;align-items:center;gap:8px;cursor:pointer}
+    .checkbox{width:18px;height:18px;border-radius:4px;border:2px solid var(--border-medium);background:var(--bg-card);display:flex;align-items:center;justify-content:center;transition:var(--transition);cursor:pointer}
+    .checkbox.checked{background:var(--gradient-accent);border-color:var(--accent)}
+    .checkbox.checked::after{content:'✓';color:white;font-size:0.7rem;font-weight:700}
+
+    .health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+    .health-item{background:var(--bg-card);border-radius:var(--radius-md);padding:14px;border:1px solid var(--border-light);display:flex;align-items:center;gap:12px}
+    .health-indicator{width:12px;height:12px;border-radius:50%}
+    .health-indicator.good{background:var(--success);box-shadow:0 0 10px var(--success)}
+    .health-indicator.warning{background:var(--warning);box-shadow:0 0 10px var(--warning)}
+    .health-indicator.bad{background:var(--error);box-shadow:0 0 10px var(--error)}
+    .health-info h4{font-size:0.85rem;font-weight:700}
+    .health-info p{font-size:0.72rem;color:var(--text-muted)}
+
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:10px}
+    ::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}
+    
+    .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted)}
+    .empty-state h3{font-size:1.1rem;margin-bottom:8px;color:var(--text-secondary)}
+    .empty-state p{font-size:0.85rem}
+
+    .last-updated{font-size:0.72rem;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+    .icon-svg{width:16px;height:16px;display:inline-block;vertical-align:middle}
   </style>
 </head>
 <body>
 
-<div class="bg-aurora">
-  <div class="aurora-orb orb-1"></div>
-  <div class="aurora-orb orb-2"></div>
-  <div class="aurora-orb orb-3"></div>
-</div>
+<div class="bg-effects"><div class="aurora"></div></div>
 
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-<div class="layout">
-  <!-- Sidebar -->
-  <aside class="sidebar" id="sidebar">
+<div class="app-container">
+  <header class="header">
     <div class="brand">
-      <div class="brand-icon">
+      <div class="logo">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
       <div class="brand-text">
         <h1>Admin Panel</h1>
-        <span>CodeCloud VPS</span>
+        <p>CodeCloud Management v2.0</p>
       </div>
     </div>
-
-    <div class="nav-section">
-      <div class="nav-label">Management</div>
-      <nav class="nav-menu">
-        <button class="nav-item active" data-tab="dashboard">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
-          Dashboard
-        </button>
-        <button class="nav-item" data-tab="vps">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          Running VPS
-          <span class="badge" id="vps-count">0</span>
-        </button>
-        <button class="nav-item" data-tab="users">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Users
-        </button>
-        <button class="nav-item" data-tab="logs">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          System Logs
-        </button>
-        <button class="nav-item" data-tab="tokens">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Tokens
-        </button>
-      </nav>
+    <div class="header-actions">
+      <div class="admin-badge"><span class="online-indicator"></span> <span id="admin-name">Admin</span></div>
+      <button id="auto-refresh-btn" class="auto-refresh-toggle active" title="Auto Refresh"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Auto: <span id="auto-refresh-status">ON</span></button>
+      <span class="last-updated">Cập nhật: <span id="last-updated-time">--:--</span></span>
+      <a href="index.html" class="btn-back">← Dashboard</a>
     </div>
-
-    <div class="sidebar-footer">
-      <a href="index.html" class="nav-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Back to App
-      </a>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main class="main">
-    <header class="header">
-      <div class="header-left">
-        <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-        </button>
-        <h1 class="page-title" id="page-title">Dashboard</h1>
+  </header>
+  
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card" style="animation-delay:0.1s">
+        <div class="stat-header"><div class="stat-icon users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div></div>
+        <div class="stat-label">Tổng Users</div>
+        <div class="stat-value" id="stat-total-users">0</div>
+        <div class="stat-sub" id="stat-new-users">+0 hôm nay</div>
       </div>
-      <div class="admin-badge">
-        <div class="admin-avatar" id="admin-avatar">A</div>
-        <span class="admin-name" id="admin-name">Admin</span>
+      <div class="stat-card" style="animation-delay:0.15s">
+        <div class="stat-header"><div class="stat-icon time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+        <div class="stat-label">Tổng Thời Gian</div>
+        <div class="stat-value" id="stat-total-time">0h</div>
+        <div class="stat-sub">Tất cả users</div>
       </div>
-    </header>
-
-    <!-- Dashboard View -->
-    <div id="view-dashboard" class="view active">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="stat-vps">0</div>
-            <div class="stat-label">Active VPS</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon green">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="stat-users">0</div>
-            <div class="stat-label">Total Users</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="stat-tokens">0</div>
-            <div class="stat-label">Live Tokens</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon orange">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value" id="stat-logs">0</div>
-            <div class="stat-label">Events Today</div>
-          </div>
-        </div>
+      <div class="stat-card" style="animation-delay:0.2s">
+        <div class="stat-header"><div class="stat-icon active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg></div></div>
+        <div class="stat-label">Đang Hoạt Động</div>
+        <div class="stat-value" id="stat-active-users">0</div>
+        <div class="stat-sub">Có time > 0</div>
       </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Recent Activity</h3>
-          <button class="btn-icon" onclick="loadDashboard()" title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-        <div class="card-body no-padding">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Time</th><th>Type</th><th>User</th><th>Details</th></tr>
-              </thead>
-              <tbody id="recent-activity"></tbody>
-            </table>
-          </div>
-        </div>
+      <div class="stat-card" style="animation-delay:0.25s">
+        <div class="stat-header"><div class="stat-icon banned"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg></div></div>
+        <div class="stat-label">Đã Bị Ban</div>
+        <div class="stat-value" id="stat-banned-users">0</div>
+        <div class="stat-sub">Users bị khóa</div>
+      </div>
+      <div class="stat-card highlight" style="animation-delay:0.3s">
+        <div class="stat-header"><div class="stat-icon vps"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div></div>
+        <div class="stat-label">VPS Đang Chạy</div>
+        <div class="stat-value" id="stat-active-vps">-</div>
+        <div class="stat-sub">Tổng instances</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.35s">
+        <div class="stat-header"><div class="stat-icon tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div></div>
+        <div class="stat-label">GitHub Tokens</div>
+        <div class="stat-value" id="stat-tokens">0</div>
+        <div class="stat-sub" id="stat-tokens-sub">Live tokens</div>
       </div>
     </div>
-
-    <!-- VPS View -->
-    <div id="view-vps" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Running Instances</h3>
-          <div class="card-actions">
-            <button class="btn btn-ghost btn-sm" onclick="runCronCleanup()">🧹 Cleanup Expired</button>
-            <button class="btn-icon" onclick="loadVPS()" title="Refresh">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            </button>
+    
+    <div class="tabs">
+      <button class="tab active" data-tab="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Users</button>
+      <button class="tab" data-tab="time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Thời Gian</button>
+      <button class="tab" data-tab="bulk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Bulk Actions</button>
+      <button class="tab" data-tab="tokens"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg> Tokens</button>
+      <button class="tab" data-tab="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Logs</button>
+      <button class="tab" data-tab="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> System</button>
+    </div>
+    
+    <!-- Tab: Users -->
+    <div class="tab-content active" id="tab-users">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2 class="panel-title">Quản Lý Users</h2>
+            <p class="panel-desc">Quản lý tài khoản, ban/unban, cộng thời gian</p>
+          </div>
+          <div class="panel-actions">
+            <button id="btn-export-csv" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Export CSV</button>
+            <button id="btn-refresh" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
           </div>
         </div>
-        <div class="card-body no-padding">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Owner</th><th>Repository</th><th>Plan</th><th>Started</th><th>Time Left</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="vps-list"></tbody>
-            </table>
-          </div>
+        
+        <div class="search-box">
+          <input type="text" id="user-search" class="input" placeholder="🔍 Tìm username hoặc IP..." />
+          <select id="user-filter" class="input" style="width:150px">
+            <option value="all">Tất cả</option>
+            <option value="active">Có time</option>
+            <option value="notime">Hết time</option>
+            <option value="banned">Đã ban</option>
+          </select>
+          <select id="user-sort" class="input" style="width:150px">
+            <option value="newest">Mới nhất</option>
+            <option value="oldest">Cũ nhất</option>
+            <option value="time-high">Time cao→thấp</option>
+            <option value="time-low">Time thấp→cao</option>
+          </select>
         </div>
+        
+        <div class="user-table-wrapper">
+          <table class="user-table">
+            <thead>
+              <tr>
+                <th style="width:40px"><div class="checkbox" id="select-all-users"></div></th>
+                <th>Username</th>
+                <th>Thời Gian</th>
+                <th>IP Đăng Ký</th>
+                <th>Ngày Tạo</th>
+                <th>Trạng Thái</th>
+                <th>Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="user-table-body">
+              <tr><td colspan="7" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span> Đang tải...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">Hiển thị <strong id="user-count-display">0</strong> users | Đã chọn: <strong id="selected-users-count">0</strong></div>
       </div>
     </div>
-
-    <!-- Users View -->
-    <div id="view-users" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Quick Add Time</h3>
+    
+    <!-- Tab: Time -->
+    <div class="tab-content" id="tab-time">
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">Cộng/Trừ Thời Gian</h2></div>
+        
+        <div class="form-group">
+          <label class="label">Tên User</label>
+          <input type="text" id="time-username" class="input" placeholder="Nhập username" list="user-list-datalist" />
+          <datalist id="user-list-datalist"></datalist>
         </div>
-        <div class="card-body">
-          <div class="form-row">
-            <input type="text" id="time-username" class="input" placeholder="Username" style="width:200px">
-            <input type="number" id="time-minutes" class="input" value="60" style="width:120px">
-            <button class="btn btn-primary" onclick="addTimeToUser()">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              Add Time
-            </button>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label class="label">Số Phút</label>
+            <input type="number" id="time-minutes" class="input" placeholder="60" min="1" max="10000" value="60" />
           </div>
+          <div class="form-group">
+            <label class="label">Thao Tác</label>
+            <select id="time-operation" class="input">
+              <option value="add">➕ Cộng</option>
+              <option value="deduct">➖ Trừ</option>
+              <option value="set">🎯 Đặt cố định</option>
+            </select>
+          </div>
+          <button id="btn-apply-time" class="btn btn-primary">Áp dụng</button>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">User Management</h3>
-          <button class="btn-icon" onclick="loadUsers()" title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-        <div class="card-body no-padding">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Username</th><th>Role</th><th>Balance</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="users-list"></tbody>
-            </table>
+        
+        <div style="margin-top:20px">
+          <h4 style="font-size:0.9rem;margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Quick Add</h4>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="30">+30m</button>
+            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="60">+1h</button>
+            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="120">+2h</button>
+            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="180">+3h</button>
+            <button class="btn btn-success btn-sm quick-time-btn" data-minutes="360">+6h</button>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Logs View -->
-    <div id="view-logs" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">System Events</h3>
-          <button class="btn-icon" onclick="loadLogs()" title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
+    
+    <!-- Tab: Bulk Actions -->
+    <div class="tab-content" id="tab-bulk">
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">Bulk Actions</h2><p class="panel-desc">Thực hiện hành động hàng loạt</p></div>
+        
+        <div class="setting-item" style="margin-bottom:16px">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg> Cộng thời gian cho TẤT CẢ users</h4>
+          <p>Cộng thời gian cho tất cả users đang hoạt động (không bị ban)</p>
+          <div style="display:flex;gap:10px;align-items:end;margin-top:12px">
+            <div class="form-group" style="margin:0">
+              <label class="label">Số phút</label>
+              <input type="number" id="bulk-time-minutes" class="input" value="30" min="1" max="1000" style="width:120px" />
+            </div>
+            <button id="btn-bulk-add-time" class="btn btn-success">Cộng cho tất cả</button>
+          </div>
         </div>
-        <div class="card-body no-padding">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Time</th><th>Type</th><th>User</th><th>Details</th><th>IP</th></tr>
-              </thead>
-              <tbody id="logs-list"></tbody>
-            </table>
+        
+        <div class="setting-item">
+          <h4><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban users đã chọn</h4>
+          <p>Chọn users từ tab Users trước, sau đó quay lại đây</p>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:12px">
+            <span id="bulk-selected-info">0 users đã chọn</span>
+            <button id="btn-bulk-ban" class="btn btn-danger btn-sm" disabled>Ban tất cả đã chọn</button>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Tokens View -->
-    <div id="view-tokens" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Add GitHub Token</h3>
-        </div>
-        <div class="card-body">
-          <div class="form-row">
-            <input type="password" id="new-token" class="input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1;min-width:300px">
-            <button class="btn btn-primary" onclick="addToken()" id="btn-add-token">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
-              Add Token
-            </button>
+    
+    <!-- Tab: Tokens -->
+    <div class="tab-content" id="tab-tokens">
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">GitHub Tokens</h2></div>
+        
+        <div class="form-group">
+          <label class="label">Thêm Token (PAT)</label>
+          <div style="display:flex;gap:10px">
+            <input type="password" id="admin-token-input" class="input" placeholder="ghp_xxxxxxxxxxxx" style="flex:1" />
+            <button id="btn-add-token" class="btn btn-primary">Thêm</button>
           </div>
-          <p style="margin-top:12px;font-size:0.8rem;color:var(--text-muted)">Token will be tested before saving (creates test repo, runs workflow, then deletes)</p>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Token Pool</h3>
-          <button class="btn-icon" onclick="loadTokens()" title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-        <div class="card-body no-padding">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Owner</th><th>Token</th><th>Status</th><th>Last Check</th><th>Actions</th></tr>
-              </thead>
-              <tbody id="tokens-list"></tbody>
-            </table>
+        
+        <div style="margin-top:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h4 style="font-size:0.9rem">Saved Tokens</h4>
+            <button id="btn-refresh-tokens" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
           </div>
+          <div id="token-list" style="border:1px solid var(--border-light);border-radius:var(--radius-md);max-height:400px;overflow:auto">Đang tải...</div>
         </div>
       </div>
     </div>
+    
+    <!-- Tab: Logs -->
+    <div class="tab-content" id="tab-logs">
+      <div class="panel">
+        <div class="panel-header">
+          <div><h2 class="panel-title">System Logs</h2><p class="panel-desc">Nhật ký hoạt động hệ thống</p></div>
+          <button id="btn-refresh-logs" class="btn btn-secondary btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Làm mới</button>
+        </div>
+        
+        <div class="search-box">
+          <select id="log-filter" class="input" style="width:180px">
+            <option value="all">Tất cả</option>
+            <option value="login">Đăng nhập</option>
+            <option value="register">Đăng ký</option>
+            <option value="vps">VPS</option>
+            <option value="ban">Ban/Unban</option>
+            <option value="time">Thời gian</option>
+          </select>
+          <input type="text" id="log-search" class="input" placeholder="🔍 Tìm theo username, IP..." />
+        </div>
 
-  </main>
+        <div class="user-table-wrapper" style="max-height:600px">
+          <table class="user-table logs-table">
+            <thead>
+              <tr>
+                <th style="width:140px">Thời Gian</th>
+                <th style="width:100px">User</th>
+                <th style="width:110px">Hành Động</th>
+                <th style="width:120px">IP</th>
+                <th style="min-width:200px">Chi Tiết</th>
+              </tr>
+            </thead>
+            <tbody id="logs-table-body">
+              <tr><td colspan="5" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab: System -->
+    <div class="tab-content" id="tab-system">
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">System Health</h2></div>
+        <div class="health-grid">
+          <div class="health-item">
+            <div class="health-indicator good"></div>
+            <div class="health-info"><h4>API Server</h4><p>Hoạt động bình thường</p></div>
+          </div>
+          <div class="health-item">
+            <div class="health-indicator" id="health-redis"></div>
+            <div class="health-info"><h4>Redis Database</h4><p id="health-redis-text">Đang kiểm tra...</p></div>
+          </div>
+          <div class="health-item">
+            <div class="health-indicator" id="health-tokens"></div>
+            <div class="health-info"><h4>GitHub Tokens</h4><p id="health-tokens-text">Đang kiểm tra...</p></div>
+          </div>
+          <div class="health-item">
+            <div class="health-indicator good" id="health-cron"></div>
+            <div class="health-info"><h4>Cron Jobs</h4><p>Chạy mỗi 6 giờ (Vercel)</p></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel">
+        <div class="panel-header"><h2 class="panel-title">Manual Actions</h2></div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button id="btn-run-cron" class="btn btn-warning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Chạy Cron thủ công</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="toast" class="toast"></div>
+<!-- Ban Modal -->
+<div id="ban-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog">
+    <button class="modal-close" id="ban-modal-close">×</button>
+    <h3 class="modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban User: <span id="ban-username"></span></h3>
+    <div class="form-group">
+      <label class="label">Thời gian ban</label>
+      <select id="ban-duration" class="input">
+        <option value="1-hours">1 giờ</option>
+        <option value="6-hours">6 giờ</option>
+        <option value="12-hours">12 giờ</option>
+        <option value="24-hours">24 giờ</option>
+        <option value="3-days">3 ngày</option>
+        <option value="7-days">7 ngày</option>
+        <option value="30-days">30 ngày</option>
+        <option value="0-permanent">Vĩnh viễn</option>
+      </select>
+    </div>
+    <button id="btn-confirm-ban" class="btn btn-danger btn-full">Xác nhận Ban</button>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div id="user-detail-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog wide">
+    <button class="modal-close" id="user-detail-close">×</button>
+    <h3 class="modal-title">👤 Chi tiết: <span id="detail-username"></span></h3>
+    <div id="user-detail-content"></div>
+    <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-success btn-sm" id="detail-add-time">+1h</button>
+      <button class="btn btn-danger btn-sm" id="detail-ban">Ban</button>
+      <button class="btn btn-secondary btn-sm" id="detail-close-btn">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-icon"></span><span id="toast-message"></span></div></div>
 
 <script>
-  // Constants
-  const ADMINS = ['vanmanh', 'depchai'];
-  const $ = s => document.querySelector(s);
-  const $$ = s => document.querySelectorAll(s);
-
-  // Toast
-  function showToast(msg, type = 'success') {
-    const t = $('#toast');
-    t.textContent = msg;
-    t.className = `toast toast-${type} active`;
-    setTimeout(() => t.classList.remove('active'), 3000);
-  }
-
-  // Auth Check
+(function() {
+  'use strict';
+  
+  const CURRENT_USER_KEY = 'cc_current_user';
+  const ADMIN_USERS = ['vanmanh', 'depchai'];
+  const API_URL = '/api/auth';
+  
+  let currentUser = null;
+  let allUsers = [];
+  let allLogs = [];
+  let selectedUsers = new Set();
+  let banTargetUser = null;
+  let autoRefresh = true;
+  let autoRefreshInterval = null;
+  
   function checkAdmin() {
     try {
-      const u = JSON.parse(localStorage.getItem('cc_current_user'));
-      if (!u || !ADMINS.includes(u.username.toLowerCase())) {
-        location.href = 'index.html';
-        return;
+      const saved = localStorage.getItem(CURRENT_USER_KEY);
+      if (!saved) { window.location.href = 'login.html'; return false; }
+      currentUser = JSON.parse(saved);
+      if (!ADMIN_USERS.includes(currentUser.username?.toLowerCase())) {
+        alert('Không có quyền truy cập!');
+        window.location.href = 'index.html';
+        return false;
       }
-      $('#admin-name').textContent = u.username;
-      $('#admin-avatar').textContent = u.username[0].toUpperCase();
-    } catch {
-      location.href = 'login.html';
+      return true;
+    } catch(e) { window.location.href = 'login.html'; return false; }
+  }
+  
+  if (!checkAdmin()) return;
+  document.getElementById('admin-name').textContent = currentUser.username;
+  
+  const $ = id => document.getElementById(id);
+  const $$ = sel => document.querySelectorAll(sel);
+  
+  let toastTimer = null;
+  function showToast(msg, type = 'info') {
+    const toast = $('toast');
+    const icons = { success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><polyline points="20 6 9 17 4 12"/></svg>', error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>', info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' };
+    toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
+    toast.classList.add('toast-' + type);
+    $('toast-message').textContent = msg;
+    $('toast-icon').innerHTML = icons[type] || icons.info;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
+  }
+  
+  function formatTime(minutes) {
+    if (minutes < 60) return `${minutes}m`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  
+  function formatDateTime(str) {
+    if (!str) return '—';
+    try {
+      const d = new Date(str);
+      return d.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+    } catch(e) { return str; }
+  }
+  
+  function formatDateShort(str) {
+    if (!str) return '—';
+    try {
+      const d = new Date(str);
+      return d.toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'2-digit' });
+    } catch(e) { return str; }
+  }
+  
+  function updateLastUpdated() {
+    $('last-updated-time').textContent = new Date().toLocaleTimeString('vi-VN', { hour:'2-digit', minute:'2-digit' });
+  }
+  
+  async function callAPI(data) {
+    try {
+      const res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      return await res.json();
+    } catch(e) { console.error('API error:', e); return { success: false, message: e.message }; }
+  }
+  
+  async function fetchAllUsers() {
+    const data = await callAPI({ action: 'getAllUsers' });
+    if (data.success) {
+      allUsers = data.users || [];
+      updateStats();
+      renderUserTable();
+      updateUserDatalist();
     }
   }
-  checkAdmin();
-
-  // Sidebar Toggle
-  function toggleSidebar() {
-    $('#sidebar').classList.toggle('open');
-    $('#overlay').classList.toggle('active');
+  
+  function updateStats() {
+    let totalTime = 0, activeUsers = 0, bannedUsers = 0;
+    const today = new Date().toDateString();
+    let newToday = 0;
+    
+    allUsers.forEach(u => {
+      totalTime += u.timeMinutes || 0;
+      if (u.timeMinutes > 0 && !u.isBanned) activeUsers++;
+      if (u.isBanned) bannedUsers++;
+      if (u.createdAt && new Date(u.createdAt).toDateString() === today) newToday++;
+    });
+    
+    $('stat-total-users').textContent = allUsers.length;
+    $('stat-total-time').textContent = formatTime(totalTime);
+    $('stat-active-users').textContent = activeUsers;
+    $('stat-banned-users').textContent = bannedUsers;
+    $('stat-new-users').textContent = `+${newToday} hôm nay`;
   }
-
-  // Navigation
-  $$('.nav-item[data-tab]').forEach(btn => {
-    btn.onclick = () => {
-      $$('.nav-item').forEach(n => n.classList.remove('active'));
-      btn.classList.add('active');
-      $$('.view').forEach(v => v.classList.remove('active'));
-      $(`#view-${btn.dataset.tab}`).classList.add('active');
-      $('#page-title').textContent = btn.textContent.trim().split('\n')[0];
-      
-      if (window.innerWidth <= 1024) toggleSidebar();
-      
-      // Load data
-      if (btn.dataset.tab === 'dashboard') loadDashboard();
-      if (btn.dataset.tab === 'vps') loadVPS();
-      if (btn.dataset.tab === 'users') loadUsers();
-      if (btn.dataset.tab === 'logs') loadLogs();
-      if (btn.dataset.tab === 'tokens') loadTokens();
-    };
-  });
-
-  // Helper: Format date
-  function formatDate(d) {
-    if (!d) return '-';
-    const date = new Date(d);
-    return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) + ' ' + 
-           date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  
+  function updateUserDatalist() {
+    const datalist = $('user-list-datalist');
+    datalist.innerHTML = allUsers.map(u => `<option value="${u.username}">`).join('');
   }
-
-  // Helper: Truncate text
-  function truncate(str, len = 50) {
-    if (!str) return '-';
-    return str.length > len ? str.slice(0, len) + '...' : str;
-  }
-
-  // Helper: Log type badge
-  function logBadge(type) {
-    const badges = {
-      'login': 'badge-blue',
-      'admin_login': 'badge-purple',
-      'register': 'badge-green',
-      'vps_created': 'badge-blue',
-      'vps_deleted': 'badge-red',
-      'vps_auto_deleted': 'badge-orange',
-      'ban': 'badge-red',
-      'unban': 'badge-green',
-      'updateTime': 'badge-purple',
-      'error': 'badge-red'
-    };
-    return `<span class="badge ${badges[type] || 'badge-gray'}">${type}</span>`;
-  }
-
-  // === DASHBOARD ===
-  async function loadDashboard() {
-    try {
-      // Load all data
-      const [vpsRes, usersRes, logsRes, tokensRes] = await Promise.all([
-        fetch('/api/active-vps').then(r => r.json()),
-        fetch('/api/auth', { method: 'POST', body: JSON.stringify({ action: 'getAllUsers' }) }).then(r => r.json()),
-        fetch('/api/logs').then(r => r.json()),
-        fetch('/api/tokens', { method: 'POST', body: JSON.stringify({ action: 'list' }) }).then(r => r.json())
-      ]);
-
-      const vpsCount = vpsRes.items?.length || 0;
-      const userCount = usersRes.users?.length || 0;
-      const liveTokens = (tokensRes.items || []).filter(t => t.status === 'live').length;
-      const todayLogs = (logsRes.items || []).filter(l => {
-        const d = new Date(l.at);
-        const today = new Date();
-        return d.toDateString() === today.toDateString();
-      }).length;
-
-      $('#stat-vps').textContent = vpsCount;
-      $('#stat-users').textContent = userCount;
-      $('#stat-tokens').textContent = liveTokens;
-      $('#stat-logs').textContent = todayLogs;
-      $('#vps-count').textContent = vpsCount;
-
-      // Recent activity
-      const tbody = $('#recent-activity');
-      tbody.innerHTML = '';
-      const recentLogs = (logsRes.items || []).slice(0, 10);
-      
-      if (recentLogs.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">No recent activity</td></tr>';
-        return;
+  
+  function renderUserTable() {
+    const tbody = $('user-table-body');
+    const search = $('user-search').value.toLowerCase();
+    const filter = $('user-filter').value;
+    const sort = $('user-sort').value;
+    
+    let filtered = allUsers.filter(u => {
+      const matchSearch = u.username.toLowerCase().includes(search) || (u.registerIP && u.registerIP.includes(search));
+      if (!matchSearch) return false;
+      if (filter === 'active') return u.timeMinutes > 0 && !u.isBanned;
+      if (filter === 'notime') return (u.timeMinutes || 0) === 0;
+      if (filter === 'banned') return u.isBanned;
+      return true;
+    });
+    
+    filtered.sort((a, b) => {
+      switch(sort) {
+        case 'oldest': return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        case 'time-high': return (b.timeMinutes || 0) - (a.timeMinutes || 0);
+        case 'time-low': return (a.timeMinutes || 0) - (b.timeMinutes || 0);
+        default: return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
       }
-
-      recentLogs.forEach(log => {
-        const tr = document.createElement('tr');
-        let details = '';
-        if (log.type === 'vps_created') details = `Created ${log.repo}`;
-        else if (log.type === 'login') details = 'Logged in';
-        else if (log.type === 'register') details = 'Registered';
-        else if (log.type === 'ban') details = `Banned ${log.target}`;
-        else details = log.operation || log.type;
-
-        tr.innerHTML = `
-          <td class="mono">${formatDate(log.at)}</td>
-          <td>${logBadge(log.type)}</td>
-          <td><strong>${log.username || log.target || '-'}</strong></td>
-          <td>${truncate(details, 40)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-    } catch (e) {
-      console.error('Dashboard error:', e);
+    });
+    
+    $('user-count-display').textContent = filtered.length;
+    
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">Không tìm thấy user</td></tr>';
+      return;
     }
-  }
-
-  // === VPS ===
-  async function loadVPS() {
-    try {
-      const res = await fetch('/api/active-vps');
-      const data = await res.json();
-      const items = data.items || [];
-
-      $('#stat-vps').textContent = items.length;
-      $('#vps-count').textContent = items.length;
-
-      const tbody = $('#vps-list');
-      tbody.innerHTML = '';
-
-      if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No running VPS instances</td></tr>';
-        return;
-      }
-
-      items.forEach(vps => {
-        const expires = new Date(vps.expiresAt);
-        const now = Date.now();
-        const remainingMs = expires - now;
-        const remainingMin = Math.max(0, Math.round(remainingMs / 60000));
-        const totalMin = vps.durationMinutes || 60;
-        const percent = Math.max(0, Math.min(100, (remainingMin / totalMin) * 100));
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${vps.owner}</strong></td>
-          <td class="mono">${vps.repo}</td>
-          <td><span class="badge badge-blue">${vps.planId || 'Standard'}</span></td>
-          <td class="mono">${formatDate(vps.createdAt)}</td>
-          <td>
-            <div style="min-width:100px">
-              <span style="font-weight:600;color:${remainingMin < 10 ? 'var(--error)' : 'var(--text-primary)'}">${remainingMin}m</span>
-              <div class="time-bar"><div class="time-bar-fill" style="width:${percent}%"></div></div>
-            </div>
-          </td>
-          <td>
-            <button class="btn btn-danger btn-sm" onclick="killVPS('${vps.owner}','${vps.repo}')">Kill</button>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    } catch (e) {
-      console.error('VPS error:', e);
-    }
-  }
-
-  async function killVPS(owner, repo) {
-    if (!confirm(`Kill VPS ${repo}?`)) return;
-    try {
-      const res = await fetch('/api/delete-vps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ owner, repo })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('VPS deleted');
-        loadVPS();
+    
+    tbody.innerHTML = filtered.map(u => {
+      const time = u.timeMinutes || 0;
+      const isSelected = selectedUsers.has(u.username);
+      let statusBadge = '';
+      if (u.isBanned) {
+        statusBadge = u.banType === 'permanent' ? '<span class="badge badge-error">Vĩnh viễn</span>' : '<span class="badge badge-warning">Đã ban</span>';
       } else {
-        showToast(data.message || 'Error', 'error');
+        statusBadge = '<span class="badge badge-success">OK</span>';
       }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function runCronCleanup() {
-    showToast('Running cleanup...');
-    try {
-      const res = await fetch('/api/cron');
-      const data = await res.json();
-      showToast(`Cleaned ${data.vpsCleanup?.deleted || 0} VPS`);
-      loadVPS();
-    } catch (e) {
-      showToast('Cleanup failed', 'error');
-    }
-  }
-
-  // === USERS ===
-  async function loadUsers() {
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'getAllUsers' })
-      });
-      const data = await res.json();
-      const users = data.users || [];
-
-      $('#stat-users').textContent = users.length + ADMINS.length;
-
-      const tbody = $('#users-list');
-      tbody.innerHTML = '';
-
-      // Add hardcoded admins first
-      ADMINS.forEach(admin => {
-        const exists = users.find(u => u.username === admin);
-        if (!exists) {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${admin}</strong></td>
-            <td><span class="badge badge-purple">ADMIN</span></td>
-            <td>0m</td>
-            <td><span class="badge badge-green">ACTIVE</span></td>
-            <td>-</td>
-              <div style="display:flex;gap:6px">
-                <button class="btn btn-success btn-sm" onclick="quickAddTime('${admin}', 60)">+60m</button>
-              </div>
-            </td>
-          `;
-          tbody.appendChild(tr);
+      
+      return `<tr class="${isSelected ? 'selected' : ''}" data-username="${u.username}">
+        <td><div class="checkbox ${isSelected ? 'checked' : ''}" data-user="${u.username}"></div></td>
+        <td><strong style="cursor:pointer;color:var(--accent)" onclick="showUserDetail('${u.username}')">${u.username}</strong></td>
+        <td><span class="badge ${time > 60 ? 'badge-success' : time > 0 ? 'badge-warning' : 'badge-error'}">${formatTime(time)}</span></td>
+        <td><span class="ip-text">${u.registerIP || 'N/A'}</span></td>
+        <td style="font-size:0.75rem;color:var(--text-muted)">${formatDateShort(u.createdAt)}</td>
+        <td>${statusBadge}</td>
+        <td style="white-space:nowrap">
+          ${u.isBanned ? `<button class="btn btn-success btn-xs" onclick="unbanUser('${u.username}')">Unban</button>` : `<button class="btn btn-danger btn-xs" onclick="openBanModal('${u.username}')">Ban</button>`}
+          <button class="btn btn-primary btn-xs" onclick="quickAddTime('${u.username}')">+1h</button>
+        </td>
+      </tr>`;
+    }).join('');
+    
+    tbody.querySelectorAll('.checkbox').forEach(cb => {
+      cb.onclick = () => {
+        const user = cb.dataset.user;
+        if (selectedUsers.has(user)) {
+          selectedUsers.delete(user);
+          cb.classList.remove('checked');
+          cb.closest('tr').classList.remove('selected');
+        } else {
+          selectedUsers.add(user);
+          cb.classList.add('checked');
+          cb.closest('tr').classList.add('selected');
         }
-      });
-
-      users.forEach(u => {
-        const isAdmin = ADMINS.includes(u.username) || u.isAdmin;
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${u.username}</strong></td>
-          <td>${isAdmin ? '<span class="badge badge-purple">ADMIN</span>' : '<span class="badge badge-gray">USER</span>'}</td>
-          <td><span style="color:var(--success);font-weight:600">${u.timeMinutes}m</span></td>
-          <td>${u.isBanned ? '<span class="badge badge-red">BANNED</span>' : '<span class="badge badge-green">ACTIVE</span>'}</td>
-          <td class="mono">${formatDate(u.createdAt)}</td>
-          <td>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-success btn-sm" onclick="quickAddTime('${u.username}', 60)">+60m</button>
-              ${!isAdmin ? (u.isBanned 
-                ? `<button class="btn btn-ghost btn-sm" onclick="unbanUser('${u.username}')">Unban</button>`
-                : `<button class="btn btn-danger btn-sm" onclick="banUser('${u.username}')">Ban</button>`
-              ) : ''}
-            </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    } catch (e) {
-      console.error('Users error:', e);
+        updateSelectedCount();
+      };
+    });
+  }
+  
+  function updateSelectedCount() {
+    $('selected-users-count').textContent = selectedUsers.size;
+    $('bulk-selected-info').textContent = `${selectedUsers.size} users đã chọn`;
+    $('btn-bulk-ban').disabled = selectedUsers.size === 0;
+  }
+  
+  $('select-all-users').onclick = () => {
+    const allCb = $('select-all-users');
+    const isChecked = allCb.classList.contains('checked');
+    if (isChecked) {
+      selectedUsers.clear();
+      allCb.classList.remove('checked');
+    } else {
+      allUsers.forEach(u => selectedUsers.add(u.username));
+      allCb.classList.add('checked');
     }
-  }
-
-  async function addTimeToUser() {
-    const username = $('#time-username').value.trim();
-    const minutes = parseInt($('#time-minutes').value) || 60;
-    if (!username) return showToast('Enter username', 'error');
-    await quickAddTime(username, minutes);
-    $('#time-username').value = '';
-  }
-
-  async function quickAddTime(username, minutes) {
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'updateTime', username, minutes, operation: 'add' })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`Added ${minutes}m to ${username}`);
-        loadUsers();
-      } else {
-        showToast(data.message || 'Error', 'error');
-      }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function banUser(username) {
-    if (!confirm(`Ban ${username} permanently?`)) return;
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'banUser', targetUsername: username, banUnit: 'permanent' })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`Banned ${username}`);
-        loadUsers();
-      } else {
-        showToast(data.message || 'Error', 'error');
-      }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function unbanUser(username) {
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'unbanUser', targetUsername: username })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast(`Unbanned ${username}`);
-        loadUsers();
-      } else {
-        showToast(data.message || 'Error', 'error');
-      }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  // === LOGS ===
-  async function loadLogs() {
+    renderUserTable();
+    updateSelectedCount();
+  };
+  
+  window.showUserDetail = function(username) {
+    const user = allUsers.find(u => u.username === username);
+    if (!user) return;
+    $('detail-username').textContent = username;
+    $('user-detail-content').innerHTML = `
+      <div class="user-detail-grid">
+        <div class="user-detail-item"><div class="label">Username</div><div class="value">${user.username}</div></div>
+        <div class="user-detail-item"><div class="label">Thời gian còn</div><div class="value">${formatTime(user.timeMinutes || 0)}</div></div>
+        <div class="user-detail-item"><div class="label">IP Đăng ký</div><div class="value">${user.registerIP || 'N/A'}</div></div>
+        <div class="user-detail-item"><div class="label">IP Login cuối</div><div class="value">${user.lastLoginIP || 'N/A'}</div></div>
+        <div class="user-detail-item"><div class="label">Ngày tạo</div><div class="value">${formatDateTime(user.createdAt)}</div></div>
+        <div class="user-detail-item"><div class="label">Login cuối</div><div class="value">${formatDateTime(user.lastLoginAt)}</div></div>
+        <div class="user-detail-item"><div class="label">Trạng thái</div><div class="value">${user.isBanned ? '<span class="badge badge-error">🚫 Đã ban</span>' : '<span class="badge badge-success">✅ OK</span>'}</div></div>
+        ${user.isBanned ? `<div class="user-detail-item"><div class="label">Lý do ban</div><div class="value">${user.banReason || 'N/A'}</div></div>` : ''}
+      </div>
+    `;
+    $('detail-add-time').onclick = () => { quickAddTime(username); $('user-detail-modal').classList.add('hidden'); };
+    $('detail-ban').onclick = () => { $('user-detail-modal').classList.add('hidden'); openBanModal(username); };
+    $('user-detail-modal').classList.remove('hidden');
+  };
+  
+  $('user-detail-close').onclick = () => $('user-detail-modal').classList.add('hidden');
+  $('detail-close-btn').onclick = () => $('user-detail-modal').classList.add('hidden');
+  $('user-detail-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) $('user-detail-modal').classList.add('hidden'); };
+  
+  $('btn-export-csv').onclick = () => {
+    const headers = ['Username', 'Time (minutes)', 'Register IP', 'Created At', 'Status'];
+    const rows = allUsers.map(u => [u.username, u.timeMinutes || 0, u.registerIP || '', u.createdAt || '', u.isBanned ? 'Banned' : 'Active']);
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `codecloud-users-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+    showToast('Đã export CSV!', 'success');
+  };
+  
+  async function fetchLogs() {
+    const tbody = $('logs-table-body');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px"><span class="spinner spinner-dark"></span></td></tr>';
     try {
       const res = await fetch('/api/logs');
       const data = await res.json();
-      const items = data.items || [];
-
-      const tbody = $('#logs-list');
-      tbody.innerHTML = '';
-
-      if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No logs yet</td></tr>';
-        return;
-      }
-
-      items.slice(0, 100).forEach(log => {
-        let details = '';
-        if (log.type === 'vps_created') details = `${log.repo} (${log.durationMinutes}m)`;
-        else if (log.type === 'login' || log.type === 'admin_login') details = 'Logged in';
-        else if (log.type === 'register') details = log.banned ? 'Registered (banned)' : 'Registered';
-        else if (log.type === 'ban') details = `${log.target} - ${log.unit}`;
-        else if (log.type === 'unban') details = log.target;
-        else if (log.type === 'updateTime') details = `${log.operation} ${log.minutes}m`;
-        else if (log.type === 'vps_deleted' || log.type === 'vps_auto_deleted') details = log.repo;
-        else details = JSON.stringify(log).slice(0, 60);
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="mono">${formatDate(log.at)}</td>
-          <td>${logBadge(log.type)}</td>
-          <td><strong>${log.username || log.target || '-'}</strong></td>
-          <td style="color:var(--text-muted)">${truncate(details, 50)}</td>
-          <td class="mono" style="font-size:0.8rem;color:var(--text-muted)">${log.ip || '-'}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+      allLogs = data.success ? (data.items || []) : [];
+      renderLogs();
     } catch (e) {
-      console.error('Logs error:', e);
+      console.error('Fetch logs error:', e);
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--error)">Lỗi khi tải logs</td></tr>';
     }
   }
-
-  // === TOKENS ===
+  
+  function renderLogs() {
+    const tbody = $('logs-table-body');
+    const filter = $('log-filter').value;
+    const search = $('log-search').value.toLowerCase();
+    
+    let filtered = allLogs.filter(it => {
+      const type = (it.type || '').toLowerCase();
+      const user = (it.username || it.target || it.githubLogin || '').toLowerCase();
+      const ip = (it.ip || '').toLowerCase();
+      if (filter !== 'all') {
+        if (filter === 'login' && !type.includes('login')) return false;
+        if (filter === 'register' && !type.includes('register')) return false;
+        if (filter === 'vps' && !type.includes('vps')) return false;
+        if (filter === 'ban' && !type.includes('ban')) return false;
+        if (filter === 'time' && !type.includes('time')) return false;
+      }
+      if (search && !user.includes(search) && !ip.includes(search)) return false;
+      return true;
+    });
+    
+    if (filtered.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted)">Không có logs</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = filtered.slice(0, 200).map(it => {
+      const time = formatDateTime(it.at || it.createdAt);
+      const user = it.username || it.target || it.githubLogin || '—';
+      const action = it.type || '';
+      const badgeClass = getActionBadgeClass(action);
+      const ip = it.ip || '—';
+      return `<tr>
+        <td><span style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;color:var(--text-secondary)">${time}</span></td>
+        <td><strong style="color:var(--text-primary)">${user}</strong></td>
+        <td><span class="action-badge ${badgeClass}">${action}</span></td>
+        <td><span class="ip-text">${ip}</span></td>
+        <td>${formatLogDetails(it)}</td>
+      </tr>`;
+    }).join('');
+  }
+  
+  function getActionBadgeClass(type) {
+    if (!type) return '';
+    const t = type.toLowerCase();
+    if (t.includes('login') && !t.includes('admin')) return 'login';
+    if (t.includes('admin')) return 'admin';
+    if (t.includes('register')) return 'register';
+    if (t.includes('ban') && !t.includes('unban')) return 'ban';
+    if (t.includes('unban')) return 'unban';
+    if (t.includes('vps') && t.includes('delete')) return 'delete';
+    if (t.includes('vps')) return 'vps';
+    if (t.includes('time')) return 'time';
+    return '';
+  }
+  
+  function formatLogDetails(obj) {
+    if (!obj || typeof obj !== 'object') return '<div class="detail-empty">—</div>';
+    const ignore = ['type', 'username', 'ip', 'ipRaw', 'ua', 'at', 'createdAt', '_id', 'target'];
+    const entries = Object.entries(obj).filter(([k]) => !ignore.includes(k));
+    if (entries.length === 0) return '<div class="detail-empty">—</div>';
+    let html = '<div class="detail-card">';
+    for (const [k, v] of entries) {
+      let valStr;
+      if (v === null || v === undefined) valStr = '<span style="color:var(--text-muted)">—</span>';
+      else if (typeof v === 'boolean') valStr = v ? '<span style="color:var(--success)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><polyline points="20 6 9 17 4 12"/></svg></span>' : '<span style="color:var(--error)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon-svg"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>';
+      else if (typeof v === 'object') valStr = JSON.stringify(v);
+      else valStr = String(v);
+      const keyName = k.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+      html += `<div class="detail-row"><span class="detail-key">${keyName}</span><span class="detail-val">${valStr}</span></div>`;
+    }
+    return html + '</div>';
+  }
+  
   async function loadTokens() {
     try {
-      const res = await fetch('/api/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'list' })
-      });
-      const data = await res.json();
-      const items = data.items || [];
-
-      const liveCount = items.filter(t => t.status === 'live').length;
-      $('#stat-tokens').textContent = liveCount;
-
-      const tbody = $('#tokens-list');
-      tbody.innerHTML = '';
-
-      if (items.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No tokens added yet</td></tr>';
-        return;
+      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'list' }) });
+      const d = await res.json();
+      const container = $('token-list');
+      if (!d.success || !Array.isArray(d.items) || d.items.length === 0) {
+        container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted)">Chưa có token nào</div>';
+        $('stat-tokens').textContent = '0'; $('stat-tokens-sub').textContent = '0 live';
+        updateHealthTokens(0); return;
       }
-
-      items.forEach(t => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><strong>${t.owner || 'Unknown'}</strong></td>
-          <td class="mono">${t.masked}</td>
-          <td>${t.status === 'live' 
-            ? '<span class="badge badge-green">LIVE</span>' 
-            : '<span class="badge badge-red">DEAD</span>'}</td>
-          <td class="mono" style="font-size:0.8rem">${t.lastChecked ? formatDate(t.lastChecked) : '-'}</td>
-          <td>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" onclick="checkToken('${t.id}')">Check</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteToken('${t.id}')">Delete</button>
-            </div>
-          </td>
-        `;
-        tbody.appendChild(tr);
+      const liveCount = d.items.filter(t => t.status === 'live').length;
+      $('stat-tokens').textContent = d.items.length; $('stat-tokens-sub').textContent = `${liveCount} live`;
+      updateHealthTokens(liveCount);
+      container.innerHTML = d.items.map(t => {
+        const statusBadge = t.status === 'live' ? '<span class="badge badge-success">Live</span>' : '<span class="badge badge-error">Dead</span>';
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid var(--border-light);gap:10px">
+          <div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--text-primary)">${t.owner || 'unknown'}</div>
+          <div style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:8px;margin-top:4px"><code style="background:var(--bg-base);padding:2px 6px;border-radius:4px">${t.masked || ''}</code>${statusBadge}</div></div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-secondary btn-xs" data-id="${t.id}" data-action="check">Check</button>
+            <button class="btn btn-danger btn-xs" data-id="${t.id}" data-action="delete">Xóa</button>
+          </div>
+        </div>`;
+      }).join('');
+      container.querySelectorAll('button[data-action]').forEach(b => b.onclick = async () => {
+        const id = b.dataset.id, action = b.dataset.action;
+        b.disabled = true;
+        if (action === 'delete') {
+          await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id }) });
+          showToast('Đã xóa token', 'success');
+        } else if (action === 'check') {
+          const r = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'check', id }) });
+          const d = await r.json();
+          showToast(d.success && d.live ? 'Token OK' : 'Token lỗi', d.live ? 'success' : 'error');
+        }
+        await loadTokens();
       });
-    } catch (e) {
-      console.error('Tokens error:', e);
-    }
+    } catch (e) { console.error(e); showToast('Failed loading tokens', 'error'); }
   }
-
-  async function addToken() {
-    const token = $('#new-token').value.trim();
-    if (!token) return showToast('Enter a token', 'error');
-
-    const btn = $('#btn-add-token');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = 'Testing...';
-    btn.disabled = true;
-
+  
+  function updateHealthTokens(count) {
+    const el = $('health-tokens'), text = $('health-tokens-text');
+    if (count >= 2) { el.className = 'health-indicator good'; text.textContent = `${count} tokens hoạt động`; }
+    else if (count === 1) { el.className = 'health-indicator warning'; text.textContent = '1 token (nên thêm)'; }
+    else { el.className = 'health-indicator bad'; text.textContent = 'Không có token!'; }
+  }
+  
+  $('btn-add-token').onclick = async () => {
+    const val = $('admin-token-input').value.trim();
+    if (!val) { showToast('Nhập token!', 'error'); return; }
+    const btn = $('btn-add-token'); btn.disabled = true; btn.textContent = 'Checking...';
     try {
-      const res = await fetch('/api/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add', token })
+      const res = await fetch('/api/tokens', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'add', token: val }) });
+      const d = await res.json();
+      if (!d.success) showToast(d.message || 'Check failed', 'error');
+      else { showToast('Token live and saved', 'success'); $('admin-token-input').value = ''; }
+    } catch (e) { showToast('Error adding token', 'error'); }
+    finally { btn.disabled = false; btn.textContent = 'Thêm'; await loadTokens(); }
+  };
+  
+  window.openBanModal = function(username) {
+    banTargetUser = username;
+    $('ban-username').textContent = username;
+    $('ban-modal').classList.remove('hidden');
+  };
+  function closeBanModal() { $('ban-modal').classList.add('hidden'); banTargetUser = null; }
+  $('ban-modal-close').onclick = closeBanModal;
+  $('ban-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) closeBanModal(); };
+  
+  $('btn-confirm-ban').onclick = async () => {
+    if (!banTargetUser) return;
+    const durationValue = $('ban-duration').value;
+    const [duration, unit] = durationValue.split('-');
+    const btn = $('btn-confirm-ban'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    const result = await callAPI({ action: 'banUser', targetUsername: banTargetUser, banDuration: parseInt(duration), banUnit: unit });
+    btn.disabled = false; btn.textContent = 'Xác nhận Ban';
+    if (result.success) { showToast(`Đã ban ${banTargetUser}`, 'success'); closeBanModal(); await fetchAllUsers(); }
+    else showToast(result.message || 'Lỗi!', 'error');
+  };
+  
+  window.unbanUser = async function(username) {
+    if (!confirm(`Unban ${username}?`)) return;
+    const result = await callAPI({ action: 'unbanUser', targetUsername: username });
+    if (result.success) { showToast(`Đã unban ${username}`, 'success'); await fetchAllUsers(); }
+    else showToast(result.message || 'Lỗi!', 'error');
+  };
+  
+  window.quickAddTime = async function(username) {
+    const result = await callAPI({ action: 'updateTime', username, minutes: 60, operation: 'add' });
+    if (result.success) { showToast(`+1h cho ${username}`, 'success'); await fetchAllUsers(); }
+    else showToast(result.message || 'Lỗi!', 'error');
+  };
+  
+  $('btn-apply-time').onclick = async () => {
+    const username = $('time-username').value.trim();
+    const minutes = parseInt($('time-minutes').value) || 0;
+    const operation = $('time-operation').value;
+    if (!username) { showToast('Nhập tên user!', 'error'); return; }
+    if (minutes < 1 || minutes > 10000) { showToast('Số phút từ 1-10000!', 'error'); return; }
+    const btn = $('btn-apply-time'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+    const result = await callAPI({ action: 'updateTime', username, minutes, operation });
+    btn.disabled = false; btn.textContent = 'Áp dụng';
+    if (result.success) {
+      const opText = { add: 'Cộng', deduct: 'Trừ', set: 'Đặt' }[operation];
+      showToast(`${opText} ${formatTime(minutes)} cho ${username}`, 'success');
+      $('time-username').value = ''; await fetchAllUsers();
+    } else showToast(result.message || 'Lỗi!', 'error');
+  };
+  
+  $$('.quick-time-btn').forEach(btn => {
+    btn.onclick = () => {
+      const username = $('time-username').value.trim();
+      if (!username) { showToast('Nhập tên user trước!', 'error'); return; }
+      const minutes = parseInt(btn.dataset.minutes);
+      callAPI({ action: 'updateTime', username, minutes, operation: 'add' }).then(result => {
+        if (result.success) { showToast(`+${formatTime(minutes)} cho ${username}`, 'success'); fetchAllUsers(); }
+        else showToast(result.message || 'Lỗi!', 'error');
       });
-      const data = await res.json();
-      
-      if (data.success) {
-        showToast(data.message);
-        $('#new-token').value = '';
-        loadTokens();
-      } else {
-        showToast(data.message || 'Token is dead', 'error');
+    };
+  });
+  
+  $('btn-bulk-add-time').onclick = async () => {
+    const minutes = parseInt($('bulk-time-minutes').value) || 0;
+    if (minutes < 1) { showToast('Nhập số phút hợp lệ!', 'error'); return; }
+    if (!confirm(`Cộng ${minutes} phút cho TẤT CẢ users?`)) return;
+    const btn = $('btn-bulk-add-time'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Đang xử lý...';
+    let success = 0, failed = 0;
+    for (const user of allUsers) {
+      if (!user.isBanned) {
+        const result = await callAPI({ action: 'updateTime', username: user.username, minutes, operation: 'add' });
+        if (result.success) success++; else failed++;
       }
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
     }
-  }
-
-  async function checkToken(id) {
-    showToast('Checking token...');
+    btn.disabled = false; btn.textContent = 'Cộng cho tất cả';
+    showToast(`Đã cộng cho ${success} users (${failed} thất bại)`, 'success');
+    await fetchAllUsers();
+  };
+  
+  $('btn-bulk-ban').onclick = async () => {
+    if (selectedUsers.size === 0) return;
+    if (!confirm(`Ban ${selectedUsers.size} users đã chọn?`)) return;
+    const btn = $('btn-bulk-ban'); btn.disabled = true;
+    for (const username of selectedUsers) {
+      await callAPI({ action: 'banUser', targetUsername: username, banDuration: 0, banUnit: 'permanent' });
+    }
+    selectedUsers.clear(); updateSelectedCount();
+    showToast('Đã ban tất cả users đã chọn', 'success');
+    await fetchAllUsers();
+  };
+  
+  $('btn-run-cron').onclick = async () => {
+    if (!confirm('Chạy cron job thủ công?')) return;
+    const btn = $('btn-run-cron'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Đang chạy...';
     try {
-      const res = await fetch('/api/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'check', id })
-      });
+      const res = await fetch('/api/cron');
       const data = await res.json();
-      showToast(data.message, data.live ? 'success' : 'error');
-      loadTokens();
-    } catch (e) {
-      showToast('Error: ' + e.message, 'error');
-    }
-  }
-
-  async function deleteToken(id) {
-    if (!confirm('Delete this token?')) return;
+      showToast(`Cron hoàn tất: ${data.vpsCleanup?.deleted || 0} VPS đã xóa`, 'success');
+    } catch (e) { showToast('Lỗi chạy cron: ' + e.message, 'error'); }
+    finally { btn.disabled = false; btn.textContent = '🔄 Chạy Cron thủ công'; }
+  };
+  
+  async function checkHealth() {
     try {
-      const res = await fetch('/api/tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('Token deleted');
-        loadTokens();
-      }
+      await callAPI({ action: 'getAllUsers' });
+      $('health-redis').className = 'health-indicator good';
+      $('health-redis-text').textContent = 'Hoạt động bình thường';
     } catch (e) {
-      showToast('Error: ' + e.message, 'error');
+      $('health-redis').className = 'health-indicator bad';
+      $('health-redis-text').textContent = 'Lỗi kết nối';
     }
   }
-
-  // Initial load
-  loadDashboard();
+  
+  $$('.tab').forEach(tab => {
+    tab.onclick = () => {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      $$('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      $('tab-' + tab.dataset.tab).classList.add('active');
+      if (tab.dataset.tab === 'logs') fetchLogs();
+      if (tab.dataset.tab === 'system') checkHealth();
+    };
+  });
+  
+  $('user-search').oninput = renderUserTable;
+  $('user-filter').onchange = renderUserTable;
+  $('user-sort').onchange = renderUserTable;
+  $('btn-refresh').onclick = fetchAllUsers;
+  $('btn-refresh-tokens').onclick = loadTokens;
+  $('btn-refresh-logs').onclick = fetchLogs;
+  $('log-filter').onchange = renderLogs;
+  $('log-search').oninput = renderLogs;
+  
+  $('auto-refresh-btn').onclick = () => {
+    autoRefresh = !autoRefresh;
+    $('auto-refresh-status').textContent = autoRefresh ? 'ON' : 'OFF';
+    $('auto-refresh-btn').classList.toggle('active', autoRefresh);
+    if (autoRefresh) startAutoRefresh();
+    else stopAutoRefresh();
+  };
+  
+  function startAutoRefresh() {
+    stopAutoRefresh();
+    autoRefreshInterval = setInterval(() => {
+      fetchAllUsers();
+      updateLastUpdated();
+    }, 30000);
+  }
+  
+  function stopAutoRefresh() {
+    if (autoRefreshInterval) { clearInterval(autoRefreshInterval); autoRefreshInterval = null; }
+  }
+  
+  async function init() {
+    await fetchAllUsers();
+    await loadTokens();
+    updateLastUpdated();
+    checkHealth();
+    if (autoRefresh) startAutoRefresh();
+  }
+  
+  init();
+})();
 </script>
 </body>
 </html>
