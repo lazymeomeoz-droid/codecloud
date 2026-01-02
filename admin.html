@@ -208,6 +208,15 @@
     .health-info h4{font-size:0.85rem;font-weight:700}
     .health-info p{font-size:0.72rem;color:var(--text-muted)}
 
+    .selection-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px}
+    @media(max-width:500px){.selection-grid{grid-template-columns:repeat(2,1fr)}}
+    .selection-option{position:relative;cursor:pointer}
+    .selection-option input{position:absolute;opacity:0;width:0;height:0}
+    .selection-card{display:flex;align-items:center;justify-content:center;padding:12px 8px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-sm);transition:var(--transition);font-size:0.85rem;font-weight:600;color:var(--text-secondary);text-align:center;height:100%}
+    .selection-option input:checked+.selection-card{background:rgba(248,113,113,0.15);border-color:var(--error);color:var(--error);box-shadow:0 0 0 1px var(--error)}
+    .selection-option:hover .selection-card{background:var(--bg-elevated);border-color:var(--text-muted)}
+    select.input option{background:#0f172a;color:var(--text-primary);padding:8px}
+
     ::-webkit-scrollbar{width:6px;height:6px}
     ::-webkit-scrollbar-track{background:transparent}
     ::-webkit-scrollbar-thumb{background:var(--border-medium);border-radius:10px}
@@ -518,16 +527,16 @@
     <h3 class="modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg> Ban User: <span id="ban-username"></span></h3>
     <div class="form-group">
       <label class="label">Thời gian ban</label>
-      <select id="ban-duration" class="input">
-        <option value="1-hours">1 giờ</option>
-        <option value="6-hours">6 giờ</option>
-        <option value="12-hours">12 giờ</option>
-        <option value="24-hours">24 giờ</option>
-        <option value="3-days">3 ngày</option>
-        <option value="7-days">7 ngày</option>
-        <option value="30-days">30 ngày</option>
-        <option value="0-permanent">Vĩnh viễn</option>
-      </select>
+      <div class="selection-grid">
+        <label class="selection-option"><input type="radio" name="ban-duration" value="1-hours"><div class="selection-card">1 Giờ</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="6-hours"><div class="selection-card">6 Giờ</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="12-hours"><div class="selection-card">12 Giờ</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="24-hours"><div class="selection-card">24 Giờ</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="3-days"><div class="selection-card">3 Ngày</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="7-days"><div class="selection-card">7 Ngày</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="30-days"><div class="selection-card">30 Ngày</div></label>
+        <label class="selection-option"><input type="radio" name="ban-duration" value="0-permanent" checked><div class="selection-card">Vĩnh viễn</div></label>
+      </div>
     </div>
     <button id="btn-confirm-ban" class="btn btn-danger btn-full">Xác nhận Ban</button>
   </div>
@@ -975,7 +984,8 @@
   
   $('btn-confirm-ban').onclick = async () => {
     if (!banTargetUser) return;
-    const durationValue = $('ban-duration').value;
+    const checked = document.querySelector('input[name="ban-duration"]:checked');
+    const durationValue = checked ? checked.value : '0-permanent';
     const [duration, unit] = durationValue.split('-');
     const btn = $('btn-confirm-ban'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
     const result = await callAPI({ action: 'banUser', targetUsername: banTargetUser, banDuration: parseInt(duration), banUnit: unit });
