@@ -245,50 +245,50 @@ jobs:
       run: |
         # Wrap Tailscale startup in a try/catch so non-zero native exits do not fail the step
         try {
-          $tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
-          if (!(Test-Path $tsPath)) {
+          \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+          if (!(Test-Path \$tsPath)) {
             Write-Host "Tailscale not found, skipping..."
             if (!(Test-Path info.txt)) {
               "ERROR|Tailscale not installed" | Out-File info.txt -NoNewline -Encoding UTF8
             }
           } else {
             Write-Host "Starting Tailscale..."
-            Start-Process $tsPath -ArgumentList "up", "--hostname=gh-rdp", "--accept-routes" -WindowStyle Hidden -ErrorAction SilentlyContinue
+            Start-Process \$tsPath -ArgumentList "up", "--hostname=gh-rdp", "--accept-routes" -WindowStyle Hidden -ErrorAction SilentlyContinue
             Start-Sleep -Seconds 10
-            $found = $false
-            for ($i = 0; $i -lt 60; $i++) {
+            \$found = \$false
+            for (\$i = 0; \$i -lt 60; \$i++) {
               Start-Sleep -Seconds 3
               try {
-                $ipResult = & $tsPath ip -4 2>&1
-                $ipStr = $ipResult | Out-String
-                Write-Host "Attempt $i - IP result: $ipStr"
-                if ($ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
-                  $ip = $Matches[0]
-                  Write-Host "Got Tailscale IP: $ip"
-                  "${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
-                  $found = $true
+                \$ipResult = & \$tsPath ip -4 2>&1
+                \$ipStr = \$ipResult | Out-String
+                Write-Host "Attempt \$i - IP result: \$ipStr"
+                if (\$ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
+                  \$ip = \$Matches[0]
+                  Write-Host "Got Tailscale IP: \$ip"
+                  "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
+                  \$found = \$true
                   break
                 }
-                $statusResult = & $tsPath status 2>&1 | Out-String
-                Write-Host "Status: $statusResult"
-                if ($statusResult -match 'https://login\\.tailscale\\.com/a/[a-zA-Z0-9]+') {
-                  $authUrl = $Matches[0]
-                  Write-Host "Auth URL found: $authUrl"
-                  "WAITING_AUTH|$authUrl" | Out-File info.txt -NoNewline -Encoding UTF8
-                  $found = $true
+                \$statusResult = & \$tsPath status 2>&1 | Out-String
+                Write-Host "Status: \$statusResult"
+                if (\$statusResult -match 'https://login\\.tailscale\\.com/a/[a-zA-Z0-9]+') {
+                  \$authUrl = \$Matches[0]
+                  Write-Host "Auth URL found: \$authUrl"
+                  "WAITING_AUTH|\$authUrl" | Out-File info.txt -NoNewline -Encoding UTF8
+                  \$found = \$true
                   break
                 }
               } catch {
-                Write-Host "Error checking status: $_"
+                Write-Host "Error checking status: \$_"
               }
             }
-            if (!$found) {
+            if (!\$found) {
               Write-Host "Timeout waiting for Tailscale"
               "PENDING|Waiting for Tailscale..." | Out-File info.txt -NoNewline -Encoding UTF8
             }
           }
         } catch {
-          Write-Host "Tailscale start error: $_"
+          Write-Host "Tailscale start error: \$_"
           if (!(Test-Path info.txt)) {
             "ERROR|Tailscale start error" | Out-File info.txt -NoNewline -Encoding UTF8
           }
