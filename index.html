@@ -23,7 +23,7 @@
       --bg-base: #f0f4ff; --bg-surface: rgba(255,255,255,0.7); --bg-card: rgba(255,255,255,0.5); --bg-elevated: #fff;
       --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
       --border-light: rgba(99,102,241,0.12); --border-medium: rgba(99,102,241,0.2);
-      --accent: #6366f1; --accent-light: #818cf8; --accent-soft: rgba(99,102,241,0.1); --accent-glow: rgba(99,102,241,0.3);
+      --accent: #6366f1; --accent-light: #818cf8; --accent-soft: rgba(99,102,241,0.12); --accent-glow: rgba(99,102,241,0.3);
       --success: #10b981; --success-soft: rgba(16,185,129,0.12);
       --error: #ef4444; --error-soft: rgba(239,68,68,0.12);
       --warning: #f59e0b; --warning-soft: rgba(245,158,11,0.12);
@@ -38,7 +38,7 @@
       --bg-base: #020617; --bg-surface: rgba(15,23,42,0.8); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
       --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
       --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
-      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
+      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.15); --accent-glow: rgba(129,140,248,0.3);
       --success: #34d399; --success-soft: rgba(52,211,153,0.12);
       --error: #f87171; --error-soft: rgba(248,113,113,0.12);
       --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
@@ -79,10 +79,10 @@
     .brand-info .tagline{font-size:0.7rem;color:var(--text-muted);margin-top:2px}
     
     .user-info{padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:12px;background:var(--accent-soft)}
-    .user-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem}
+    .user-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem;box-shadow:var(--shadow-md)}
     .user-details h4{font-size:0.9rem;font-weight:700}
     .user-details p{font-size:0.7rem;color:var(--text-muted)}
-    .user-time{font-size:0.72rem;color:var(--success);font-weight:600;margin-top:2px}
+    .user-time{font-size:0.72rem;color:var(--success);font-weight:600;margin-top:2px;display:flex;align-items:center;gap:4px}
     
     .nav-menu{padding:20px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
     .nav-item{width:100%;border:none;background:transparent;color:var(--text-secondary);padding:12px 14px;border-radius:var(--radius-md);font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--transition);position:relative}
@@ -258,7 +258,7 @@
     .region-option { background: var(--bg-card); border: 2px solid transparent; border-radius: var(--radius-md); padding: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition); text-align: center; }
     .region-option:hover { border-color: var(--accent-soft); transform: translateY(-2px); background: var(--bg-surface); }
     .region-option.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md); }
-    .region-flag { font-size: 1.5rem; }
+    .region-flag { width: 24px; height: 24px; color: var(--text-primary); }
     .region-name { font-size: 0.8rem; font-weight: 600; }
 
     /* Resume Banner */
@@ -326,11 +326,11 @@
     </div>
     
     <div class="user-info">
-      <div class="user-avatar" id="user-avatar">U</div>
+      <div class="user-avatar" id="user-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
       <div class="user-details">
         <h4><span id="user-display-name">User</span></h4>
         <p id="user-role">Member</p>
-        <p class="user-time" id="user-time-display">⏱️ Loading...</p>
+        <p class="user-time" id="user-time-display"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Loading...</p>
       </div>
     </div>
     
@@ -377,7 +377,7 @@
         <!-- Resume Banner -->
         <div id="resume-banner" class="resume-banner hidden">
           <div class="resume-content">
-            <div class="resume-icon">🔄</div>
+            <div class="resume-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
             <div class="resume-info">
               <h4>Phát hiện VPS đang tạo</h4>
               <p>Repo: <strong id="resume-repo">...</strong> &bull; Đã chạy: <span id="resume-time">...</span></p>
@@ -436,7 +436,7 @@
                   <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
                 </div>
                 <div class="form-group hidden" id="region-group">
-                  <label class="label">🌍 Ngrok Region</label>
+                  <label class="label">Ngrok Region</label>
                   <div class="region-grid" id="ngrok-region-selector">
                     <!-- Populated by JS -->
                   </div>
@@ -451,10 +451,10 @@
                   <p class="input-hint">Tối đa 5h30p (330 phút). Thời gian sẽ bị trừ từ tài khoản của bạn.</p>
                 </div>
                 <div id="tailscale-duration-notice" class="hidden" style="background:var(--accent-soft);border:1px solid var(--border-medium);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
-                  <span>⏱️</span><span><strong>Tailscale:</strong> Fixed 6-hour duration.</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span><strong>Tailscale:</strong> Fixed 6-hour duration.</span>
                 </div>
                 <div id="time-warning" class="hidden" style="background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--warning);display:flex;align-items:center;gap:8px;">
-                  <span>⚠️</span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
                 </div>
                 <div style="margin-top:16px;">
                   <button id="btn-deploy" class="btn">🚀 Deploy VPS</button>
@@ -476,10 +476,10 @@
               </div>
 
               <div id="tailscale-auth-banner" class="hidden" style="background:linear-gradient(135deg,rgba(34,211,238,0.1) 0%,rgba(14,165,233,0.06) 100%);border:1px solid rgba(34,211,238,0.3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:18px;text-align:center;">
-                <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;">🔐 Tailscale Authentication Required</h3>
+                <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Tailscale Authentication Required</h3>
                 <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">Click the link below to authenticate your VPS.</p>
                 <a id="tailscale-auth-link" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;text-decoration:none;border-radius:999px;font-weight:800;font-size:0.9rem;">🔗 Login to Tailscale</a>
-                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">⚠️ After logging in, wait 10-30 seconds.</p>
+                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> After logging in, wait 10-30 seconds.</p>
               </div>
 
               <div class="panel">
@@ -582,7 +582,7 @@
   <div class="modal-backdrop"></div>
   <div class="modal-dialog" style="text-align:center;max-width:380px;">
     <button class="modal-close" id="captcha-close">&times;</button>
-    <div style="font-size:3.5rem;margin-bottom:12px;">🤖</div>
+    <div style="margin-bottom:12px;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width:64px;height:64px"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg></div>
     <h3 class="modal-title" style="justify-content:center;margin-bottom:10px;">Bạn có phải robot không?</h3>
     <p class="confirm-text" style="margin-bottom:24px;">Vui lòng xác minh bạn là con người</p>
     <div style="display:flex;justify-content:center;">
@@ -614,13 +614,13 @@
   ];
 
   const REGIONS = [
-    { id: 'ap', name: 'Asia Pacific', flag: '🌏' },
-    { id: 'us', name: 'United States', flag: '🇺🇸' },
-    { id: 'eu', name: 'Europe', flag: '🇪🇺' },
-    { id: 'au', name: 'Australia', flag: '🇦🇺' },
-    { id: 'sa', name: 'South America', flag: '🇧🇷' },
-    { id: 'jp', name: 'Japan', flag: '🇯🇵' },
-    { id: 'in', name: 'India', flag: '🇮🇳' }
+    { id: 'ap', name: 'Asia Pacific', code: 'AP' },
+    { id: 'us', name: 'United States', code: 'US' },
+    { id: 'eu', name: 'Europe', code: 'EU' },
+    { id: 'au', name: 'Australia', code: 'AU' },
+    { id: 'sa', name: 'South America', code: 'SA' },
+    { id: 'jp', name: 'Japan', code: 'JP' },
+    { id: 'in', name: 'India', code: 'IN' }
   ];
   
   let selectedPlan = PLANS[0], selectedSpecs = 'public', currentDeployment = null, pollInterval = null, deploymentStartTime = null, elapsedTimer = null, isTailscalePlan = false;
@@ -675,7 +675,7 @@
   function updateUserUI() {
     if (!currentUser) return;
     $('#user-display-name').textContent = currentUser.username;
-    $('#user-avatar').textContent = currentUser.username.charAt(0).toUpperCase();
+    // Avatar is now SVG
     $('#user-role').textContent = isAdmin() ? 'Admin' : 'Member';
     if (isAdmin()) $('#nav-admin').classList.remove('hidden');
     else $('#nav-admin').classList.add('hidden');
@@ -691,13 +691,13 @@
   function updateTimeDisplay() {
     const timeDisplay = $('#user-time-display');
     if (userTimeMinutes <= 0) {
-      timeDisplay.textContent = '⏱️ Hết thời gian!';
+      timeDisplay.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Hết thời gian!';
       timeDisplay.style.color = 'var(--error)';
     } else if (userTimeMinutes < 30) {
-      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${formatTime(userTimeMinutes)}`;
       timeDisplay.style.color = 'var(--warning)';
     } else {
-      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${formatTime(userTimeMinutes)}`;
       timeDisplay.style.color = 'var(--success)';
     }
     const statEl = $('#stat-remaining-time');
@@ -878,7 +878,7 @@
     REGIONS.forEach(r => {
       const el = document.createElement('div');
       el.className = 'region-option' + (r.id === 'ap' ? ' selected' : '');
-      el.innerHTML = `<span class="region-flag">${r.flag}</span><span class="region-name">${r.name}</span>`;
+      el.innerHTML = `<svg class="region-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg><span class="region-name">${r.name}</span>`;
       el.onclick = () => {
         $$('.region-option').forEach(o => o.classList.remove('selected'));
         el.classList.add('selected');
@@ -1061,7 +1061,7 @@
       
       clearLogs(); showProgressPanel(); updateProgress({ progress: 5, status: 'pending', message: 'Sending request...' });
       log(`📤 Creating VPS (${actualDuration}m, ${selectedSpecs})...`, 'info');
-      log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
+      log(`⏳ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
       
       try {
         const res = await fetch('/api/vps', { 
@@ -1186,8 +1186,8 @@
       const maxDuration = item.duration || 60, remainingMinutes = Math.max(0, maxDuration - runningMinutes);
       const isExpired = remainingMinutes <= 0, isWarning = remainingMinutes > 0 && remainingMinutes <= 30;
       const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
-      let timeDisplay = `⏱️ ${runningMinutes}m/${maxDuration}m`;
-      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">⏱️ ${remainingMinutes}m left</span>`;
+      let timeDisplay = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${runningMinutes}m/${maxDuration}m`;
+      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;vertical-align:middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${remainingMinutes}m left</span>`;
       el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${item.owner || ''}">Delete</button></div>`;
       container.appendChild(el);
     });
