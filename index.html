@@ -270,6 +270,11 @@
     .resume-info p { font-size: 0.82rem; color: var(--text-muted); }
     .resume-actions { display: flex; gap: 12px; align-items: center; }
 
+    /* Token Status Badge */
+    .token-status { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin-left: 12px; }
+    .token-status.live { background: var(--success-soft); color: var(--success); }
+    .token-status.dead { background: var(--error-soft); color: var(--error); }
+
     .app-footer{border-top:1px solid var(--border-light);padding:16px 28px;background:var(--bg-surface);backdrop-filter:blur(16px)}
     .footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted)}
     .footer-discord{padding:8px 14px;border-radius:999px;text-decoration:none;font-weight:700;background:linear-gradient(135deg,#5865F2,#4752C4);color:white;font-size:0.78rem;transition:var(--transition)}
@@ -916,7 +921,6 @@
       const saved = sessionStorage.getItem(SESSION_KEY);
       if (!saved) return;
       const session = JSON.parse(saved);
-      // If session is older than 30 mins and no link found, maybe discard? keeping it simple for now.
       
       $('#resume-banner').classList.remove('hidden');
       $('#resume-repo').textContent = session.repo;
@@ -958,7 +962,18 @@
     pollForLink();
   }
 
-  function saveDeploymentSession() { if (!currentDeployment) return; try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...currentDeployment, startTime: deploymentStartTime, savedAt: Date.now(), isTailscalePlan })); } catch(e) {} }
+  function saveDeploymentSession() { 
+    if (!currentDeployment) return; 
+    try { 
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ 
+        ...currentDeployment, 
+        startTime: deploymentStartTime, 
+        savedAt: Date.now(), 
+        isTailscalePlan 
+      })); 
+    } catch(e) {} 
+  }
+  
   function clearDeploymentSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {} }
 
   function getPlanDisplayName(planId) { return ({ ubuntu_web: 'Ubuntu', win_web: 'Windows Web', win_rdp: 'Windows RDP', win_tailscale: 'Win Tailscale' }[planId] || planId); }
@@ -968,8 +983,26 @@
   async function pollForLink() {
     if (!currentDeployment) return;
     try {
-      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
+      const res = await fetch('/api/find-link', { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ 
+          owner: currentDeployment.owner,
+          repoName: currentDeployment.repo, 
+          checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' 
+        }) 
+      });
       const data = await res.json();
+      
+      // Handle no token error
+      if (data.code === 'NO_TOKEN') {
+        log('❌ ' + data.message, 'error');
+        showToast(data.message, 'error');
+        stopPolling();
+        isDeploying = false;
+        return;
+      }
+      
       updateProgress(data);
       if (data.tailscaleAuthUrl) { log(`🔐 Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
       if (data.found && data.vpsLink) {
@@ -1047,14 +1080,21 @@
         const data = await res.json();
         
         if (!data.success) {
-          if (data.timeout) {
+          if (data.code === 'NO_TOKEN') {
+            log('❌ Không có GitHub Token khả dụng!', 'error');
+            log('💡 Admin cần thêm token trong Admin Panel', 'error');
+          } else if (data.code === 'TOKEN_EXPIRED') {
+            log('❌ GitHub Token trong pool đã hết hạn!', 'error');
+            log('💡 Admin cần kiểm tra và cập nhật token', 'error');
+          } else if (data.timeout) {
             log('❌ Workflow không khởi động trong 60 giây!', 'error');
             log('⚠️ Vui lòng thử lại hoặc kiểm tra GitHub Actions', 'error');
           }
           throw new Error(data.message || 'Unknown error');
         }
         
-        await deductTime(actualDuration);
+        // Time is deducted server-side, just refresh display
+        await fetchTimeFromServer();
         log(`💳 Đã trừ ${actualDuration} phút. Còn lại: ${formatTime(userTimeMinutes)}`, 'info');
         
         updateProgress({ progress: 15, status: 'in_progress', message: 'Repository created' });
@@ -1063,7 +1103,18 @@
         else log('⚠️ Manual trigger needed', 'pending');
         log(`📂 ${data.repoUrl}`, 'info');
         
-        currentDeployment = { repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
+        // Store owner for polling
+        currentDeployment = { 
+          repo, 
+          owner: data.owner,
+          vpsPassword: data.vpsPassword, 
+          repoUrl: data.repoUrl, 
+          actionsUrl: data.actionsUrl, 
+          planId: data.planId, 
+          duration: actualDuration, 
+          specs: data.specs, 
+          vpsLink: null 
+        };
         isTailscalePlan = data.planId === 'win_tailscale';
         updateConnInfo(currentDeployment);
         saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
@@ -1112,7 +1163,7 @@
   }
 
   function saveToVpsList(data, repo, actualDuration) {
-    const item = { id: Date.now(), repo, plan: data.planId, link: data.vpsLink || null, pass: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, duration: actualDuration, specs: data.specs?.label || null, created: new Date().toLocaleString(), startTime: Date.now() };
+    const item = { id: Date.now(), repo, owner: data.owner, plan: data.planId, link: data.vpsLink || null, pass: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, duration: actualDuration, specs: data.specs?.label || null, created: new Date().toLocaleString(), startTime: Date.now() };
     const list = getVpsList().filter(x => x.repo !== repo); list.unshift(item); saveVpsList(list.slice(0, 50));
   }
 
@@ -1137,17 +1188,17 @@
       const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
       let timeDisplay = `⏱️ ${runningMinutes}m/${maxDuration}m`;
       if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">⏱️ ${remainingMinutes}m left</span>`;
-      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}">Delete</button></div>`;
+      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}" data-owner="${item.owner || ''}">Delete</button></div>`;
       container.appendChild(el);
     });
     container.querySelectorAll('.btn-del').forEach(btn => btn.onclick = () => {
-      openConfirmModal('Delete VPS', `Delete "${btn.dataset.repo}"? This will delete the GitHub repository.`, () => executeDeleteVps(parseInt(btn.dataset.id), btn.dataset.repo));
+      openConfirmModal('Delete VPS', `Delete "${btn.dataset.repo}"? This will delete the GitHub repository.`, () => executeDeleteVps(parseInt(btn.dataset.id), btn.dataset.owner, btn.dataset.repo));
     });
   }
 
-  async function executeDeleteVps(id, repo) {
+  async function executeDeleteVps(id, owner, repo) {
     try {
-      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repo }) });
+      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ owner, repo }) });
       const d = await res.json(); 
       if (!d.success) throw new Error(d.message || 'Delete failed');
       
