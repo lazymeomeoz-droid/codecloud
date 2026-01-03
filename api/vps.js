@@ -453,18 +453,27 @@ function getClientIP(req) {
   return req.headers['x-real-ip'] || req.connection?.remoteAddress || 'unknown';
 }
 
-// Get a live token from the pool
+// Get a live token from the pool (round-robin style)
 async function getLiveToken() {
   const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
   if (!ids || ids.length === 0) return null;
   
-  for (const id of ids) {
+  // Try to get last used index for round-robin
+  let lastIdx = parseInt(await upstash('GET', 'gh_token_last_idx') || '0');
+  
+  // Try each token starting from lastIdx
+  for (let i = 0; i < ids.length; i++) {
+    const idx = (lastIdx + i) % ids.length;
+    const id = ids[idx];
     const raw = await upstash('GET', `gh_token:${id}`);
     if (!raw) continue;
+    
     try {
       const parsed = JSON.parse(raw);
       const meta = parsed.meta || {};
       if (meta.status === 'live' && parsed.token) {
+        // Update last used index
+        await upstash('SET', 'gh_token_last_idx', String((idx + 1) % ids.length));
         return { id, token: parsed.token, owner: meta.owner };
       }
     } catch (e) { continue; }
@@ -509,22 +518,25 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = req.body || {};
-    const { planId, durationMinutes, githubToken: clientGithubToken, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
+    const { planId, durationMinutes, repoName, ngrokToken, repoVisibility, ngrokRegion } = body;
 
     console.log("[VPS] Request:", { planId, repoName, visibility: repoVisibility });
 
-    // Get token from pool
-    let githubToken = clientGithubToken;
-    let usedTokenId = null;
-    
-    if (!githubToken || typeof githubToken !== 'string' || githubToken.length < 10) {
-      const tokenData = await getLiveToken();
-      if (!tokenData) {
-        return res.status(500).json({ success: false, message: 'No live GitHub tokens available. Contact admin.' });
-      }
-      githubToken = tokenData.token;
-      usedTokenId = tokenData.id;
+    // ALWAYS get token from pool - users don't provide tokens anymore
+    const tokenData = await getLiveToken();
+    if (!tokenData) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Không có GitHub Token khả dụng. Admin cần thêm token trong Admin Panel.',
+        code: 'NO_TOKEN'
+      });
     }
+    
+    const githubToken = tokenData.token;
+    const usedTokenId = tokenData.id;
+    const tokenOwner = tokenData.owner;
+    
+    console.log(`[VPS] Using token: ${usedTokenId} (owner: ${tokenOwner})`);
     
     if (!repoName || typeof repoName !== "string") {
       return res.status(400).json({ success: false, message: "Thiếu tên Repository" });
@@ -545,17 +557,28 @@ module.exports = async function handler(req, res) {
     console.log("[VPS] Verifying token...");
     const userRes = await ghFetch("https://api.github.com/user", "GET", githubToken);
     if (userRes.status !== 200 || !userRes.data?.login) {
-      return res.status(401).json({ 
+      // Mark token as dead
+      const raw = await upstash('GET', `gh_token:${usedTokenId}`);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          parsed.meta = parsed.meta || {};
+          parsed.meta.status = 'dead';
+          parsed.meta.lastChecked = new Date().toISOString();
+          await upstash('SET', `gh_token:${usedTokenId}`, JSON.stringify(parsed));
+        } catch(e) {}
+      }
+      return res.status(500).json({ 
         success: false, 
-        message: "GitHub Token không hợp lệ hoặc đã hết hạn",
-        detail: userRes.data
+        message: "GitHub Token trong pool đã hết hạn. Admin cần kiểm tra token.",
+        code: 'TOKEN_EXPIRED'
       });
     }
     const login = userRes.data.login;
     console.log("[VPS] User:", login);
 
     const password = randomPassword();
-    const duration = planId === "win_tailscale" ? 360 : Math.max(10, Math.min(360, parseInt(durationMinutes) || 60));
+    const duration = planId === "win_tailscale" ? 360 : Math.max(1, Math.min(360, parseInt(durationMinutes) || 60));
     const timeout = duration + 25;
     const isPrivate = repoVisibility === "private";
     const specs = isPrivate ? SPECS.private : SPECS.public;
@@ -686,7 +709,7 @@ module.exports = async function handler(req, res) {
     console.log("[VPS] Complete! dispatched=", dispatched);
 
     // Save active VPS for auto-cleanup
-    if (usedTokenId) {
+    try {
       await saveActiveVps({
         owner: login,
         repo: repoName,
@@ -694,6 +717,38 @@ module.exports = async function handler(req, res) {
         durationMinutes: duration,
         createdAt
       });
+    } catch (e) {
+      console.error('[VPS] Failed to save active VPS:', e);
+    }
+
+    // Deduct time from the user's balance server-side
+    try {
+      const username = body.username;
+      if (username) {
+        const timeKey = `time:${username}`;
+        const raw = await upstash('GET', timeKey);
+        const previousMinutes = raw ? parseInt(raw) || 0 : 0;
+        const newMinutes = Math.max(0, previousMinutes - duration);
+        await upstash('SET', timeKey, String(newMinutes));
+        
+        const clientIP = getClientIP(req);
+        const logEntry = {
+          type: 'updateTime',
+          username: username,
+          ip: clientIP,
+          at: new Date().toISOString(),
+          operation: 'deduct',
+          minutes: duration,
+          previousMinutes,
+          newMinutes,
+          repo: `${login}/${repoName}`
+        };
+        await upstash('LPUSH', 'userlogs', JSON.stringify(logEntry));
+        await upstash('LTRIM', 'userlogs', '0', '499');
+        console.log(`[VPS] Deducted ${duration}m from ${username} (was ${previousMinutes} -> now ${newMinutes})`);
+      }
+    } catch (e) {
+      console.error('[VPS] Failed to deduct time:', e);
     }
 
     // Log deployment
@@ -712,7 +767,8 @@ module.exports = async function handler(req, res) {
         clientIP,
         ipRaw: req.headers['x-forwarded-for'] || req.headers['cf-connecting-ip'] || null,
         ua: req.headers['user-agent'] || null,
-        tokenId: usedTokenId
+        tokenId: usedTokenId,
+        tokenOwner: login
       };
       await upstash('LPUSH', 'userlogs', JSON.stringify(deployLog));
       await upstash('LTRIM', 'userlogs', '0', '499');

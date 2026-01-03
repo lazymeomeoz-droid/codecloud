@@ -26,6 +26,24 @@ function setCachedResult(key, data) {
   resultCache.set(key, { data, timestamp: Date.now() });
 }
 
+async function upstash(command, ...args) {
+  const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+  const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!UPSTASH_URL || !UPSTASH_TOKEN) return null;
+  try {
+    const r = await fetch(UPSTASH_URL, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify([command, ...args])
+    });
+    const d = await r.json();
+    return d.result;
+  } catch (e) {
+    console.error('Upstash error:', e);
+    return null;
+  }
+}
+
 async function ghFetch(url, method, token, body, retries = 3) {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -240,7 +258,7 @@ async function tryGetArtifactInfo(repoPath, runId, token) {
     }
 
     const content = zip.readAsText(entry).trim();
-    console.log(`[find-link] Content: "${content}"`);
+    console.log(`[find-link] Content: "${content)}"`);
     
     if (!content) {
       return { found: false, reason: "empty_content" };
@@ -286,7 +304,7 @@ async function tryGetArtifactInfo(repoPath, runId, token) {
     );
     
     if (!isValidUrl) {
-      console.log(`[find-link] Invalid URL: "${url}"`);
+      console.log(`[find-link] Invalid URL: "${url)}"`);
       return { found: false, reason: "invalid_url", url: url || "empty" };
     }
 
@@ -301,6 +319,70 @@ async function tryGetArtifactInfo(repoPath, runId, token) {
     console.log(`[find-link] Zip error: ${zipErr.message}`);
     return { found: false, reason: "zip_error", error: zipErr.message };
   }
+}
+
+// Get token from VPS record or pool
+async function getTokenForVps(owner, repoName) {
+  // Method 1: Try to get token from saved VPS record
+  if (owner && repoName) {
+    const vpsKey = `active_vps:${owner}:${repoName}`;
+    const vpsRaw = await upstash('GET', vpsKey);
+    if (vpsRaw) {
+      try {
+        const vps = JSON.parse(vpsRaw);
+        if (vps.tokenId) {
+          const tokenRaw = await upstash('GET', `gh_token:${vps.tokenId}`);
+          if (tokenRaw) {
+            const parsed = JSON.parse(tokenRaw);
+            if (parsed.token) {
+              console.log(`[find-link] Got token from VPS record: ${vps.tokenId}`);
+              return { token: parsed.token, owner: parsed.meta?.owner };
+            }
+          }
+        }
+      } catch (e) {
+        console.log(`[find-link] Error parsing VPS record:`, e.message);
+      }
+    }
+  }
+  
+  // Method 2: Try to find token by owner
+  if (owner) {
+    const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
+    if (ids && ids.length > 0) {
+      for (const id of ids) {
+        const raw = await upstash('GET', `gh_token:${id}`);
+        if (!raw) continue;
+        try {
+          const parsed = JSON.parse(raw);
+          const meta = parsed.meta || {};
+          if (meta.owner && meta.owner.toLowerCase() === owner.toLowerCase() && meta.status === 'live' && parsed.token) {
+            console.log(`[find-link] Found token by owner: ${id}`);
+            return { token: parsed.token, owner: meta.owner };
+          }
+        } catch (e) { continue; }
+      }
+    }
+  }
+  
+  // Method 3: Use any live token from pool
+  const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
+  if (ids && ids.length > 0) {
+    for (const id of ids) {
+      const raw = await upstash('GET', `gh_token:${id}`);
+      if (!raw) continue;
+      try {
+        const parsed = JSON.parse(raw);
+        const meta = parsed.meta || {};
+        if (meta.status === 'live' && parsed.token) {
+          console.log(`[find-link] Using fallback live token: ${id}`);
+          return { token: parsed.token, owner: meta.owner };
+        }
+      } catch (e) { continue; }
+    }
+  }
+  
+  return null;
 }
 
 module.exports = async function handler(req, res) {
@@ -318,50 +400,28 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { githubToken: clientToken, owner, repoName, checkTailscaleAuth } = req.body || {};
+    const { owner, repoName, checkTailscaleAuth } = req.body || {};
 
     if (!repoName) {
       return res.status(400).json({ success: false, message: "Thiếu tên Repository" });
     }
 
-    let githubToken = clientToken;
-    let login = owner;
-    // If client didn't provide a token, try to find a saved token for the owner
-    if (!githubToken) {
-      if (!owner) return res.status(400).json({ success: false, message: 'Missing owner or token' });
-      const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-      const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
-      if (!UPSTASH_URL || !UPSTASH_TOKEN) return res.status(500).json({ success: false, message: 'Upstash not configured' });
-      try {
-        const r = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['LRANGE', 'gh_tokens', '0', '-1']) });
-        const j = await r.json();
-        const ids = Array.isArray(j.result) ? j.result : [];
-        for (const id of ids) {
-          const g = await fetch(UPSTASH_URL, { method: 'POST', headers: { 'Authorization': `Bearer ${UPSTASH_TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(['GET', `gh_token:${id}`]) });
-          const gj = await g.json();
-          if (gj.result) {
-            try {
-              const parsed = JSON.parse(gj.result);
-              const token = parsed.token;
-              const meta = parsed.meta || {};
-              if (meta.owner && meta.owner.toLowerCase() === owner.toLowerCase()) { githubToken = token; break; }
-            } catch (e) {}
-          }
-        }
-      } catch (e) { console.log('[find-link] upstash lookup error', e.message); }
+    if (!owner) {
+      return res.status(400).json({ success: false, message: "Thiếu owner" });
     }
 
-    if (!githubToken) {
-      return res.status(400).json({ success: false, message: "Thiếu GitHub Token và không tìm thấy token lưu của owner" });
+    // Get token from pool
+    const tokenData = await getTokenForVps(owner, repoName);
+    if (!tokenData || !tokenData.token) {
+      return res.status(500).json({ 
+        success: false, 
+        message: 'Không tìm thấy GitHub Token trong pool. Admin cần thêm token.',
+        code: 'NO_TOKEN'
+      });
     }
 
-    // Get user from token (login) to build repoPath
-    const me = await ghFetch("https://api.github.com/user", "GET", githubToken);
-    if (me.status !== 200 || !me.data.login) {
-      return res.status(401).json({ success: false, message: "GitHub Token không hợp lệ" });
-    }
-    login = me.data.login;
-    const repoPath = `${login}/${encodeURIComponent(repoName)}`;
+    const githubToken = tokenData.token;
+    const repoPath = `${owner}/${encodeURIComponent(repoName)}`;
     const cacheKey = `${repoPath}:link`;
 
     // Check cache
