@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#06080d">
+  <meta name="theme-color" content="#020617">
   <title>CodeCloud VPS</title>
   <script>
     (function() {
-      const theme = localStorage.getItem('cc_theme') || 'dark';
+      var theme = localStorage.getItem('cc_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.setAttribute('data-theme', theme);
       if (!localStorage.getItem('cc_current_user')) {
         window.location.href = 'login.html';
@@ -16,1119 +16,1217 @@
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
   <style>
     :root {
-      --bg-base: #06080d;
-      --bg-card: rgba(15, 20, 35, 0.75);
-      --bg-card-hover: rgba(20, 28, 50, 0.85);
-      --bg-input: rgba(25, 35, 60, 0.5);
-      --border: rgba(99, 102, 241, 0.15);
-      --border-subtle: rgba(255, 255, 255, 0.06);
-      --text-primary: #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted: #64748b;
-      --primary: #818cf8;
-      --primary-rgb: 129, 140, 248;
-      --primary-dim: rgba(129, 140, 248, 0.12);
-      --accent: #a78bfa;
-      --accent-rgb: 167, 139, 250;
-      --success: #34d399;
-      --success-dim: rgba(52, 211, 153, 0.12);
-      --error: #f87171;
-      --error-dim: rgba(248, 113, 113, 0.12);
-      --warning: #fbbf24;
-      --warning-dim: rgba(251, 191, 36, 0.12);
-      --info: #60a5fa;
-      --radius: 18px;
-      --radius-sm: 12px;
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      --sidebar-w: 280px;
-    }
-
-    [data-theme="light"] {
-      --bg-base: #f1f5f9;
-      --bg-card: rgba(255, 255, 255, 0.85);
-      --bg-card-hover: rgba(255, 255, 255, 0.95);
-      --bg-input: rgba(241, 245, 249, 0.8);
-      --border-subtle: rgba(0, 0, 0, 0.08);
-      --text-primary: #1e293b;
-      --text-secondary: #64748b;
-      --text-muted: #94a3b8;
-      --primary: #6366f1;
-      --primary-rgb: 99, 102, 241;
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg-base);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Aurora Background */
-    .bg-aurora {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      overflow: hidden;
-      background: linear-gradient(135deg, #06080d 0%, #0c1222 50%, #0a0a1a 100%);
-    }
-
-    [data-theme="light"] .bg-aurora {
-      background: linear-gradient(135deg, #e0e7ff 0%, #f1f5f9 50%, #dbeafe 100%);
-    }
-
-    .aurora-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(100px);
-      opacity: 0.5;
-      animation: float 25s ease-in-out infinite;
-    }
-
-    .orb-1 {
-      width: 700px; height: 700px;
-      background: radial-gradient(circle, rgba(var(--primary-rgb), 0.3), transparent 70%);
-      top: -250px; left: -150px;
-    }
-
-    .orb-2 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.25), transparent 70%);
-      bottom: -200px; right: -150px;
-      animation-delay: -12s;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      25% { transform: translate(40px, -40px) scale(1.05); }
-      50% { transform: translate(-20px, 30px) scale(0.98); }
-      75% { transform: translate(30px, 20px) scale(1.02); }
-    }
-
-    /* Layout */
-    .layout { display: flex; min-height: 100vh; }
-
-    .nav-item:hover {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text-primary);
-      transform: translateX(4px);
-    }
-
-    .nav-item.active {
-      background: var(--primary-dim);
-      color: var(--primary);
-      border-color: rgba(var(--primary-rgb), 0.2);
-    }
-
-    .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
-
-    /* User Card */
-    .user-card {
-      margin-top: auto;
-      padding: 18px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: var(--radius);
-      border: 1px solid var(--border-subtle);
-    }
-
-    .user-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .user-avatar {
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--primary));
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700;
-      font-size: 1rem;
-      color: white;
-    }
-
-    .user-meta h4 { font-size: 0.9rem; font-weight: 700; }
-    .user-meta p { font-size: 0.8rem; color: var(--text-muted); }
-
-    .btn-logout {
-      width: 100%;
-      padding: 11px;
-      background: transparent;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-family: inherit;
-    }
-
-    .btn-logout:hover {
-      background: var(--error-dim);
-      color: var(--error);
-      border-color: rgba(248, 113, 113, 0.25);
-    }
-
-    /* Main Content */
-    .main {
-      flex: 1;
-      margin-left: var(--sidebar-w);
-      padding: 32px;
-      max-width: 100%;
-    }
-
-    @media (max-width: 1024px) {
-      .main { margin-left: 0; padding: 20px; }
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .menu-btn {
-      display: none;
-      width: 46px; height: 46px;
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-primary);
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-    }
-
-    @media (max-width: 1024px) {
-      .menu-btn { display: flex; }
-    }
-
-    .page-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .header-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-icon {
-      width: 44px; height: 44px;
-      border-radius: var(--radius-sm);
-      background: var(--bg-card);
-      border: 1px solid var(--border-subtle);
-      color: var(--text-secondary);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .btn-icon:hover {
-      background: var(--bg-card-hover);
-      color: var(--primary);
-      border-color: var(--border);
-    }
-
-    /* Cards */
-    .card {
-      background: var(--bg-card);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius);
-      margin-bottom: 24px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card:hover {
-      border-color: var(--border);
-    }
-
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 22px 26px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .card-title {
-      font-size: 1rem;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .card-title::before {
-      content: '';
-      width: 4px; height: 20px;
-      background: linear-gradient(180deg, var(--primary), var(--accent));
-      border-radius: 4px;
-    }
-
-    .card-desc {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .card-body { padding: 26px; }
-
-    /* Grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 24px;
-    }
-
-    @media (max-width: 1100px) {
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-
-    /* Plan Cards */
-    .plans-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-    }
-
-    .plan-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 2px solid transparent;
-      border-radius: 16px;
-      padding: 18px;
-      cursor: pointer;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .plan-card:hover {
-      background: rgba(255, 255, 255, 0.05);
-      transform: translateY(-3px);
-    }
-
-    .plan-card.active {
-      background: var(--primary-dim);
-      border-color: var(--primary);
-      box-shadow: 0 0 32px rgba(var(--primary-rgb), 0.2);
-    }
-
-    .plan-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-    }
-
-    .plan-info h4 { font-size: 0.95rem; font-weight: 700; }
-    .plan-info p { font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; }
-
-    /* Form Elements */
-    .form-group { margin-bottom: 22px; }
-
-    .label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-    }
-
-    .input {
-      width: 100%;
-      background: var(--bg-input);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      color: var(--text-primary);
-      font-size: 0.9rem;
-      font-family: inherit;
-      transition: all 0.2s;
-      outline: none;
-    }
-
-    .input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.12);
-    }
-
-    .input-row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .flex-between {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 15px 24px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      border: none;
-      font-family: inherit;
-      width: 100%;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--accent));
-      color: white;
-      box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.35);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(var(--primary-rgb), 0.4);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none !important;
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-subtle);
-      padding: 12px 16px;
-      width: auto;
-    }
-
-    .btn-ghost:hover {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-primary);
-    }
-
-    .btn-danger {
-      background: var(--error-dim);
-      color: var(--error);
-      border: 1px solid rgba(248, 113, 113, 0.2);
-    }
-
-    .btn-danger:hover {
-      background: rgba(248, 113, 113, 0.2);
-    }
-
-    .btn-sm {
-      padding: 10px 16px;
-      font-size: 0.85rem;
-    }
-
-    /* Progress */
-    .progress-bar {
-      height: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 14px 0;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--accent));
-      border-radius: 10px;
-      transition: width 0.5s ease;
-      width: 0%;
-    }
-
-    /* Terminal */
-    .terminal {
-      background: #0c1222;
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      padding: 18px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.82rem;
-      height: 300px;
-      overflow-y: auto;
-      color: #94a3b8;
-    }
-
-    .log-entry {
-      display: flex;
-      gap: 12px;
-      padding: 7px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .log-time {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      min-width: 70px;
-    }
-
-    .log-msg { flex: 1; word-break: break-word; }
-    .log-info { color: #60a5fa; }
-    .log-success { color: #34d399; }
-    .log-error { color: #f87171; }
-    .log-warn { color: #fbbf24; }
-
-    /* Connection Info */
-    .conn-empty {
-      text-align: center;
-      padding: 36px;
-      color: var(--text-muted);
-    }
-
-    .conn-field { margin-bottom: 14px; }
-
-    /* Instance Cards */
-    .instances-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-    }
-
-    .instance-card {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius);
-      padding: 22px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .instance-icon {
-      width: 52px; height: 52px;
-      border-radius: 14px;
-      background: var(--success-dim);
-      color: var(--success);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .instance-info { flex: 1; }
-    .instance-info h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
-    .instance-info p { font-size: 0.8rem; color: var(--text-muted); }
-
-    /* Views */
-    .view { display: none; }
-    .view.active { display: block; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 32px;
-      right: 32px;
-      padding: 16px 24px;
-      background: var(--bg-card);
-      backdrop-filter: blur(24px);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      box-shadow: var(--shadow);
-      z-index: 1000;
-      transform: translateY(120px);
-      opacity: 0;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 600;
-    }
-
-    .toast.active { transform: translateY(0); opacity: 1; }
-    .toast-success { border-left: 4px solid var(--success); color: var(--success); }
-    .toast-error { border-left: 4px solid var(--error); color: var(--error); }
-
-    /* Modal */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal.active { display: flex; }
-
-    .modal-content {
-      background: var(--bg-card);
-      backdrop-filter: blur(24px);
-      border: 1px solid var(--border-subtle);
-      border-radius: var(--radius);
-      padding: 36px;
-      max-width: 440px;
-      width: 100%;
-      text-align: center;
-      box-shadow: var(--shadow);
-    }
-
-    .modal-content h3 { margin-bottom: 24px; font-size: 1.2rem; }
-
-    /* Overlay */
-    .overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 99;
-    }
-
-    .overlay.active { display: block; }
-
-    /* Hidden */
-    .hidden { display: none !important; }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
+      --bg-base: #f0f4ff; --bg-surface: rgba(255,255,255,0.7); --bg-card: rgba(255,255,255,0.5); --bg-elevated: #fff;
+      --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+      --border-light: rgba(99,102,241,0.12); --border-medium: rgba(99,102,241,0.2);
+      --accent: #6366f1; --accent-light: #818cf8; --accent-soft: rgba(99,102,241,0.1); --accent-glow: rgba(99,102,241,0.3);
+      --success: #10b981; --success-soft: rgba(16,185,129,0.12);
+      --error: #ef4444; --error-soft: rgba(239,68,68,0.12);
+      --warning: #f59e0b; --warning-soft: rgba(245,158,11,0.12);
+      --gradient-primary: linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);
+      --gradient-accent: linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);
+      --shadow-md: 0 4px 20px -2px rgba(99,102,241,0.15); --shadow-lg: 0 20px 40px -10px rgba(99,102,241,0.2);
+      --shadow-glow: 0 0 40px rgba(99,102,241,0.25);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+      --sidebar-w: 280px; --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    [data-theme="dark"] {
+      --bg-base: #020617; --bg-surface: rgba(15,23,42,0.8); --bg-card: rgba(30,41,59,0.6); --bg-elevated: #1e293b;
+      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #94a3b8;
+      --border-light: rgba(139,92,246,0.12); --border-medium: rgba(139,92,246,0.25);
+      --accent: #818cf8; --accent-light: #a5b4fc; --accent-soft: rgba(129,140,248,0.12); --accent-glow: rgba(129,140,248,0.3);
+      --success: #34d399; --success-soft: rgba(52,211,153,0.12);
+      --error: #f87171; --error-soft: rgba(248,113,113,0.12);
+      --warning: #fbbf24; --warning-soft: rgba(251,191,36,0.12);
+      --shadow-md: 0 4px 20px -2px rgba(0,0,0,0.5); --shadow-lg: 0 20px 40px -10px rgba(0,0,0,0.6);
+      --shadow-glow: 0 0 50px rgba(129,140,248,0.2);
+    }
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:'Inter',sans-serif;background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    .hidden{display:none!important}
+    
+    .bg-effects{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .aurora{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,var(--accent-soft) 60deg,transparent 120deg,rgba(34,211,238,0.08) 180deg,transparent 240deg,var(--accent-glow) 300deg,transparent 360deg);animation:auroraRotate 60s linear infinite}
+    @keyframes auroraRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes scaleIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes slideIn{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}
+    
+    .app-layout{display:flex;min-height:100vh;position:relative;z-index:1}
+    .theme-toggle{position:fixed;top:20px;right:20px;width:52px;height:52px;border-radius:50%;border:2px solid var(--border-light);background:var(--bg-surface);backdrop-filter:blur(20px);box-shadow:var(--shadow-md);cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+    .theme-toggle:hover{transform:translateY(-3px) scale(1.05);box-shadow:var(--shadow-lg);border-color:var(--accent)}
+    .theme-toggle svg{width:22px;height:22px}
+    .icon-sun{color:#fbbf24}
+    .icon-moon{color:var(--accent-light);display:none}
+    [data-theme="dark"] .icon-sun{display:none}
+    [data-theme="dark"] .icon-moon{display:block}
+    
+    .sidebar{width:var(--sidebar-w);background:var(--bg-surface);backdrop-filter:blur(30px);border-right:1px solid var(--border-light);display:flex;flex-direction:column;z-index:50;transition:var(--transition);animation:slideIn 0.5s ease-out;position:relative}
+    @media(max-width:1024px){.sidebar{position:fixed;inset:0 auto 0 0;transform:translateX(-100%);box-shadow:var(--shadow-lg)}.sidebar.active{transform:translateX(0)}}
+    .sidebar-header{padding:24px 20px;border-bottom:1px solid var(--border-light)}
+    .brand{display:flex;align-items:center;gap:14px}
+    .logo{width:50px;height:50px;position:relative;display:flex;align-items:center;justify-content:center}
+    .logo-inner{width:100%;height:100%;border-radius:14px;background:var(--gradient-primary);display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-glow);animation:float 4s ease-in-out infinite}
+    .brand-info .app-name{font-weight:900;font-size:1.25rem;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+    .brand-info .tagline{font-size:0.7rem;color:var(--text-muted);margin-top:2px}
+    
+    .user-info{padding:16px 20px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:12px;background:var(--accent-soft)}
+    .user-avatar{width:40px;height:40px;border-radius:50%;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1rem}
+    .user-details h4{font-size:0.9rem;font-weight:700}
+    .user-details p{font-size:0.7rem;color:var(--text-muted)}
+    .user-time{font-size:0.72rem;color:var(--success);font-weight:600;margin-top:2px}
+    
+    .nav-menu{padding:20px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+    .nav-item{width:100%;border:none;background:transparent;color:var(--text-secondary);padding:12px 14px;border-radius:var(--radius-md);font-size:0.9rem;font-weight:600;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--transition);position:relative}
+    .nav-item:hover{color:var(--text-primary);background:var(--accent-soft);transform:translateX(4px)}
+    .nav-item.active{color:white;background:var(--gradient-accent);box-shadow:var(--shadow-md)}
+    .nav-icon{width:34px;height:34px;border-radius:var(--radius-sm);background:var(--bg-card);border:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+    .nav-icon svg{width:16px;height:16px;color:var(--accent)}
+    .nav-item.active .nav-icon{background:rgba(255,255,255,0.2);border-color:rgba(255,255,255,0.3)}
+    .nav-item.active .nav-icon svg{color:white}
+    
+    .sidebar-footer{padding:20px;border-top:1px solid var(--border-light)}
+    .logout-btn{width:100%;padding:12px;border-radius:var(--radius-md);border:1px solid var(--border-light);background:var(--bg-card);color:var(--text-secondary);font-weight:600;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:var(--transition)}
+    .logout-btn:hover{background:var(--error-soft);color:var(--error);border-color:var(--error)}
+    
+    .sidebar-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(8px);z-index:40;opacity:0;pointer-events:none;transition:opacity var(--transition)}
+    .sidebar.active~.sidebar-overlay{opacity:1;pointer-events:auto}
+    
+    .main-content{flex:1;display:flex;flex-direction:column;min-width:0}
+    .top-bar{height:72px;display:flex;align-items:center;padding:0 28px;gap:14px;background:var(--bg-surface);backdrop-filter:blur(20px);border-bottom:1px solid var(--border-light);position:sticky;top:0;z-index:30}
+    .menu-btn{background:var(--bg-card);border:1px solid var(--border-light);color:var(--text-primary);cursor:pointer;display:none;padding:10px;border-radius:var(--radius-sm);transition:var(--transition)}
+    .menu-btn:hover{background:var(--accent-soft);border-color:var(--accent)}
+    .menu-btn svg{width:20px;height:20px}
+    @media(max-width:1024px){.menu-btn{display:flex}}
+    .page-title{font-size:1.5rem;font-weight:900;background:var(--gradient-primary);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:slideUp 0.4s ease-out}
+    
+    .scroll-area{flex:1;overflow-y:auto;padding:28px}
+    @media(max-width:768px){.top-bar{padding:0 16px;height:64px}.page-title{font-size:1.25rem}.scroll-area{padding:16px}}
+    .container{max-width:1300px;margin:0 auto}
+    
+    .panel{background:var(--bg-surface);backdrop-filter:blur(30px);border-radius:var(--radius-xl);padding:28px;border:1px solid var(--border-light);box-shadow:var(--shadow-md);margin-bottom:20px;transition:var(--transition);animation:slideUp 0.5s ease-out backwards;position:relative;overflow:hidden}
+    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-light),transparent);opacity:0.5}
+    .panel:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);border-color:var(--border-medium)}
+    .panel>*{position:relative;z-index:2}
+    .panel-header{margin-bottom:18px}
+    .panel-title{font-size:1.05rem;font-weight:800;color:var(--text-primary);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+    .panel-title::before{content:'';width:4px;height:20px;background:var(--gradient-accent);border-radius:2px}
+    .panel-desc{color:var(--text-muted);font-size:0.82rem;margin-left:12px}
+    
+    .grid-layout{display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px}
+    @media(max-width:1024px){.grid-layout{grid-template-columns:1fr}}
+    
+    .plans-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(max-width:600px){.plans-grid{grid-template-columns:1fr}}
+    .plan-card{background:var(--bg-card);border-radius:var(--radius-lg);padding:14px;border:2px solid transparent;display:flex;align-items:center;gap:12px;cursor:pointer;transition:var(--transition)}
+    .plan-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:var(--shadow-lg)}
+    .plan-card.selected{border-color:var(--accent);background:linear-gradient(135deg,var(--accent-soft) 0%,rgba(139,92,246,0.08) 100%);box-shadow:var(--shadow-lg),var(--shadow-glow)}
+    .plan-icon{width:48px;height:48px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--shadow-sm)}
+    .plan-icon svg{width:28px;height:28px}
+    .os-ubuntu{background:linear-gradient(135deg,#dd4814 0%,#f47421 100%);border-radius:50%}
+    .os-windows{background:linear-gradient(135deg,#00a4ef 0%,#0078d4 100%)}
+    .os-windows-rdp{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);border:2px solid #0078d4}
+    .os-tailscale{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%)}
+    .plan-text{display:flex;flex-direction:column;gap:2px}
+    .plan-name{font-weight:700;font-size:0.92rem;color:var(--text-primary)}
+    .plan-detail{font-size:0.72rem;color:var(--text-muted)}
+    
+    .specs-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:768px){.specs-selector{grid-template-columns:1fr}}
+    .specs-option{background:var(--bg-card);border-radius:var(--radius-lg);padding:14px;border:2px solid transparent;cursor:pointer;transition:var(--transition)}
+    .specs-option:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:var(--shadow-md)}
+    .specs-option.selected{border-color:var(--success);background:linear-gradient(135deg,var(--success-soft) 0%,rgba(16,185,129,0.05) 100%);box-shadow:0 0 25px rgba(16,185,129,0.2)}
+    .specs-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .specs-chip{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;background:var(--accent-soft);color:var(--accent);text-transform:uppercase}
+    .specs-label{font-size:0.68rem;color:var(--text-muted)}
+    .specs-metrics{display:flex;flex-direction:column;gap:6px}
+    .specs-metric{display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:8px;font-size:0.78rem}
+    .specs-metric-label{color:var(--text-muted);font-weight:500}
+    .specs-metric-value{font-weight:700;color:var(--text-primary)}
+    .specs-bar{height:5px;border-radius:999px;background:var(--border-light);overflow:hidden}
+    .specs-bar-fill{height:100%;border-radius:999px;background:var(--gradient-accent)}
+    .specs-bar-fill--medium{width:50%}
+    .specs-bar-fill--high{width:90%}
+    .specs-footnote{font-size:0.68rem;color:var(--text-muted);margin-top:8px;font-style:italic}
+    
+    .form-group{margin-bottom:16px}
+    .label{display:block;font-size:0.82rem;font-weight:700;margin-bottom:6px;color:var(--text-primary)}
+    .input{width:100%;background:var(--bg-card);border-radius:var(--radius-md);border:2px solid var(--border-light);padding:12px 14px;font-size:0.88rem;color:var(--text-primary);transition:var(--transition);font-family:inherit}
+    .input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+    .input::placeholder{color:var(--text-muted)}
+    .input.input-error{border-color:var(--error);background:var(--error-soft)}
+    .input-hint{font-size:0.72rem;color:var(--text-muted);margin-top:4px}
+    .input-hint.error{color:var(--error)}
+    select.input{cursor:pointer}
+    input[type=range]{appearance:none;-webkit-appearance:none;width:100%;height:6px;background:var(--border-light);border-radius:999px;margin:10px 0}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--gradient-accent);cursor:pointer;box-shadow:var(--shadow-md)}
+    
+    .btn{width:100%;padding:16px 24px;border-radius:999px;border:none;background:var(--gradient-accent);color:white;font-weight:800;font-size:1rem;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow-md),var(--shadow-glow);transition:all 0.3s ease;position:relative;overflow:hidden}
+    .btn:hover:not(:disabled){transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+    .btn:disabled{opacity:0.6;cursor:not-allowed}
+    .btn-secondary{background:linear-gradient(135deg,var(--success) 0%,#14b8a6 100%)}
+    .btn-small{padding:10px 16px;font-size:0.82rem;width:auto}
+    .btn-danger{background:linear-gradient(135deg,var(--error),#dc2626)}
+    .btn-small-link{padding:7px 12px;border-radius:999px;border:none;font-size:0.78rem;font-weight:600;background:var(--accent-soft);color:var(--accent);text-decoration:none;display:inline-flex;align-items:center;gap:4px;cursor:pointer;transition:var(--transition)}
+    .btn-small-link:hover{background:var(--accent);color:white;transform:translateY(-2px)}
+    .btn-del{padding:7px 12px;border-radius:999px;border:none;font-size:0.78rem;font-weight:600;background:var(--error-soft);color:var(--error);cursor:pointer;transition:var(--transition)}
+    .btn-del:hover{background:var(--error);color:white;transform:translateY(-2px)}
+    
+    .progress-container{margin-bottom:16px}
+    .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .progress-title{font-size:0.88rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+    .progress-percent{font-size:0.85rem;font-weight:800;color:var(--accent)}
+    .progress-bar-wrapper{height:10px;background:var(--border-light);border-radius:999px;overflow:hidden}
+    .progress-bar-fill{height:100%;border-radius:999px;background:var(--gradient-accent);transition:width 0.5s ease-out}
+    .progress-bar-fill.success{background:linear-gradient(90deg,var(--success),#14b8a6)}
+    .progress-bar-fill.warning{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+    .progress-bar-fill.error{background:linear-gradient(90deg,var(--error),#f87171)}
+    .progress-info{display:flex;justify-content:space-between;margin-top:6px;font-size:0.72rem;color:var(--text-muted)}
+    
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    @media(max-width:768px){.stats-grid{grid-template-columns:1fr}}
+    .stat-card{background:var(--bg-card);border-radius:var(--radius-lg);padding:16px;border:1px solid var(--border-light);transition:var(--transition)}
+    .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+    .stat-icon{width:40px;height:40px;border-radius:var(--radius-md);background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;margin-bottom:10px;box-shadow:0 4px 15px var(--accent-glow)}
+    .stat-icon svg{width:18px;height:18px;color:white}
+    .stat-label{font-size:0.72rem;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase}
+    .stat-value{font-size:1.3rem;font-weight:900;color:var(--text-primary)}
+    .stat-value-small{font-size:1rem}
+    
+    .log-box{background:linear-gradient(180deg,rgba(15,23,42,0.95) 0%,rgba(2,6,23,0.98) 100%);color:#e2e8f0;border-radius:var(--radius-lg);padding:16px;height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.6;border:1px solid rgba(99,102,241,0.2)}
+    .log-entry{margin-bottom:4px;animation:slideUp 0.15s ease-out;padding:2px 0}
+    .log-entry .time{color:#64748b;margin-right:8px;font-size:0.68rem}
+    .log-entry.info{color:#93c5fd}
+    .log-entry.success{color:#4ade80}
+    .log-entry.error{color:#f87171}
+    .log-entry.pending{color:#fbbf24}
+    
+    .vps-item{background:var(--bg-card);border-radius:var(--radius-lg);padding:16px;border:1px solid var(--border-light);display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;transition:var(--transition);flex-wrap:wrap}
+    .vps-item:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--accent)}
+    .vps-item.expired{opacity:0.6;border-color:var(--error)}
+    .vps-info h4{font-size:0.95rem;font-weight:800;margin-bottom:5px;color:var(--text-primary)}
+    .vps-meta{font-size:0.72rem;color:var(--text-muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .tag{padding:3px 8px;border-radius:999px;font-weight:700;font-size:0.68rem;background:var(--accent-soft);color:var(--accent);text-transform:uppercase}
+    .tag-specs{background:var(--success-soft);color:var(--success)}
+    .tag-expired{background:var(--error-soft);color:var(--error)}
+    
+    .info-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border-light);gap:12px;flex-wrap:wrap}
+    .info-row:last-child{border-bottom:none}
+    .info-label{color:var(--text-muted);font-size:0.82rem;font-weight:500}
+    .info-value{font-weight:600;font-size:0.82rem;color:var(--text-primary);background:var(--bg-card);padding:6px 10px;border-radius:999px;display:flex;align-items:center;gap:6px;max-width:100%;overflow:hidden}
+    .copy-btn{background:var(--accent-soft);border:none;border-radius:6px;padding:3px 8px;font-size:0.68rem;font-weight:700;color:var(--accent);cursor:pointer;transition:all 0.15s ease}
+    .copy-btn:hover{background:var(--accent);color:white}
+    
+    .modal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.2s ease-out}
+    .modal.hidden{display:none}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(10px)}
+    .modal-dialog{position:relative;z-index:1;width:100%;max-width:500px;margin:16px;background:var(--bg-elevated);border-radius:var(--radius-xl);padding:24px;border:1px solid var(--border-light);box-shadow:var(--shadow-lg);animation:scaleIn 0.3s ease-out;max-height:90vh;overflow-y:auto}
+    .modal-title{font-size:1.05rem;font-weight:800;color:var(--text-primary);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:none;background:var(--bg-card);color:var(--text-muted);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+    .modal-close:hover{background:var(--error-soft);color:var(--error);transform:rotate(90deg)}
+    .confirm-text{font-size:0.85rem;color:var(--text-secondary);line-height:1.5;margin-bottom:16px}
+    .confirm-actions{display:flex;justify-content:flex-end;gap:10px}
+    .confirm-btn{padding:8px 16px;border-radius:999px;border:none;font-size:0.82rem;font-weight:700;cursor:pointer;transition:var(--transition)}
+    .confirm-btn.cancel{background:var(--bg-card);color:var(--text-primary)}
+    .confirm-btn.cancel:hover{background:var(--border-light)}
+    .confirm-btn.danger{background:linear-gradient(135deg,var(--error),#dc2626);color:white}
+    .confirm-btn.danger:hover{transform:translateY(-2px)}
+    
+    .toast{position:fixed;bottom:20px;right:20px;z-index:300;animation:slideUp 0.3s ease-out}
+    .toast.hidden{display:none}
+    .toast-inner{min-width:240px;max-width:360px;padding:14px 18px;border-radius:var(--radius-lg);display:flex;align-items:center;gap:10px;font-size:0.88rem;font-weight:600;background:var(--bg-elevated);color:var(--text-primary);box-shadow:var(--shadow-lg);border:1px solid var(--border-light)}
+    .toast.toast-success .toast-inner{background:linear-gradient(135deg,#16a34a,#15803d);color:white;border:none}
+    .toast.toast-error .toast-inner{background:linear-gradient(135deg,#dc2626,#b91c1c);color:white;border:none}
+    .toast.toast-info .toast-inner{background:var(--gradient-accent);color:white;border:none}
+    
+    /* Improved Toast */
+    .toast-inner { background: var(--bg-elevated) !important; color: var(--text-primary) !important; border: 1px solid var(--border-light) !important; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); padding: 16px 20px; }
+    .toast.toast-success .toast-inner { border-left: 4px solid var(--success) !important; }
+    .toast.toast-error .toast-inner { border-left: 4px solid var(--error) !important; }
+    .toast.toast-info .toast-inner { border-left: 4px solid var(--accent) !important; }
+    
+    /* Region Grid */
+    .region-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 8px; }
+    .region-option { background: var(--bg-card); border: 2px solid transparent; border-radius: var(--radius-md); padding: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: var(--transition); text-align: center; }
+    .region-option:hover { border-color: var(--accent-soft); transform: translateY(-2px); background: var(--bg-surface); }
+    .region-option.selected { border-color: var(--accent); background: var(--accent-soft); box-shadow: var(--shadow-md); }
+    .region-flag { font-size: 1.5rem; }
+    .region-name { font-size: 0.8rem; font-weight: 600; }
+
+    /* Resume Banner */
+    .resume-banner { background: var(--bg-surface); border: 1px solid var(--accent-soft); border-radius: var(--radius-lg); padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: var(--shadow-lg); animation: slideUp 0.4s ease-out; position: relative; overflow: hidden; }
+    .resume-banner::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gradient-accent); }
+    .resume-content { display: flex; align-items: center; gap: 16px; }
+    .resume-icon { width: 42px; height: 42px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; animation: spin 3s linear infinite; }
+    .resume-info h4 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; color: var(--text-primary); }
+    .resume-info p { font-size: 0.82rem; color: var(--text-muted); }
+    .resume-actions { display: flex; gap: 12px; align-items: center; }
+
+    .app-footer{border-top:1px solid var(--border-light);padding:16px 28px;background:var(--bg-surface);backdrop-filter:blur(16px)}
+    .footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted)}
+    .footer-discord{padding:8px 14px;border-radius:999px;text-decoration:none;font-weight:700;background:linear-gradient(135deg,#5865F2,#4752C4);color:white;font-size:0.78rem;transition:var(--transition)}
+    .footer-discord:hover{transform:translateY(-2px)}
+    
+    .text-center{text-align:center;color:var(--text-muted);padding:24px;font-size:0.88rem}
+    .template-actions{display:flex;gap:10px;margin-top:12px}
+    .template-actions button{flex:1}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.6s linear infinite}
+    
+    .time-badge{padding:4px 10px;border-radius:999px;font-size:0.72rem;font-weight:700;background:var(--success-soft);color:var(--success)}
+    .time-badge.low{background:var(--warning-soft);color:var(--warning)}
+    .time-badge.empty{background:var(--error-soft);color:var(--error)}
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    ::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* Custom Select & Button Fixes */
+    select.input { appearance: none; -webkit-appearance: none; padding-right: 32px; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; }
+    .btn-sm { width: auto; padding: 8px 16px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
 
-<div class="bg-aurora">
-  <div class="aurora-orb orb-1"></div>
-  <div class="aurora-orb orb-2"></div>
-</div>
+<div class="bg-effects"><div class="aurora"></div></div>
 
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+<button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+  <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+</button>
 
-<div class="layout">
-  <!-- Sidebar -->
+<div class="app-layout">
   <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
-      </div>
-      <div class="brand-text">
-        <h1>CodeCloud</h1>
-        <span>Free VPS Platform</span>
-      </div>
-    </div>
-
-    <nav class="nav-menu">
-      <button class="nav-item active" data-view="deploy">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        Deploy VPS
-      </button>
-      <button class="nav-item" data-view="instances">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-        My Instances
-      </button>
-      <button class="nav-item" data-view="settings">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </button>
-      <button class="nav-item hidden" id="nav-admin" onclick="location.href='admin.html'">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Admin Panel
-      </button>
-    </nav>
-
-    <div class="user-card">
-      <div class="user-info">
-        <div class="user-avatar" id="user-avatar">U</div>
-        <div class="user-meta">
-          <h4 id="user-name">User</h4>
-          <p id="user-balance">Loading...</p>
+    <div class="sidebar-header">
+      <div class="brand">
+        <div class="logo">
+          <div class="logo-inner">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:28px;height:28px;color:white;"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path></svg>
+          </div>
+        </div>
+        <div class="brand-info">
+          <div class="app-name">CodeCloud</div>
+          <div class="tagline">Made with ❤️ by _Justalazydev</div>
         </div>
       </div>
-      <button class="btn-logout" id="btn-logout">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Sign Out
+    </div>
+    
+    <div class="user-info">
+      <div class="user-avatar" id="user-avatar">U</div>
+      <div class="user-details">
+        <h4><span id="user-display-name">User</span></h4>
+        <p id="user-role">Member</p>
+        <p class="user-time" id="user-time-display">⏱️ Loading...</p>
+      </div>
+    </div>
+    
+    <nav class="nav-menu">
+      <button class="nav-item active" data-target="create">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+        <span>Deploy VPS</span>
+      </button>
+      <button class="nav-item" data-target="manager">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></span>
+        <span>My Instances</span>
+      </button>
+      <button class="nav-item" data-target="settings">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></span>
+        <span>Settings</span>
+      </button>
+      <button class="nav-item hidden" data-target="admin" id="nav-admin">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        <span>Admin Panel</span>
+      </button>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <button class="logout-btn" id="logout-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Đăng xuất
       </button>
     </div>
   </aside>
+  
+  <div class="sidebar-overlay" id="overlay"></div>
 
-  <!-- Main Content -->
-  <main class="main">
-    <header class="header">
-      <div class="header-left">
-        <button class="menu-btn" id="menu-btn" onclick="toggleSidebar()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-        </button>
-        <h1 class="page-title" id="page-title">Deploy VPS</h1>
-      </div>
-      <div class="header-actions">
-        <button class="btn-icon" id="theme-toggle" title="Toggle Theme">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        </button>
-      </div>
+  <main class="main-content">
+    <header class="top-bar">
+      <button class="menu-btn" id="menu-toggle" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18" stroke-linecap="round"/></svg>
+      </button>
+      <div class="page-title" id="page-title">Deploy New VPS</div>
     </header>
 
-    <!-- Deploy View -->
-    <div id="view-deploy" class="view active">
-      <div class="grid-2">
-        <!-- Left Column -->
-        <div>
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 class="card-title">1. Select Environment</h3>
-                <p class="card-desc">Choose operating system and connection type</p>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="plans-grid" id="plans-grid"></div>
+    <div class="scroll-area">
+      <div class="container">
+        
+        <!-- Resume Banner -->
+        <div id="resume-banner" class="resume-banner hidden">
+          <div class="resume-content">
+            <div class="resume-icon">🔄</div>
+            <div class="resume-info">
+              <h4>Phát hiện VPS đang tạo</h4>
+              <p>Repo: <strong id="resume-repo">...</strong> &bull; Đã chạy: <span id="resume-time">...</span></p>
             </div>
           </div>
+          <div class="resume-actions">
+            <button id="btn-resume-discard" class="btn-small-link" style="color:var(--text-muted)">Bỏ qua</button>
+            <button id="btn-resume-continue" class="btn btn-small">Quay lại</button>
+          </div>
+        </div>
 
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <h3 class="card-title">2. Configuration</h3>
-                <p class="card-desc">Customize your server settings</p>
+        <!-- View: Create VPS -->
+        <div id="view-create">
+          <div class="grid-layout">
+            <div>
+              <div class="panel">
+                <div class="panel-header">
+                  <h2 class="panel-title">Select Environment</h2>
+                  <p class="panel-desc">Choose your preferred OS and access method.</p>
+                </div>
+                <div class="plans-grid" id="plans-container"></div>
               </div>
-            </div>
-            <div class="card-body">
-              <div class="form-group">
-                <label class="label">Server Name</label>
-                <div class="input-row">
-                  <input type="text" id="repo-name" class="input" readonly>
-                  <button class="btn-icon" id="btn-regenerate" title="Regenerate">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-                  </button>
+
+              <div class="panel">
+                <div class="panel-header">
+                  <h2 class="panel-title">Select Specifications</h2>
+                  <p class="panel-desc">Private repos have limited resources. Public repos get max performance.</p>
+                </div>
+                <div class="specs-selector" id="specs-container">
+                  <div class="specs-option private" data-visibility="private">
+                    <div class="specs-header"><div class="specs-chip">Private</div><span class="specs-label">Secure</span></div>
+                    <div class="specs-metrics">
+                      <div class="specs-metric"><span class="specs-metric-label">CPU</span><div class="specs-bar"><div class="specs-bar-fill specs-bar-fill--medium"></div></div><span class="specs-metric-value">2 cores</span></div>
+                      <div class="specs-metric"><span class="specs-metric-label">RAM</span><div class="specs-bar"><div class="specs-bar-fill specs-bar-fill--medium"></div></div><span class="specs-metric-value">7 GB</span></div>
+                    </div>
+                    <div class="specs-footnote">Best for private projects.</div>
+                  </div>
+                  <div class="specs-option public selected" data-visibility="public">
+                    <div class="specs-header"><div class="specs-chip">Public</div><span class="specs-label">Maximum</span></div>
+                    <div class="specs-metrics">
+                      <div class="specs-metric"><span class="specs-metric-label">CPU</span><div class="specs-bar"><div class="specs-bar-fill specs-bar-fill--high"></div></div><span class="specs-metric-value">4 cores</span></div>
+                      <div class="specs-metric"><span class="specs-metric-label">RAM</span><div class="specs-bar"><div class="specs-bar-fill specs-bar-fill--high"></div></div><span class="specs-metric-value">16 GB</span></div>
+                    </div>
+                    <div class="specs-footnote">Best for demos & tools.</div>
+                  </div>
                 </div>
               </div>
 
-              <div class="form-group hidden" id="ngrok-group">
-                <label class="label">Ngrok Token</label>
-                <input type="password" id="ngrok-token" class="input" placeholder="Enter your Ngrok authtoken">
-              </div>
-
-              <div class="form-group">
-                <div class="flex-between">
-                  <label class="label">Duration</label>
-                  <span style="font-weight:700;color:var(--primary)" id="duration-display">60m</span>
+              <div class="panel">
+                <div class="panel-header">
+                  <h2 class="panel-title">Configuration</h2>
+                  <p class="panel-desc">Enter your settings.</p>
                 </div>
-                <input type="range" id="duration-slider" min="30" max="330" step="30" value="60" style="width:100%;accent-color:var(--primary)">
-              </div>
-
-              <button class="btn btn-primary" id="btn-deploy">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Deploy Now
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column -->
-        <div>
-          <div class="card hidden" id="progress-card">
-            <div class="card-header">
-              <div>
-                <h3 class="card-title">Deployment Status</h3>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="flex-between">
-                <span id="progress-text" style="font-weight:600">Initializing...</span>
-                <span id="progress-percent" style="color:var(--primary);font-weight:700">0%</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" id="progress-fill"></div>
-              </div>
-              <div class="terminal" id="logs"></div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Connection Info</h3>
-            </div>
-            <div class="card-body">
-              <div id="conn-info">
-                <div class="conn-empty">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.3;margin-bottom:12px"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-                  <p>Deploy a VPS to see connection details</p>
+                <div class="form-group">
+                  <label class="label">Repository Name</label>
+                  <input type="text" id="repo-name" class="input" placeholder="my-vps-01" autocomplete="off" />
+                  <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
+                </div>
+                <div class="form-group">
+                  <label class="label">🔑 GitHub Personal Access Token</label>
+                  <input type="password" id="github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
+                  <p class="input-hint">Token sẽ được tự động lưu trên trình duyệt.</p>
+                </div>
+                <div class="form-group hidden" id="ngrok-group">
+                  <label class="label">Ngrok Authtoken</label>
+                  <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
+                </div>
+                <div class="form-group hidden" id="region-group">
+                  <label class="label">🌍 Ngrok Region</label>
+                  <div class="region-grid" id="ngrok-region-selector">
+                    <!-- Populated by JS -->
+                  </div>
+                  <input type="hidden" id="ngrok-region" value="ap">
+                </div>
+                <div class="form-group" id="duration-group">
+                  <label class="label" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span>Session Duration</span>
+                    <span style="color:var(--accent);font-weight:800;"><span id="duration-val">60</span> min</span>
+                  </label>
+                  <input type="range" id="duration" min="30" max="330" step="30" value="60" />
+                  <p class="input-hint">Tối đa 5h30p (330 phút). Thời gian sẽ bị trừ từ tài khoản của bạn.</p>
+                </div>
+                <div id="tailscale-duration-notice" class="hidden" style="background:var(--accent-soft);border:1px solid var(--border-medium);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:8px;">
+                  <span>⏱️</span><span><strong>Tailscale:</strong> Fixed 6-hour duration.</span>
+                </div>
+                <div id="time-warning" class="hidden" style="background:var(--warning-soft);border:1px solid var(--warning);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;font-size:0.78rem;color:var(--warning);display:flex;align-items:center;gap:8px;">
+                  <span>⚠️</span><span id="time-warning-text">Bạn không đủ thời gian chơi!</span>
+                </div>
+                <div style="margin-top:16px;">
+                  <button id="btn-deploy" class="btn">🚀 Deploy VPS</button>
                 </div>
               </div>
             </div>
+
+            <div>
+              <div class="panel" id="progress-panel" style="display:none;">
+                <div class="panel-header"><h3 class="panel-title">Deployment Progress</h3></div>
+                <div class="progress-container">
+                  <div class="progress-header">
+                    <div class="progress-title"><span id="progress-status-icon"></span><span id="progress-status-text">Initializing...</span></div>
+                    <div class="progress-percent" id="progress-percent">0%</div>
+                  </div>
+                  <div class="progress-bar-wrapper"><div class="progress-bar-fill" id="progress-bar-fill" style="width:0%"></div></div>
+                  <div class="progress-info"><span id="progress-step-text">Step 0/0</span><span id="progress-elapsed">0m 0s</span></div>
+                </div>
+              </div>
+
+              <div id="tailscale-auth-banner" class="hidden" style="background:linear-gradient(135deg,rgba(34,211,238,0.1) 0%,rgba(14,165,233,0.06) 100%);border:1px solid rgba(34,211,238,0.3);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:18px;text-align:center;">
+                <h3 style="font-size:0.95rem;font-weight:800;margin-bottom:6px;">🔐 Tailscale Authentication Required</h3>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:12px;">Click the link below to authenticate your VPS.</p>
+                <a id="tailscale-auth-link" href="#" target="_blank" style="display:inline-block;padding:12px 24px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:white;text-decoration:none;border-radius:999px;font-weight:800;font-size:0.9rem;">🔗 Login to Tailscale</a>
+                <p style="font-size:0.72rem;color:var(--text-muted);margin-top:10px;">⚠️ After logging in, wait 10-30 seconds.</p>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header"><h3 class="panel-title">Deployment Logs</h3></div>
+                <div class="log-box" id="logs"></div>
+              </div>
+
+              <div class="panel">
+                <div class="panel-header"><h3 class="panel-title">Connection Info</h3></div>
+                <div id="conn-info"><div class="text-center">No active VPS deployment.</div></div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- View: Manager -->
+        <div id="view-manager" class="hidden">
+          <div class="panel">
+            <div class="panel-header"><h2 class="panel-title">Usage Statistics</h2></div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+                <div class="stat-label">Total VPS Created</div>
+                <div class="stat-value" id="stat-total-vps">0</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+                <div class="stat-label">Remaining Time</div>
+                <div class="stat-value stat-value-small" id="stat-remaining-time">0 min</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header"><h2 class="panel-title">Active Instances</h2></div>
+            <div id="vps-list" style="min-height:140px;"></div>
+          </div>
+        </div>
+
+        <!-- View: Settings -->
+        <div id="view-settings" class="hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Interface Settings</h2>
+            </div>
+            <div class="form-group">
+              <label class="label">Theme Preference</label>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button id="set-theme-light" class="specs-option" style="text-align:center;justify-content:center;display:flex;align-items:center;gap:8px;padding:12px;">☀️ Light</button>
+                <button id="set-theme-dark" class="specs-option" style="text-align:center;justify-content:center;display:flex;align-items:center;gap:8px;padding:12px;">🌙 Dark</button>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Account Settings</h2>
+            </div>
+            <button id="btn-forget-token" class="btn btn-secondary">🔑 Quên GitHub Token đã lưu</button>
+            <p class="specs-footnote" style="margin-top:10px;">Xoá token GitHub khỏi trình duyệt này.</p>
+          </div>
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">Application Data</h2>
+            </div>
+            <button id="btn-clear-data" class="btn btn-danger">🗑️ Clear All Local Data</button>
+            <p class="specs-footnote" style="text-align:center;margin-top:10px;">Removes all saved history and settings.</p>
+          </div>
+        </div>
+
+        <!-- View: Admin (redirect) -->
+        <div id="view-admin" class="hidden">
+          <div class="panel">
+            <div class="panel-header">
+              <h2 class="panel-title">🛡️ Admin Panel</h2>
+            </div>
+            <p style="margin-bottom:16px;">Truy cập trang Admin Panel đầy đủ:</p>
+            <a href="admin.html" class="btn">Mở Admin Panel →</a>
+          </div>
+        </div>
+
       </div>
     </div>
-
-    <!-- Instances View -->
-    <div id="view-instances" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Active Instances</h3>
-          <button class="btn-icon" onclick="renderInstances()" title="Refresh">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          </button>
-        </div>
-        <div class="card-body">
-          <div class="instances-grid" id="instances-grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Settings View -->
-    <div id="view-settings" class="view">
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Settings</h3>
-        </div>
-        <div class="card-body">
-          <button class="btn btn-danger" id="btn-clear-data" style="max-width:320px">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-            Clear Local Data
-          </button>
-        </div>
-      </div>
-    </div>
-
   </main>
 </div>
 
-<!-- Toast -->
-<div id="toast" class="toast"></div>
+<footer class="app-footer">
+  <div class="footer-inner">
+    <span>© 2025 CodeCloud VPS · Made by <strong>_Justalazydev</strong></span>
+    <a href="https://discord.gg/Q3p8mrZFJT" target="_blank" class="footer-discord">Join Discord</a>
+  </div>
+</footer>
 
-<!-- Captcha Modal -->
-<div class="modal" id="captcha-modal">
-  <div class="modal-content">
-    <h3>Security Verification</h3>
-    <div class="h-captcha" data-sitekey="a044fd58-a078-46ca-9f5e-71a6ecbcd500" data-callback="onCaptchaSuccess"></div>
-    <button class="btn btn-ghost" onclick="$('#captcha-modal').classList.remove('active')" style="margin-top:18px;width:auto">Cancel</button>
+<div id="toast" class="toast hidden"><div class="toast-inner"><span id="toast-icon"></span><span id="toast-message"></span></div></div>
+
+<div id="confirm-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog">
+    <h3 class="modal-title" id="confirm-title">🗑️ Confirm</h3>
+    <p class="confirm-text" id="confirm-text">Are you sure?</p>
+    <div class="confirm-actions">
+      <button class="confirm-btn cancel" id="confirm-cancel-btn">Cancel</button>
+      <button class="confirm-btn danger" id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div id="captcha-modal" class="modal hidden">
+  <div class="modal-backdrop"></div>
+  <div class="modal-dialog" style="text-align:center;max-width:380px;">
+    <button class="modal-close" id="captcha-close">&times;</button>
+    <div style="font-size:3.5rem;margin-bottom:12px;">🤖</div>
+    <h3 class="modal-title" style="justify-content:center;margin-bottom:10px;">Bạn có phải robot không?</h3>
+    <p class="confirm-text" style="margin-bottom:24px;">Vui lòng xác minh bạn là con người</p>
+    <div style="display:flex;justify-content:center;">
+      <div class="h-captcha" data-sitekey="a044fd58-a078-46ca-9f5e-71a6ecbcd500" data-callback="onCaptchaSuccess"></div>
+    </div>
   </div>
 </div>
 
 <script>
-  // Constants
+(function() {
+  'use strict';
+
+  const THEME_KEY = 'cc_theme';
+  const NGROK_KEY = 'cc_ngrok_token';
+  const GITHUB_KEY = 'cc_github_token';
+  const STORE_KEY = 'cc_vps_store';
+  const STATS_KEY = 'cc_vps_stats';
+  const SESSION_KEY = 'cc_active_session';
+  const CURRENT_USER_KEY = 'cc_current_user';
+  const USER_TIME_KEY = 'cc_user_time';
+  
+  const ADMIN_USERS = ['vanmanh', 'depchai'];
+  const MAX_VPS_DURATION = 330;
+
   const PLANS = [
-    { id: 'ubuntu_web', name: 'Ubuntu', desc: 'XFCE Desktop', icon: '🐧' },
-    { id: 'win_web', name: 'Windows Web', desc: 'In-Browser', icon: '🪟' },
-    { id: 'win_rdp', name: 'Windows RDP', desc: 'Remote Desktop', icon: '🖥️' },
-    { id: 'win_tailscale', name: 'Tailscale', desc: 'Private Network', icon: '🔒' }
+    { id: 'ubuntu_web', name: 'Ubuntu Desktop', desc: 'XFCE via NoVNC' },
+    { id: 'win_web', name: 'Windows Web', desc: 'Windows via NoVNC' },
+    { id: 'win_rdp', name: 'Windows RDP', desc: 'RDP via Ngrok' },
+    { id: 'win_tailscale', name: 'Win Tailscale', desc: 'RDP via Tailscale (6h)' }
   ];
-  const ADMINS = ['vanmanh', 'depchai'];
 
-  // Helpers
-  window.$ = s => document.querySelector(s);
-  window.$$ = s => document.querySelectorAll(s);
-
-  function showToast(msg, type = 'success') {
-    const t = $('#toast');
-    t.textContent = msg;
-    t.className = `toast toast-${type} active`;
-    setTimeout(() => t.classList.remove('active'), 3500);
-  }
-
-  function toggleSidebar() {
-    $('#sidebar').classList.toggle('open');
-    $('#overlay').classList.toggle('active');
-  }
-
-  function generateRepoName() {
-    return 'vps-' + Math.floor(Math.random() * 100000);
-  }
-
-  // Auth Check
-  let currentUser = null;
-  try {
-    currentUser = JSON.parse(localStorage.getItem('cc_current_user'));
-    if (!currentUser) throw new Error();
-    $('#user-name').textContent = currentUser.username;
-    $('#user-avatar').textContent = currentUser.username[0].toUpperCase();
-    $('#user-balance').textContent = currentUser.isAdmin ? 'Administrator' : 'Free Plan';
-    if (ADMINS.includes(currentUser.username.toLowerCase()) || currentUser.isAdmin) {
-      $('#nav-admin').classList.remove('hidden');
-    }
-  } catch {
-    location.href = 'login.html';
-  }
-
-  // Logout
-  $('#btn-logout').onclick = () => {
-    localStorage.removeItem('cc_current_user');
-    location.href = 'login.html';
-  };
-
-  // Theme Toggle
-  $('#theme-toggle').onclick = () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('cc_theme', next);
-  };
-
-  // Navigation
-  $$('.nav-item[data-view]').forEach(btn => {
-    btn.onclick = () => {
-      $$('.nav-item').forEach(n => n.classList.remove('active'));
-      btn.classList.add('active');
-      $$('.view').forEach(v => v.classList.remove('active'));
-      $(`#view-${btn.dataset.view}`).classList.add('active');
-      $('#page-title').textContent = btn.textContent.trim();
-      if (window.innerWidth <= 1024) toggleSidebar();
-      if (btn.dataset.view === 'instances') renderInstances();
-    };
-  });
-
-  // Render Plans
-  let selectedPlan = PLANS[0];
-  const plansGrid = $('#plans-grid');
-  PLANS.forEach(plan => {
-    const el = document.createElement('div');
-    el.className = `plan-card ${plan.id === selectedPlan.id ? 'active' : ''}`;
-    el.innerHTML = `
-      <div class="plan-icon">${plan.icon}</div>
-      <div class="plan-info">
-        <h4>${plan.name}</h4>
-        <p>${plan.desc}</p>
-      </div>
-    `;
-    el.onclick = () => {
-      $$('.plan-card').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
-      selectedPlan = plan;
-      if (plan.id === 'win_rdp') $('#ngrok-group').classList.remove('hidden');
-      else $('#ngrok-group').classList.add('hidden');
-    };
-    plansGrid.appendChild(el);
-  });
-
-  // Repo Name
-  $('#repo-name').value = generateRepoName();
-  $('#btn-regenerate').onclick = () => $('#repo-name').value = generateRepoName();
-
-  // Duration
-  $('#duration-slider').oninput = e => $('#duration-display').textContent = e.target.value + 'm';
-
-  // Deploy
+  const REGIONS = [
+    { id: 'ap', name: 'Asia Pacific', flag: '🌏' },
+    { id: 'us', name: 'United States', flag: '🇺🇸' },
+    { id: 'eu', name: 'Europe', flag: '🇪🇺' },
+    { id: 'au', name: 'Australia', flag: '🇦🇺' },
+    { id: 'sa', name: 'South America', flag: '🇧🇷' },
+    { id: 'jp', name: 'Japan', flag: '🇯🇵' },
+    { id: 'in', name: 'India', flag: '🇮🇳' }
+  ];
+  
+  let selectedPlan = PLANS[0], selectedSpecs = 'public', currentDeployment = null, pollInterval = null, deploymentStartTime = null, elapsedTimer = null, isTailscalePlan = false;
   let isDeploying = false;
-  $('#btn-deploy').onclick = () => {
-    if (isDeploying) return;
-    $('#captcha-modal').classList.add('active');
+  let currentUser = null;
+  let confirmCallback = null;
+  let userTimeMinutes = 0;
+
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+
+  let toastTimer = null;
+  window.showToast = function(msg, type = 'info') {
+    const toast = $('#toast');
+    toast.classList.remove('toast-info', 'toast-success', 'toast-error', 'hidden');
+    toast.classList.add('toast-' + type);
+    $('#toast-message').textContent = msg;
+    $('#toast-icon').innerHTML = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.add('hidden'), 3500);
   };
 
-  window.onCaptchaSuccess = () => {
-    $('#captcha-modal').classList.remove('active');
-    startDeploy();
-  };
+  function openConfirmModal(title, text, callback) {
+    $('#confirm-title').textContent = title;
+    $('#confirm-text').textContent = text;
+    confirmCallback = callback;
+    $('#confirm-modal').classList.remove('hidden');
+  }
 
-  async function startDeploy() {
-    isDeploying = true;
-    $('#progress-card').classList.remove('hidden');
-    const btn = $('#btn-deploy');
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20" style="animation:spin 1s linear infinite"><circle cx="12" cy="12" r="10" stroke-dasharray="60" stroke-dashoffset="20"/></svg> Deploying...';
-    btn.disabled = true;
+  function closeConfirmModal() {
+    $('#confirm-modal').classList.add('hidden');
+    confirmCallback = null;
+  }
 
-    const logs = $('#logs');
-    logs.innerHTML = '';
-    const addLog = (msg, type = 'info') => {
-      logs.innerHTML += `<div class="log-entry"><span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-msg log-${type}">${msg}</span></div>`;
-      logs.scrollTop = logs.scrollHeight;
-    };
+  $('#confirm-cancel-btn').onclick = closeConfirmModal;
+  $('#confirm-modal').onclick = e => { if (e.target.classList.contains('modal-backdrop')) closeConfirmModal(); };
+  $('#confirm-ok-btn').onclick = () => { if (typeof confirmCallback === 'function') confirmCallback(); closeConfirmModal(); };
 
-    addLog('Starting deployment...', 'info');
-    $('#progress-fill').style.width = '20%';
-    $('#progress-percent').textContent = '20%';
+  function isAdmin() {
+    return currentUser && ADMIN_USERS.includes(currentUser.username?.toLowerCase());
+  }
 
+  function checkAuth() {
     try {
-      const res = await fetch('/api/vps', {
+      const saved = localStorage.getItem(CURRENT_USER_KEY);
+      if (!saved) { window.location.href = 'login.html'; return false; }
+      currentUser = JSON.parse(saved);
+      return true;
+    } catch(e) { window.location.href = 'login.html'; return false; }
+  }
+
+  function updateUserUI() {
+    if (!currentUser) return;
+    $('#user-display-name').textContent = currentUser.username;
+    $('#user-avatar').textContent = currentUser.username.charAt(0).toUpperCase();
+    $('#user-role').textContent = isAdmin() ? 'Admin' : 'Member';
+    if (isAdmin()) $('#nav-admin').classList.remove('hidden');
+    else $('#nav-admin').classList.add('hidden');
+  }
+  
+  function formatTime(minutes) {
+    if (minutes < 60) return `${minutes} phút`;
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h} giờ`;
+  }
+  
+  function updateTimeDisplay() {
+    const timeDisplay = $('#user-time-display');
+    if (userTimeMinutes <= 0) {
+      timeDisplay.textContent = '⏱️ Hết thời gian!';
+      timeDisplay.style.color = 'var(--error)';
+    } else if (userTimeMinutes < 30) {
+      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.style.color = 'var(--warning)';
+    } else {
+      timeDisplay.textContent = `⏱️ ${formatTime(userTimeMinutes)}`;
+      timeDisplay.style.color = 'var(--success)';
+    }
+    const statEl = $('#stat-remaining-time');
+    if (statEl) statEl.textContent = formatTime(userTimeMinutes);
+  }
+  
+  async function fetchTimeFromServer() {
+    if (!currentUser) return;
+    try {
+      const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          planId: selectedPlan.id,
-          durationMinutes: parseInt($('#duration-slider').value),
-          repoName: $('#repo-name').value,
-          ngrokToken: $('#ngrok-token').value,
-          repoVisibility: 'public',
-          username: currentUser.username
-        })
+        body: JSON.stringify({ action: 'getTime', username: currentUser.username })
       });
       const data = await res.json();
-
-      if (!data.success) throw new Error(data.message);
-
-      addLog('Repository created: ' + data.repoUrl, 'success');
-      $('#progress-fill').style.width = '50%';
-      $('#progress-percent').textContent = '50%';
-
-      addLog('Waiting for VPS to start...', 'warn');
-      let checks = 0;
-      const poll = setInterval(async () => {
-        checks++;
-        if (checks > 45) {
-          clearInterval(poll);
-          addLog('Timeout waiting for VPS link', 'error');
-          btn.disabled = false;
-          btn.innerHTML = originalHTML;
-          isDeploying = false;
-          return;
-        }
-
-        try {
-          const findRes = await fetch('/api/find-link', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ owner: data.owner, repoName: data.repoUrl.split('/').pop() })
-          });
-          const findData = await findRes.json();
-
-          if (findData.found) {
-            clearInterval(poll);
-            $('#progress-fill').style.width = '100%';
-            $('#progress-percent').textContent = '100%';
-            addLog('VPS Ready!', 'success');
-            showToast('VPS Deployed Successfully!');
-
-            $('#conn-info').innerHTML = `
-              <div class="conn-field">
-                <label class="label">Connect URL</label>
-                <input class="input" readonly value="${findData.vpsLink}" onclick="this.select();document.execCommand('copy');showToast('Copied!')">
-              </div>
-              <div class="conn-field">
-                <label class="label">Password</label>
-                <input class="input" readonly value="${findData.vpsPassword || data.vpsPassword}" onclick="this.select();document.execCommand('copy');showToast('Copied!')">
-              </div>
-              <p style="font-size:0.8rem;color:var(--text-muted);margin-top:12px;text-align:center">Click to copy</p>
-            `;
-
-            // Save to local storage
-            const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-            list.push({
-              repo: data.repoUrl.split('/').pop(),
-              owner: data.owner,
-              plan: selectedPlan.name,
-              created: new Date().toLocaleString()
-            });
-            localStorage.setItem('cc_vps_list', JSON.stringify(list));
-
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-            isDeploying = false;
-          } else if (findData.message) {
-            $('#progress-text').textContent = findData.message.slice(0, 55);
-            if (findData.progress) {
-              $('#progress-fill').style.width = findData.progress + '%';
-              $('#progress-percent').textContent = findData.progress + '%';
-            }
-          }
-        } catch (e) {
-          // Ignore polling errors
-        }
-      }, 5000);
-
+      if (data.success) {
+        userTimeMinutes = data.minutes || 0;
+        localStorage.setItem(USER_TIME_KEY + '_' + currentUser.username, String(userTimeMinutes));
+      }
     } catch (e) {
-      addLog(e.message, 'error');
-      btn.disabled = false;
-      btn.innerHTML = originalHTML;
-      isDeploying = false;
+      console.error('Error fetching time:', e);
+      const localTime = localStorage.getItem(USER_TIME_KEY + '_' + currentUser.username);
+      userTimeMinutes = localTime ? parseInt(localTime) : 0;
     }
+    updateTimeDisplay();
+  }
+  
+  async function updateTimeOnServer(minutes, operation = 'deduct') {
+    if (!currentUser) return;
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'updateTime', username: currentUser.username, minutes, operation })
+      });
+      const data = await res.json();
+      if (data.success) {
+        userTimeMinutes = data.newMinutes;
+        localStorage.setItem(USER_TIME_KEY + '_' + currentUser.username, String(userTimeMinutes));
+      }
+    } catch (e) { console.error('Error updating time:', e); }
+    updateTimeDisplay();
+  }
+  
+  async function deductTime(minutes) { await updateTimeOnServer(minutes, 'deduct'); }
+
+  $('#logout-btn').onclick = () => {
+    openConfirmModal('Đăng xuất', 'Bạn có chắc muốn đăng xuất?', () => {
+      currentUser = null;
+      localStorage.removeItem(CURRENT_USER_KEY);
+      try { sessionStorage.removeItem('loginPageVisited'); } catch(e) {}
+      window.location.href = 'login.html';
+    });
+  };
+
+  function log(msg, type = 'info') {
+    const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    const row = document.createElement('div');
+    row.className = 'log-entry ' + type;
+    row.innerHTML = `<span class="time">${time}</span>${msg}`;
+    const logs = $('#logs');
+    logs.appendChild(row);
+    logs.scrollTop = logs.scrollHeight;
   }
 
-  // Instances
-  function renderInstances() {
-    const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-    const grid = $('#instances-grid');
-    grid.innerHTML = '';
+  function clearLogs() { $('#logs').innerHTML = ''; }
 
-    if (list.length === 0) {
-      grid.innerHTML = `
-        <div class="conn-empty" style="grid-column:1/-1">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48" style="opacity:0.3;margin-bottom:12px"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          <p>No active instances</p>
-        </div>
-      `;
-      return;
-    }
+  async function initApp() {
+    if (!checkAuth()) return;
+    updateUserUI();
+    initTheme();
+    initSidebar();
+    initNavigation();
+    renderPlans();
+    initSpecsSelector();
+    initRegionSelector();
+    initDurationSlider();
+    initRepoNameValidation();
+    initSettings();
+    initDeploy();
+    loadSavedTokens();
+    initModals();
+    checkActiveSession();
+    await fetchTimeFromServer();
+  }
 
-    list.forEach((vps, idx) => {
-      const el = document.createElement('div');
-      el.className = 'instance-card';
-      el.innerHTML = `
-        <div class="instance-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="24" height="24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="instance-info">
-          <h4>${vps.repo}</h4>
-          <p>${vps.plan} • ${vps.created}</p>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="deleteVps(${idx}, '${vps.owner}', '${vps.repo}')">Delete</button>
-      `;
-      grid.appendChild(el);
+  function initTheme() {
+    const rootEl = document.documentElement, themeBtn = $('#theme-toggle');
+    const setTheme = t => { rootEl.setAttribute('data-theme', t); try { localStorage.setItem(THEME_KEY, t); } catch(e) {} $('#set-theme-light')?.classList.toggle('selected', t === 'light'); $('#set-theme-dark')?.classList.toggle('selected', t === 'dark'); };
+    themeBtn.onclick = () => setTheme((rootEl.getAttribute('data-theme') || 'light') === 'light' ? 'dark' : 'light');
+    $('#set-theme-light').onclick = () => setTheme('light'); 
+    $('#set-theme-dark').onclick = () => setTheme('dark');
+    const currentTheme = localStorage.getItem(THEME_KEY) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    $('#set-theme-light')?.classList.toggle('selected', currentTheme === 'light');
+    $('#set-theme-dark')?.classList.toggle('selected', currentTheme === 'dark');
+  }
+
+  function initSidebar() {
+    const sidebar = $('#sidebar'), overlay = $('#overlay'), menuBtn = $('#menu-toggle');
+    menuBtn.onclick = () => sidebar.classList.toggle('active');
+    overlay.onclick = () => sidebar.classList.remove('active');
+  }
+
+  function initNavigation() {
+    const navItems = $$('.nav-item[data-target]');
+    const views = { create: $('#view-create'), manager: $('#view-manager'), settings: $('#view-settings'), admin: $('#view-admin') };
+    const titles = { create: 'Deploy New VPS', manager: 'Instance Manager', settings: 'Settings', admin: 'Admin Panel' };
+    navItems.forEach(btn => {
+      btn.onclick = () => {
+        const target = btn.dataset.target;
+        if (target === 'admin' && !isAdmin()) { showToast('Không có quyền truy cập!', 'error'); return; }
+        navItems.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        Object.values(views).forEach(v => v?.classList.add('hidden'));
+        views[target]?.classList.remove('hidden');
+        $('#page-title').textContent = titles[target] || 'CodeCloud';
+        if (target === 'manager') { renderManager(); renderStats(); }
+        if (window.innerWidth < 1024) $('#sidebar').classList.remove('active');
+      };
     });
   }
 
-  window.deleteVps = async (idx, owner, repo) => {
-    if (!confirm('Delete this VPS?')) return;
-    try {
-      await fetch('/api/delete-vps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ owner, repo })
-      });
-      const list = JSON.parse(localStorage.getItem('cc_vps_list') || '[]');
-      list.splice(idx, 1);
-      localStorage.setItem('cc_vps_list', JSON.stringify(list));
-      renderInstances();
-      showToast('VPS Deleted');
-    } catch (e) {
-      showToast('Error deleting VPS', 'error');
-    }
-  };
-
-  // Settings
-  $('#btn-clear-data').onclick = () => {
-    if (confirm('Clear all local data? You will be logged out.')) {
-      localStorage.clear();
-      location.reload();
-    }
-  };
-</script>
-
-<style>
-  @keyframes spin {
-    to { transform: rotate(360deg); }
+  function updateDurationUI() {
+    if (isTailscalePlan) { $('#duration-group').classList.add('hidden'); $('#tailscale-duration-notice').classList.remove('hidden'); } 
+    else { $('#duration-group').classList.remove('hidden'); $('#tailscale-duration-notice').classList.add('hidden'); }
+    const isRdp = selectedPlan.id === 'win_rdp';
+    $('#ngrok-group').classList.toggle('hidden', !isRdp);
+    $('#region-group').classList.toggle('hidden', !isRdp);
+    checkTimeWarning();
   }
-</style>
+  
+  function checkTimeWarning() {
+    const duration = isTailscalePlan ? 360 : parseInt($('#duration').value) || 60;
+    const warning = $('#time-warning');
+    const warningText = $('#time-warning-text');
+    if (userTimeMinutes < 1) {
+      warning.classList.remove('hidden');
+      warningText.textContent = 'Bạn đã hết thời gian chơi! Liên hệ admin để được cộng thêm.';
+    } else if (userTimeMinutes < duration) {
+      warning.classList.remove('hidden');
+      warningText.textContent = `Bạn chỉ còn ${formatTime(userTimeMinutes)}. VPS sẽ chạy tối đa ${formatTime(userTimeMinutes)}.`;
+    } else {
+      warning.classList.add('hidden');
+    }
+  }
 
+  const OS_ICONS = {
+    ubuntu_web: `<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="14" fill="white"/><circle cx="16" cy="8" r="3.5" fill="#E95420"/><circle cx="9" cy="20" r="3.5" fill="#E95420"/><circle cx="23" cy="20" r="3.5" fill="#E95420"/><circle cx="16" cy="16" r="5" stroke="#E95420" stroke-width="2.5" fill="none"/></svg>`,
+    win_web: `<svg viewBox="0 0 32 32" fill="none"><rect x="3" y="3" width="12" height="12" fill="white" rx="2"/><rect x="17" y="3" width="12" height="12" fill="white" rx="2"/><rect x="3" y="17" width="12" height="12" fill="white" rx="2"/><rect x="17" y="17" width="12" height="12" fill="white" rx="2"/></svg>`,
+    win_rdp: `<svg viewBox="0 0 32 32" fill="none"><rect x="3" y="5" width="26" height="18" rx="2" fill="#0078d4"/><rect x="5" y="7" width="10" height="7" fill="white" rx="1"/><rect x="17" y="7" width="10" height="7" fill="white" rx="1"/><rect x="5" y="16" width="10" height="5" fill="white" rx="1"/><rect x="17" y="16" width="10" height="5" fill="white" rx="1"/><rect x="12" y="23" width="8" height="2" fill="#4a5568"/><rect x="9" y="25" width="14" height="3" rx="1" fill="#4a5568"/></svg>`,
+    win_tailscale: `<svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="9" r="5" fill="#38bdf8"/><circle cx="7" cy="23" r="5" fill="#38bdf8"/><circle cx="25" cy="23" r="5" fill="#38bdf8"/><line x1="16" y1="14" x2="9" y2="19" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="14" x2="23" y2="19" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/><line x1="12" y1="23" x2="20" y2="23" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="9" r="2" fill="white"/><circle cx="7" cy="23" r="2" fill="white"/><circle cx="25" cy="23" r="2" fill="white"/></svg>`
+  };
+  const OS_CLASSES = { ubuntu_web: 'os-ubuntu', win_web: 'os-windows', win_rdp: 'os-windows-rdp', win_tailscale: 'os-tailscale' };
+
+  function renderPlans() {
+    const container = $('#plans-container');
+    container.innerHTML = '';
+    PLANS.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'plan-card' + (selectedPlan.id === p.id ? ' selected' : '');
+      el.innerHTML = `<div class="plan-icon ${OS_CLASSES[p.id]}">${OS_ICONS[p.id]}</div><div class="plan-text"><span class="plan-name">${p.name}</span><span class="plan-detail">${p.desc}</span></div>`;
+      el.onclick = () => { selectedPlan = p; isTailscalePlan = p.id === 'win_tailscale'; updateDurationUI(); renderPlans(); };
+      container.appendChild(el);
+    });
+  }
+
+  function initSpecsSelector() {
+    $('#specs-container').querySelectorAll('.specs-option').forEach(opt => opt.onclick = () => {
+      $('#specs-container').querySelectorAll('.specs-option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+      selectedSpecs = opt.dataset.visibility;
+    });
+  }
+
+  function initRegionSelector() {
+    const container = $('#ngrok-region-selector');
+    const input = $('#ngrok-region');
+    container.innerHTML = '';
+    REGIONS.forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'region-option' + (r.id === 'ap' ? ' selected' : '');
+      el.innerHTML = `<span class="region-flag">${r.flag}</span><span class="region-name">${r.name}</span>`;
+      el.onclick = () => {
+        $$('.region-option').forEach(o => o.classList.remove('selected'));
+        el.classList.add('selected');
+        input.value = r.id;
+      };
+      container.appendChild(el);
+    });
+  }
+
+  function initDurationSlider() {
+    const durationSlider = $('#duration'), durationDisplay = $('#duration-val');
+    durationSlider.oninput = () => { durationDisplay.textContent = durationSlider.value; checkTimeWarning(); };
+  }
+
+  function isValidRepoName(name) {
+    if (!name || typeof name !== 'string') return false;
+    if (name.length < 1 || name.length > 100) return false;
+    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(name)) return false;
+    if (/\.\.\./.test(name)) return false;
+    return true;
+  }
+
+  function initRepoNameValidation() {
+    const input = $('#repo-name');
+    const hint = $('#repo-name-hint');
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
+      if (!val) { input.classList.remove('input-error'); hint.classList.remove('error'); hint.textContent = 'Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)'; }
+      else if (!isValidRepoName(val)) { input.classList.add('input-error'); hint.classList.add('error'); hint.textContent = '❌ Tên không hợp lệ!'; }
+      else { input.classList.remove('input-error'); hint.classList.remove('error'); hint.textContent = '✅ Tên hợp lệ'; }
+    });
+  }
+
+  function resetConnInfo() { $('#conn-info').innerHTML = '<div class="text-center">No active VPS deployment.</div>'; }
+  function showProgressPanel() { $('#progress-panel').style.display = 'block'; }
+  function hideProgressPanel() { $('#progress-panel').style.display = 'none'; }
+  function showTailscaleAuthBanner(url) { $('#tailscale-auth-link').href = url; $('#tailscale-auth-banner').classList.remove('hidden'); }
+  function hideTailscaleAuthBanner() { $('#tailscale-auth-banner').classList.add('hidden'); }
+
+  function updateProgress(data) {
+    const { progress = 0, status, message, tailscaleAuthUrl } = data;
+    $('#progress-percent').textContent = `${Math.round(progress)}%`;
+    $('#progress-bar-fill').style.width = `${progress}%`;
+    let barClass = '';
+    if (tailscaleAuthUrl) { barClass = 'warning'; showTailscaleAuthBanner(tailscaleAuthUrl); } else hideTailscaleAuthBanner();
+    if (status === 'completed' || progress >= 100) { barClass = data.found || data.conclusion === 'success' ? 'success' : 'error'; }
+    else if (['queued', 'pending', 'waiting'].includes(status)) { barClass = 'warning'; }
+    $('#progress-status-text').textContent = message || 'Processing...';
+    $('#progress-bar-fill').className = 'progress-bar-fill' + (barClass ? ' ' + barClass : '');
+    $('#progress-step-text').textContent = data.totalSteps > 0 ? `Step ${data.currentStepNum || 0}/${data.totalSteps}` : status === 'queued' ? 'Waiting...' : 'Initializing...';
+  }
+
+  function startElapsedTimer() { deploymentStartTime = Date.now(); updateElapsedTime(); elapsedTimer = setInterval(updateElapsedTime, 1000); }
+  function stopElapsedTimer() { if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; } }
+  function updateElapsedTime() { if (!deploymentStartTime) return; const elapsed = Math.floor((Date.now() - deploymentStartTime) / 1000); $('#progress-elapsed').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`; }
+
+  function checkActiveSession() {
+    try {
+      const saved = sessionStorage.getItem(SESSION_KEY);
+      if (!saved) return;
+      const session = JSON.parse(saved);
+      // If session is older than 30 mins and no link found, maybe discard? keeping it simple for now.
+      
+      $('#resume-banner').classList.remove('hidden');
+      $('#resume-repo').textContent = session.repo;
+      
+      const updateBannerTime = () => {
+        const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
+        $('#resume-time').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`;
+      };
+      updateBannerTime();
+      const bannerTimer = setInterval(updateBannerTime, 1000);
+
+      $('#btn-resume-discard').onclick = () => {
+        clearInterval(bannerTimer);
+        clearDeploymentSession();
+        $('#resume-banner').classList.add('hidden');
+      };
+
+      $('#btn-resume-continue').onclick = () => {
+        clearInterval(bannerTimer);
+        $('#resume-banner').classList.add('hidden');
+        restoreSession(session);
+      };
+    } catch(e) { console.error(e); }
+  }
+
+  function restoreSession(session) {
+    currentDeployment = session;
+    deploymentStartTime = session.startTime;
+    isTailscalePlan = session.isTailscalePlan;
+    isDeploying = true;
+    
+    // Restore UI
+    $('#repo-name').value = session.repo;
+    showProgressPanel();
+    updateProgress({ progress: 50, status: 'in_progress', message: 'Resuming session...' });
+    log('🔄 Resuming previous session...', 'info');
+    
+    startElapsedTimer();
+    pollInterval = setInterval(pollForLink, 10000);
+    pollForLink();
+  }
+
+  function saveDeploymentSession() { if (!currentDeployment) return; try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...currentDeployment, startTime: deploymentStartTime, savedAt: Date.now(), isTailscalePlan })); } catch(e) {} }
+  function clearDeploymentSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {} }
+
+  function getPlanDisplayName(planId) { return ({ ubuntu_web: 'Ubuntu', win_web: 'Windows Web', win_rdp: 'Windows RDP', win_tailscale: 'Win Tailscale' }[planId] || planId); }
+
+  function stopPolling() { if (pollInterval) { clearInterval(pollInterval); pollInterval = null; } stopElapsedTimer(); }
+
+  async function pollForLink() {
+    if (!currentDeployment) return;
+    try {
+      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: currentDeployment.token, repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
+      const data = await res.json();
+      updateProgress(data);
+      if (data.tailscaleAuthUrl) { log(`🔐 Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
+      if (data.found && data.vpsLink) {
+        log('✅ VPS ready!', 'success'); log(`🔗 ${data.vpsLink}`, 'success'); hideTailscaleAuthBanner();
+        currentDeployment.vpsLink = data.vpsLink; if (data.vpsPassword) currentDeployment.vpsPassword = data.vpsPassword;
+        updateConnInfo(currentDeployment); updateHistoryWithLink(currentDeployment.repo, data.vpsLink);
+        stopPolling(); clearDeploymentSession(); showToast('VPS is ready!', 'success');
+        isDeploying = false;
+      } else { log(`⏳ ${data.message || 'Waiting...'}`, 'pending'); saveDeploymentSession(); }
+    } catch(err) { log(`⚠️ ${err.message}`, 'error'); }
+  }
+
+  function updateHistoryWithLink(repo, link) { const list = getVpsList(); const idx = list.findIndex(x => x.repo === repo); if (idx !== -1) { list[idx].link = link; localStorage.setItem(STORE_KEY, JSON.stringify(list)); } }
+  function getVpsList() { try { return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch { return []; } }
+  function saveVpsList(list) { try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch(e) {} }
+  function getStats() { try { return JSON.parse(localStorage.getItem(STATS_KEY) || 'null') || { totalVpsCreated: 0, totalRuntime: 0, planUsage: {}, history: [] }; } catch { return { totalVpsCreated: 0, totalRuntime: 0, planUsage: {}, history: [] }; } }
+  function saveStats(stats) { try { localStorage.setItem(STATS_KEY, JSON.stringify(stats)); } catch(e) {} }
+  function addToStats(vpsData) { const stats = getStats(); stats.totalVpsCreated++; const plan = vpsData.plan || vpsData.planId || 'unknown'; stats.planUsage[plan] = (stats.planUsage[plan] || 0) + 1; stats.history.unshift({ repo: vpsData.repo, plan, plannedDuration: vpsData.duration || 60, actualRuntime: 0, specs: vpsData.specs?.label || vpsData.specs, created: vpsData.created || new Date().toLocaleString(), deleted: null, runtimeAdded: false }); if (stats.history.length > 100) stats.history = stats.history.slice(0, 100); saveStats(stats); }
+
+  function initSettings() {
+    $('#btn-clear-data').onclick = () => {
+      openConfirmModal('Clear Data', 'Are you sure? This will wipe all local data and log you out.', () => { localStorage.clear(); location.reload(); });
+    };
+    $('#btn-forget-token').onclick = () => {
+      localStorage.removeItem(GITHUB_KEY);
+      $('#github-token').value = '';
+      showToast('Đã xoá GitHub Token!', 'success');
+    };
+  }
+
+  function loadSavedTokens() {
+    try { 
+      const savedNgrok = localStorage.getItem(NGROK_KEY); if (savedNgrok) { $('#ngrok-token').value = savedNgrok; }
+    } catch(e) {}
+    $('#ngrok-token').onchange = e => { try { localStorage.setItem(NGROK_KEY, e.target.value || ''); } catch(err) {} };
+
+    // GitHub token save/forget
+    try { const savedGh = localStorage.getItem(GITHUB_KEY); if (savedGh) $('#github-token').value = savedGh; } catch(e) {}
+    $('#github-token').addEventListener('input', (e) => {
+      try { localStorage.setItem(GITHUB_KEY, e.target.value.trim()); } catch(e) {}
+    });
+  }
+
+  function initModals() {
+    $('#captcha-close').onclick = () => $('#captcha-modal').classList.add('hidden');
+  }
+
+  function initDeploy() {
+    const executeDeploy = async () => {
+      if (isDeploying) { showToast('Đang deploy, vui lòng chờ...', 'info'); return; }
+      
+      const repo = $('#repo-name').value.trim(), ngrok = $('#ngrok-token').value.trim();
+      let requestedDuration = isTailscalePlan ? 360 : parseInt($('#duration').value, 10);
+      const ngrokRegion = $('#ngrok-region').value;
+      
+      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
+      if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi! Liên hệ admin.', 'error'); log('❌ Không đủ thời gian chơi!', 'error'); return; }
+      
+      let actualDuration = Math.min(requestedDuration, userTimeMinutes, MAX_VPS_DURATION);
+      if (actualDuration < requestedDuration) { log(`⚠️ Thời gian được giới hạn: ${actualDuration} phút (bạn có ${userTimeMinutes} phút)`, 'pending'); }
+      
+      isDeploying = true;
+      stopPolling(); clearDeploymentSession(); hideTailscaleAuthBanner();
+      const btn = $('#btn-deploy'), originalText = btn.innerHTML; 
+      btn.disabled = true; 
+      btn.innerHTML = '<span class="spinner"></span> Deploying...';
+      
+      clearLogs(); showProgressPanel(); updateProgress({ progress: 5, status: 'pending', message: 'Sending request...' });
+      log(`📤 Creating VPS (${actualDuration}m, ${selectedSpecs})...`, 'info');
+      log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
+      
+      try {
+        const userToken = document.getElementById('github-token')?.value?.trim();
+        if (!userToken) { showToast('Vui lòng nhập GitHub Token của bạn!', 'error'); btn.disabled = false; btn.innerHTML = originalText; isDeploying = false; return; }
+
+        const res = await fetch('/api/vps', { 
+          method: 'POST', 
+          headers: { 'Content-Type': 'application/json' }, 
+          body: JSON.stringify({ 
+            planId: selectedPlan.id, 
+            durationMinutes: actualDuration, 
+            repoName: repo, 
+            ngrokToken: ngrok, 
+            repoVisibility: selectedSpecs,
+            ngrokRegion: ngrokRegion,
+            githubToken: userToken,
+            username: currentUser?.username || ''
+          }) 
+        });
+        const data = await res.json();
+        
+        if (!data.success) {
+          if (data.timeout) {
+            log('❌ Workflow không khởi động trong 60 giây!', 'error');
+            log('⚠️ Vui lòng thử lại hoặc kiểm tra GitHub Actions', 'error');
+          }
+          throw new Error(data.message || 'Unknown error');
+        }
+        
+        await deductTime(actualDuration);
+        log(`💳 Đã trừ ${actualDuration} phút. Còn lại: ${formatTime(userTimeMinutes)}`, 'info');
+        
+        updateProgress({ progress: 15, status: 'in_progress', message: 'Repository created' });
+        log('✅ Repository created', 'success');
+        if (data.dispatched) { log('✅ Workflow triggered', 'success'); updateProgress({ progress: 25, status: 'in_progress', message: 'Workflow started' }); }
+        else log('⚠️ Manual trigger needed', 'pending');
+        log(`📂 ${data.repoUrl}`, 'info');
+        
+        // Use the user's token for polling
+        const userTokenForPolling = document.getElementById('github-token')?.value?.trim() || '';
+
+        currentDeployment = { token: userTokenForPolling, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
+        isTailscalePlan = data.planId === 'win_tailscale';
+        updateConnInfo(currentDeployment);
+        saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
+        startElapsedTimer(); saveDeploymentSession();
+        log('🔄 Auto-checking every 10s...', 'info');
+        pollInterval = setInterval(pollForLink, 10000); setTimeout(pollForLink, 15000);
+        showToast('VPS deployment started!', 'success');
+      } catch(err) { 
+        log('❌ ' + err.message, 'error'); 
+        showToast('Error: ' + err.message, 'error'); 
+        updateProgress({ progress: 0, status: 'error', message: err.message }); 
+        hideProgressPanel(); 
+        isDeploying = false;
+      }
+      finally { btn.disabled = false; btn.innerHTML = originalText; }
+    };
+
+    window.onCaptchaSuccess = (token) => { $('#captcha-modal').classList.add('hidden'); executeDeploy(); };
+
+    $('#btn-deploy').onclick = () => {
+      if (isDeploying) { showToast('Đang deploy, vui lòng chờ...', 'info'); return; }
+      const repo = $('#repo-name').value.trim(), ngrok = $('#ngrok-token').value.trim();
+      if (!repo) { showToast('Repository name required!', 'error'); return; }
+      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
+      if (selectedPlan.id === 'win_rdp' && !ngrok) { showToast('Ngrok Token required!', 'error'); return; }
+      if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi!', 'error'); return; }
+      $('#captcha-modal').classList.remove('hidden');
+      try { hcaptcha.reset(); } catch(e) {}
+    };
+  }
+
+  window.copyToClipboard = (text, btn) => { navigator.clipboard.writeText(text).then(() => { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1500); showToast('Copied!', 'success'); }); };
+  window.copyText = t => navigator.clipboard.writeText(t).then(() => showToast('Copied!', 'success')).catch(() => showToast('Copy failed!', 'error'));
+
+  function updateConnInfo(data) {
+    const vpsUrl = data.vpsLink || 'Searching...', vpsPass = data.vpsPassword || 'N/A', isPolling = pollInterval !== null && !data.vpsLink;
+    const specsLabel = typeof data.specs === 'string' ? data.specs : data.specs?.label || 'N/A';
+    const isTailscale = data.planId === 'win_tailscale', displayDuration = data.duration || (isTailscale ? 360 : 60);
+    $('#conn-info').innerHTML = `
+      <div class="info-row"><span class="info-label">Plan</span><span class="info-value">${getPlanDisplayName(data.planId) || 'N/A'}</span></div>
+      <div class="info-row"><span class="info-label">Specs</span><span class="info-value">${specsLabel}</span></div>
+      <div class="info-row"><span class="info-label">${isTailscale ? 'RDP' : 'URL'}</span><span class="info-value"><span style="user-select:all;overflow:hidden;text-overflow:ellipsis;">${vpsUrl}</span>${data.vpsLink ? `<button class="copy-btn" onclick="copyToClipboard('${vpsUrl}', this)">Copy</button>` : isPolling ? '<span class="spinner" style="border-color:var(--accent-soft);border-top-color:var(--accent);"></span>' : ''}</span></div>
+      <div class="info-row"><span class="info-label">Password</span><span class="info-value"><span style="user-select:all;">${vpsPass}</span><button class="copy-btn" onclick="copyToClipboard('${vpsPass}', this)">Copy</button></span></div>
+      ${isTailscale ? '<div class="info-row"><span class="info-label">Username</span><span class="info-value">runneradmin</span></div>' : ''}
+      <div class="info-row"><span class="info-label">Duration</span><span class="info-value">${displayDuration} min</span></div>
+      <div class="info-row" style="border:0;padding-top:8px;"><span class="info-label">GitHub</span><span class="info-value" style="background:transparent;gap:5px;">${data.repoUrl ? `<a href="${data.repoUrl}" target="_blank" class="btn-small-link">Repo ↗</a>` : ''}${data.actionsUrl ? `<a href="${data.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}</span></div>
+    `;
+  }
+
+  function saveToVpsList(data, repo, actualDuration) {
+    const item = { id: Date.now(), repo, plan: data.planId, link: data.vpsLink || null, pass: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, duration: actualDuration, specs: data.specs?.label || null, created: new Date().toLocaleString(), startTime: Date.now() };
+    const list = getVpsList().filter(x => x.repo !== repo); list.unshift(item); saveVpsList(list.slice(0, 50));
+  }
+
+  function formatRuntime(m) { return m < 60 ? `${m}m` : `${Math.floor(m / 60)}h ${m % 60}m`; }
+
+  function renderStats() {
+    const stats = getStats();
+    $('#stat-total-vps').textContent = stats.totalVpsCreated;
+    $('#stat-remaining-time').textContent = formatTime(userTimeMinutes);
+  }
+
+  function renderManager() {
+    const list = getVpsList(); 
+    const container = $('#vps-list');
+    container.innerHTML = '';
+    if (list.length === 0) { container.innerHTML = '<div class="text-center" style="border:2px dashed var(--border-light);border-radius:var(--radius-lg);margin-top:8px;">No active instances.</div>'; return; }
+    const now = Date.now();
+    list.forEach(item => {
+      const runningMinutes = item.startTime ? Math.floor((now - item.startTime) / 60000) : 0;
+      const maxDuration = item.duration || 60, remainingMinutes = Math.max(0, maxDuration - runningMinutes);
+      const isExpired = remainingMinutes <= 0, isWarning = remainingMinutes > 0 && remainingMinutes <= 30;
+      const el = document.createElement('div'); el.className = 'vps-item' + (isExpired ? ' expired' : '');
+      let timeDisplay = `⏱️ ${runningMinutes}m/${maxDuration}m`;
+      if (isExpired) timeDisplay = '<span class="tag tag-expired">Expired</span>'; else if (isWarning) timeDisplay = `<span style="color:var(--warning);">⏱️ ${remainingMinutes}m left</span>`;
+      el.innerHTML = `<div class="vps-info"><h4>${item.repo}</h4><div class="vps-meta"><span class="tag">${getPlanDisplayName(item.plan)}</span>${item.specs ? `<span class="tag tag-specs">${item.specs}</span>` : ''}${timeDisplay}<span>${item.created}</span></div></div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${item.actionsUrl ? `<a href="${item.actionsUrl}" target="_blank" class="btn-small-link">Actions ↗</a>` : ''}<button class="btn-del" data-id="${item.id}" data-repo="${item.repo}">Delete</button></div>`;
+      container.appendChild(el);
+    });
+    container.querySelectorAll('.btn-del').forEach(btn => btn.onclick = () => {
+      openConfirmModal('Delete VPS', `Delete "${btn.dataset.repo}"? This will delete the GitHub repository.`, () => executeDeleteVps(parseInt(btn.dataset.id), btn.dataset.repo));
+    });
+  }
+
+  async function executeDeleteVps(id, repo) {
+    try {
+      const token = document.getElementById('github-token')?.value?.trim();
+      if (!token) { showToast('Vui lòng nhập GitHub Token của bạn để xóa VPS', 'error'); return; }
+
+      const uRes = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${token}` } }); 
+      const uData = await uRes.json();
+      if (!uData.login) throw new Error('Invalid Token');
+
+      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: token, owner: uData.login, repo }) });
+      const d = await res.json(); 
+      if (!d.success) throw new Error(d.message || 'Delete failed');
+      
+      saveVpsList(getVpsList().filter(x => x.id !== id));
+      clearLogs(); stopPolling(); clearDeploymentSession(); currentDeployment = null; resetConnInfo(); hideProgressPanel(); hideTailscaleAuthBanner();
+      isDeploying = false;
+      renderManager(); renderStats();
+      showToast('Deleted!', 'success');
+    } catch(e) { showToast('Delete failed: ' + e.message, 'error'); }
+  }
+
+  initApp();
+})();
+</script>
 </body>
 </html>
-
