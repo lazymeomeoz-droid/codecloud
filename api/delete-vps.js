@@ -1,6 +1,4 @@
-// Delete VPS Repo - Vercel Serverless Function
-// Uses Upstash Redis for token storage (NO filesystem)
-// Also removes from active_vps tracking
+// API to manually delete a VPS (admin or owner)
 
 async function upstash(command, ...args) {
   const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
@@ -20,78 +18,36 @@ async function upstash(command, ...args) {
   }
 }
 
-async function ghFetch(url, method, token, body, retries = 3) {
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      const options = {
-        method,
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json",
-          "X-GitHub-Api-Version": "2022-11-28",
-          "User-Agent": "CodeCloud-VPS/1.0"
-        }
-      };
-      if (body) options.body = JSON.stringify(body);
-
-      const res = await fetch(url, options);
-      const text = await res.text();
-      let json;
-      try { json = text ? JSON.parse(text) : {}; } catch { json = { raw: text }; }
-
-      return { status: res.status, data: json };
-    } catch (err) {
-      if (attempt < retries - 1) {
-        await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
-        continue;
+async function ghFetch(url, method, token, body) {
+  try {
+    const opts = {
+      method,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        'User-Agent': 'CodeCloud-VPS/1.0'
       }
-      return { status: 0, data: {}, error: err.message };
+    };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    const text = await res.text();
+    try {
+      return { status: res.status, data: text ? JSON.parse(text) : {} };
+    } catch {
+      return { status: res.status, data: { raw: text } };
     }
+  } catch (e) {
+    return { status: 0, error: e.message };
   }
-  return { status: 0, data: {}, error: "Max retries reached" };
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(r => setTimeout(r, ms));
 }
 
-async function cancelAllWorkflows(repoPath, token) {
-  const statuses = ['in_progress', 'queued', 'waiting', 'pending', 'requested'];
-  let totalCancelled = 0;
-
-  for (const status of statuses) {
-    try {
-      const runs = await ghFetch(
-        `https://api.github.com/repos/${repoPath}/actions/runs?status=${status}&per_page=50`,
-        "GET",
-        token
-      );
-
-      if (runs.status === 200 && runs.data.workflow_runs?.length > 0) {
-        console.log(`[delete-vps] Found ${runs.data.workflow_runs.length} ${status} workflows`);
-
-        const cancelPromises = runs.data.workflow_runs.map(run =>
-          ghFetch(
-            `https://api.github.com/repos/${repoPath}/actions/runs/${run.id}/cancel`,
-            "POST",
-            token
-          )
-        );
-
-        await Promise.all(cancelPromises);
-        totalCancelled += runs.data.workflow_runs.length;
-      }
-    } catch (e) {
-      console.log(`[delete-vps] Error cancelling ${status}:`, e.message);
-    }
-  }
-
-  return totalCancelled;
-}
-
-async function findTokenForOwner(owner) {
-  // Search in Upstash for a token matching the owner
+async function getLiveToken() {
   const ids = await upstash('LRANGE', 'gh_tokens', '0', '-1');
   if (!ids || ids.length === 0) return null;
   
@@ -101,138 +57,117 @@ async function findTokenForOwner(owner) {
     try {
       const parsed = JSON.parse(raw);
       const meta = parsed.meta || {};
-      if (meta.owner && owner && meta.owner.toLowerCase() === owner.toLowerCase()) {
-        return parsed.token;
+      if (meta.status === 'live' && parsed.token) {
+        return { id, token: parsed.token, owner: meta.owner };
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) { continue; }
   }
   return null;
 }
 
-// Remove from active_vps tracking
-async function removeFromActiveVps(owner, repo) {
-  const key = `active_vps:${owner}:${repo}`;
-  await upstash('DEL', key);
-  await upstash('SREM', 'active_vps_keys', key);
-  console.log(`[delete-vps] Removed ${key} from active tracking`);
+async function getTokenById(tokenId) {
+  const raw = await upstash('GET', `gh_token:${tokenId}`);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed.token;
+  } catch (e) {
+    return null;
+  }
 }
 
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Content-Type', 'application/json');
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ success: false, message: "Method not allowed" });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ success: false, message: 'Method not allowed' });
 
   try {
     const { owner, repo } = req.body || {};
-    let { githubToken } = req.body || {};
-
+    
     if (!owner || !repo) {
-      return res.status(400).json({ success: false, message: "Thiếu owner hoặc repo" });
+      return res.status(400).json({ success: false, message: 'Missing owner or repo' });
     }
 
-    // If no token provided, try to find one from Upstash
-    if (!githubToken) {
-      githubToken = await findTokenForOwner(owner);
+    const repoPath = `${owner}/${repo}`;
+    const key = `active_vps:${owner}:${repo}`;
+    
+    // Try to get token from VPS record first
+    let token = null;
+    const vpsRaw = await upstash('GET', key);
+    if (vpsRaw) {
+      try {
+        const vps = JSON.parse(vpsRaw);
+        if (vps.tokenId) {
+          token = await getTokenById(vps.tokenId);
+        }
+      } catch (e) {}
+    }
+    
+    // Fallback to any live token
+    if (!token) {
+      const tokenData = await getLiveToken();
+      if (tokenData) token = tokenData.token;
+    }
+    
+    if (!token) {
+      return res.status(500).json({ success: false, message: 'No available token to delete repo' });
     }
 
-    if (!githubToken) {
-      return res.status(400).json({ success: false, message: "Thiếu GitHub Token và không tìm thấy token lưu" });
+    // Cancel workflows first
+    try {
+      const runs = await ghFetch(
+        `https://api.github.com/repos/${repoPath}/actions/runs?status=in_progress&per_page=10`,
+        'GET',
+        token
+      );
+      if (runs.status === 200 && runs.data.workflow_runs?.length > 0) {
+        for (const run of runs.data.workflow_runs.slice(0, 5)) {
+          await ghFetch(
+            `https://api.github.com/repos/${repoPath}/actions/runs/${run.id}/cancel`,
+            'POST',
+            token
+          );
+        }
+        await sleep(2000);
+      }
+    } catch (e) {
+      console.log('[delete-vps] Error cancelling workflows:', e.message);
     }
 
-    const repoPath = `${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;
-
-    // Check if repo exists
-    const checkRepo = await ghFetch(
-      `https://api.github.com/repos/${repoPath}`,
-      "GET",
-      githubToken
-    );
-
-    if (checkRepo.status === 404) {
-      // Repo doesn't exist, but still remove from tracking
-      await removeFromActiveVps(owner, repo);
-      return res.json({
-        success: true,
-        message: "Repository không tồn tại hoặc đã bị xoá"
-      });
-    }
-
-    // Cancel all workflows first
-    console.log(`[delete-vps] Cancelling workflows for ${repoPath}...`);
-    const cancelledCount = await cancelAllWorkflows(repoPath, githubToken);
-
-    if (cancelledCount > 0) {
-      console.log(`[delete-vps] Cancelled ${cancelledCount} workflows`);
-      await sleep(3000);
-    }
-
-    // Delete repo
-    const deleteResult = await ghFetch(
-      `https://api.github.com/repos/${repoPath}`,
-      "DELETE",
-      githubToken
-    );
-
-    if (deleteResult.status === 204) {
-      // Remove from active_vps tracking
-      await removeFromActiveVps(owner, repo);
-      
-      // Log the manual deletion
+    // Delete the repo
+    const deleteRes = await ghFetch(`https://api.github.com/repos/${repoPath}`, 'DELETE', token);
+    
+    // Clean up Redis regardless of GitHub result
+    await upstash('DEL', key);
+    await upstash('SREM', 'active_vps_keys', key);
+    
+    if (deleteRes.status === 204 || deleteRes.status === 404) {
+      // Log the deletion
       const logEntry = {
-        type: 'vps_manual_deleted',
+        type: 'vps_deleted',
         at: new Date().toISOString(),
         owner,
         repo,
-        cancelledWorkflows: cancelledCount
+        manual: true
       };
       await upstash('LPUSH', 'userlogs', JSON.stringify(logEntry));
       await upstash('LTRIM', 'userlogs', '0', '499');
       
-      return res.json({
-        success: true,
-        message: `✅ Đã xoá repository${cancelledCount > 0 ? ` và huỷ ${cancelledCount} workflows` : ''}`
+      return res.json({ success: true, message: 'VPS deleted' });
+    } else {
+      return res.json({ 
+        success: true, 
+        message: 'Cleaned from database (GitHub deletion may have failed)',
+        githubStatus: deleteRes.status,
+        githubError: deleteRes.data?.message
       });
     }
-
-    if (deleteResult.status === 403) {
-      const needsDeleteScope = deleteResult.data?.message?.includes("delete_repo") ||
-        deleteResult.data?.message?.includes("scope");
-
-      return res.status(403).json({
-        success: false,
-        message: needsDeleteScope
-          ? "Token cần quyền 'delete_repo'. Tạo token mới với scope này."
-          : "Không có quyền xoá repository",
-        detail: deleteResult.data
-      });
-    }
-
-    if (deleteResult.status === 404) {
-      await removeFromActiveVps(owner, repo);
-      return res.json({ success: true, message: "Repository đã được xoá" });
-    }
-
-    return res.status(deleteResult.status || 500).json({
-      success: false,
-      message: "Lỗi khi xoá repository",
-      status: deleteResult.status,
-      detail: deleteResult.data
-    });
-
   } catch (err) {
-    console.error("[delete-vps] Error:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Lỗi server",
-      error: String(err)
-    });
+    console.error('[delete-vps] error:', err);
+    return res.status(500).json({ success: false, message: String(err) });
   }
 };

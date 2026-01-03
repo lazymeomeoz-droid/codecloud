@@ -268,13 +268,24 @@
     .region-flag svg{width:24px;height:24px}
     .region-name{font-size:0.8rem;font-weight:600}
 
-    .resume-banner{background:var(--bg-surface);border:1px solid var(--accent-soft);border-radius:var(--radius-lg);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:var(--shadow-lg);animation:slideUp 0.4s ease-out;position:relative;overflow:hidden}
-    .resume-banner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--gradient-accent)}
-    .resume-content{display:flex;align-items:center;gap:16px}
-    .resume-icon{width:42px;height:42px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.2rem;animation:spin 3s linear infinite}
-    .resume-info h4{font-size:0.95rem;font-weight:800;margin-bottom:4px;color:var(--text-primary)}
-    .resume-info p{font-size:0.82rem;color:var(--text-muted)}
-    .resume-actions{display:flex;gap:12px;align-items:center}
+    /* Resume Banner - Enhanced */
+    .resume-banner{background:linear-gradient(135deg,var(--bg-surface) 0%,rgba(99,102,241,0.05) 100%);border:2px solid var(--warning);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:var(--shadow-lg),0 0 30px rgba(245,158,11,0.15);animation:slideUp 0.4s ease-out;position:relative;overflow:hidden}
+    .resume-banner::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(180deg,var(--warning),#f97316)}
+    .resume-banner::after{content:'';position:absolute;top:-50%;right:-50%;width:100%;height:200%;background:radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 60%);pointer-events:none}
+    .resume-content{display:flex;align-items:center;gap:16px;position:relative;z-index:1}
+    .resume-icon{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--warning-soft),rgba(245,158,11,0.2));color:var(--warning);display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 15px rgba(245,158,11,0.3)}
+    .resume-icon svg{animation:spin 3s linear infinite}
+    .resume-info{position:relative;z-index:1}
+    .resume-info h4{font-size:1rem;font-weight:800;margin-bottom:6px;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+    .resume-info h4 svg{width:18px;height:18px;color:var(--warning)}
+    .resume-details{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:0.85rem;color:var(--text-secondary)}
+    .resume-detail-item{display:flex;align-items:center;gap:6px;background:var(--bg-card);padding:4px 10px;border-radius:999px;border:1px solid var(--border-light)}
+    .resume-detail-item strong{color:var(--text-primary);font-weight:700}
+    .resume-detail-item svg{width:14px;height:14px;color:var(--accent)}
+    .resume-plan-badge{background:var(--accent-soft);color:var(--accent);padding:4px 10px;border-radius:999px;font-weight:700;font-size:0.78rem;display:flex;align-items:center;gap:6px}
+    .resume-actions{display:flex;gap:12px;align-items:center;position:relative;z-index:1}
+    .resume-actions .btn-small{padding:12px 20px}
+    @media(max-width:768px){.resume-banner{flex-direction:column;text-align:center}.resume-content{flex-direction:column}.resume-actions{width:100%;justify-content:center}}
 
     .app-footer{border-top:1px solid var(--border-light);padding:16px 28px;background:var(--bg-surface);backdrop-filter:blur(16px)}
     .footer-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:0.78rem;color:var(--text-muted)}
@@ -372,17 +383,36 @@
     <div class="scroll-area">
       <div class="container">
         
+        <!-- Resume Banner -->
         <div id="resume-banner" class="resume-banner hidden">
           <div class="resume-content">
-            <div class="resume-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:24px;height:24px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+            <div class="resume-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:26px;height:26px"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            </div>
             <div class="resume-info">
-              <h4>Phát hiện VPS đang tạo</h4>
-              <p>Repo: <strong id="resume-repo">...</strong> &bull; Đã chạy: <span id="resume-time">...</span></p>
+              <h4>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Phát hiện phiên VPS đang chạy
+              </h4>
+              <div class="resume-details">
+                <div class="resume-detail-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                  <strong id="resume-repo">...</strong>
+                </div>
+                <div class="resume-detail-item">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <span>Đã chạy:</span> <strong id="resume-time">...</strong>
+                </div>
+                <div class="resume-plan-badge" id="resume-plan-badge">
+                  <span id="resume-plan-icon"></span>
+                  <span id="resume-plan">...</span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="resume-actions">
-            <button id="btn-resume-discard" class="btn-small-link" style="color:var(--text-muted)">Bỏ qua</button>
-            <button id="btn-resume-continue" class="btn btn-small">Quay lại</button>
+            <button id="btn-resume-discard" class="btn-small-link" style="color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border-light)">Bỏ qua</button>
+            <button id="btn-resume-continue" class="btn btn-small btn-secondary">Quay lại theo dõi</button>
           </div>
         </div>
 
@@ -612,6 +642,13 @@
     { id: 'win_rdp', name: 'Windows RDP', desc: 'RDP via Ngrok' },
     { id: 'win_tailscale', name: 'Win Tailscale', desc: 'RDP via Tailscale (6h)' }
   ];
+
+  const PLAN_DISPLAY_NAMES = {
+    ubuntu_web: 'Ubuntu Desktop',
+    win_web: 'Windows Web',
+    win_rdp: 'Windows RDP',
+    win_tailscale: 'Win Tailscale'
+  };
 
   const GLOBE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`;
 
@@ -962,34 +999,60 @@
   function stopElapsedTimer() { if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; } }
   function updateElapsedTime() { if (!deploymentStartTime) return; const elapsed = Math.floor((Date.now() - deploymentStartTime) / 1000); $('#progress-elapsed').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`; }
 
+  function getPlanDisplayName(planId) {
+    return PLAN_DISPLAY_NAMES[planId] || planId || 'Unknown';
+  }
+
   function checkActiveSession() {
     try {
       const saved = sessionStorage.getItem(SESSION_KEY);
       if (!saved) return;
       const session = JSON.parse(saved);
       
-      $('#resume-banner').classList.remove('hidden');
-      $('#resume-repo').textContent = session.repo;
+      const banner = $('#resume-banner');
+      banner.classList.remove('hidden');
       
+      // Set repo name
+      $('#resume-repo').textContent = session.repo || 'Unknown';
+      
+      // Set plan name and icon
+      const planId = session.planId || 'ubuntu_web';
+      $('#resume-plan').textContent = getPlanDisplayName(planId);
+      
+      // Mini OS icon for badge
+      const miniIcons = {
+        ubuntu_web: '🐧',
+        win_web: '🪟',
+        win_rdp: '💻',
+        win_tailscale: '🔗'
+      };
+      $('#resume-plan-icon').textContent = miniIcons[planId] || '🖥️';
+      
+      // Update elapsed time in realtime
       const updateBannerTime = () => {
         const elapsed = Math.floor((Date.now() - session.startTime) / 1000);
-        $('#resume-time').textContent = `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`;
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        $('#resume-time').textContent = `${mins}m ${secs}s`;
       };
       updateBannerTime();
       const bannerTimer = setInterval(updateBannerTime, 1000);
 
+      // Discard button
       $('#btn-resume-discard').onclick = () => {
         clearInterval(bannerTimer);
         clearDeploymentSession();
-        $('#resume-banner').classList.add('hidden');
+        banner.classList.add('hidden');
+        showToast('Đã bỏ qua phiên trước', 'info');
       };
 
+      // Continue button
       $('#btn-resume-continue').onclick = () => {
         clearInterval(bannerTimer);
-        $('#resume-banner').classList.add('hidden');
+        banner.classList.add('hidden');
         restoreSession(session);
       };
-    } catch(e) { console.error(e); }
+    } catch(e) { console.error('checkActiveSession error:', e); }
   }
 
   function restoreSession(session) {
@@ -1008,10 +1071,19 @@
     pollForLink();
   }
 
-  function saveDeploymentSession() { if (!currentDeployment) return; try { sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ...currentDeployment, startTime: deploymentStartTime, savedAt: Date.now(), isTailscalePlan })); } catch(e) {} }
+  function saveDeploymentSession() { 
+    if (!currentDeployment) return; 
+    try { 
+      sessionStorage.setItem(SESSION_KEY, JSON.stringify({ 
+        ...currentDeployment, 
+        startTime: deploymentStartTime, 
+        savedAt: Date.now(), 
+        isTailscalePlan 
+      })); 
+    } catch(e) {} 
+  }
+  
   function clearDeploymentSession() { try { sessionStorage.removeItem(SESSION_KEY); } catch(e) {} }
-
-  function getPlanDisplayName(planId) { return ({ ubuntu_web: 'Ubuntu', win_web: 'Windows Web', win_rdp: 'Windows RDP', win_tailscale: 'Win Tailscale' }[planId] || planId); }
 
   function stopPolling() { if (pollInterval) { clearInterval(pollInterval); pollInterval = null; } stopElapsedTimer(); }
 

@@ -258,7 +258,7 @@ async function tryGetArtifactInfo(repoPath, runId, token) {
     }
 
     const content = zip.readAsText(entry).trim();
-    console.log(`[find-link] Content: "${content)}"`);
+    console.log(`[find-link] Content: "${content}"`);
     
     if (!content) {
       return { found: false, reason: "empty_content" };
@@ -304,7 +304,7 @@ async function tryGetArtifactInfo(repoPath, runId, token) {
     );
     
     if (!isValidUrl) {
-      console.log(`[find-link] Invalid URL: "${url)}"`);
+      console.log(`[find-link] Invalid URL: "${url}"`);
       return { found: false, reason: "invalid_url", url: url || "empty" };
     }
 
