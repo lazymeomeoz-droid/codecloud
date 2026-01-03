@@ -204,95 +204,164 @@ jobs:
     timeout-minutes: 395
     steps:
     - uses: actions/checkout@v4
-    - name: Setup RDP
+    - name: Setup Users and RDP
       shell: pwsh
       run: |
+        Write-Host "=== Setting up users ==="
+        \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
+        
+        # Create codecloud user
         try {
-          \$pw = ConvertTo-SecureString "__PASSWORD__" -AsPlainText -Force
-          # Create codecloud user
-          New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -ErrorAction SilentlyContinue
-          Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
-          Add-LocalGroupMember -Group "Remote Desktop Users" -Member "codecloud" -ErrorAction SilentlyContinue
-          # Backup runneradmin
-          Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
-          Write-Host "Users configured: codecloud"
+          New-LocalUser -Name "codecloud" -Password \$pw -FullName "CodeCloud" -Description "VPS User" -PasswordNeverExpires -ErrorAction Stop
+          Write-Host "Created user: codecloud"
         } catch {
-          Write-Host "Warning: User setup issue - \$_"
+          Write-Host "User codecloud may exist, updating password..."
+          Set-LocalUser -Name "codecloud" -Password \$pw -ErrorAction SilentlyContinue
         }
-        Set-ItemProperty 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-        Write-Host "RDP enabled"
+        
+        # Add to groups
+        Add-LocalGroupMember -Group "Administrators" -Member "codecloud" -ErrorAction SilentlyContinue
+        Add-LocalGroupMember -Group "Remote Desktop Users" -Member "codecloud" -ErrorAction SilentlyContinue
+        
+        # Update runneradmin password
+        Set-LocalUser -Name "runneradmin" -Password \$pw -ErrorAction SilentlyContinue
+        Add-LocalGroupMember -Group "Remote Desktop Users" -Member "runneradmin" -ErrorAction SilentlyContinue
+        
+        Write-Host "=== Enabling RDP ==="
+        # Enable RDP
+        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name "fDenyTSConnections" -Value 0 -Force
+        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name "UserAuthentication" -Value 0 -Force
+        
+        # Disable NLA (Network Level Authentication) for easier connection
+        Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp' -Name "SecurityLayer" -Value 0 -Force
+        
+        Write-Host "=== Configuring Firewall ==="
+        # Enable all RDP firewall rules
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop" -ErrorAction SilentlyContinue
+        
+        # Add explicit firewall rules for port 3389 on ALL profiles (including Tailscale)
+        New-NetFirewallRule -DisplayName "RDP-TCP-All" -Direction Inbound -Protocol TCP -LocalPort 3389 -Action Allow -Profile Any -ErrorAction SilentlyContinue
+        New-NetFirewallRule -DisplayName "RDP-UDP-All" -Direction Inbound -Protocol UDP -LocalPort 3389 -Action Allow -Profile Any -ErrorAction SilentlyContinue
+        
+        # Allow ICMP for ping testing
+        New-NetFirewallRule -DisplayName "Allow ICMPv4" -Direction Inbound -Protocol ICMPv4 -Action Allow -Profile Any -ErrorAction SilentlyContinue
+        
+        # Restart RDP service
+        Restart-Service -Name "TermService" -Force -ErrorAction SilentlyContinue
+        
+        Write-Host "=== RDP Setup Complete ==="
+        
     - name: Install Tailscale
       shell: pwsh
       run: |
-        Write-Host "Downloading Tailscale..."
+        Write-Host "=== Downloading Tailscale ==="
         Invoke-WebRequest -Uri "https://pkgs.tailscale.com/stable/tailscale-setup-latest-amd64.msi" -OutFile "tailscale.msi" -UseBasicParsing
-        Write-Host "Installing Tailscale..."
+        
+        Write-Host "=== Installing Tailscale ==="
         \$process = Start-Process msiexec.exe -ArgumentList '/i', 'tailscale.msi', '/quiet', '/norestart' -Wait -PassThru
         Write-Host "Installer exit code: \$(\$process.ExitCode)"
-        Start-Sleep -Seconds 15
+        
+        Start-Sleep -Seconds 20
+        
         \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
         if (Test-Path \$tsPath) {
-          Write-Host "Tailscale installed at: \$tsPath"
+          Write-Host "Tailscale installed successfully at: \$tsPath"
+          # Also start the Tailscale service
+          Start-Service -Name "Tailscale" -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 5
         } else {
-          Write-Host "ERROR: Tailscale not found at expected path"
+          Write-Host "ERROR: Tailscale not found!"
           Get-ChildItem "C:\\Program Files\\" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host \$_.Name }
           "ERROR|Tailscale installation failed" | Out-File info.txt -NoNewline -Encoding UTF8
           exit 0
         }
-    - name: Start Tailscale
+        
+    - name: Start Tailscale and Get IP
       shell: pwsh
       run: |
-        # Wrap Tailscale startup in a try/catch so non-zero native exits do not fail the step
-        try {
-          \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
-          if (!(Test-Path \$tsPath)) {
-            Write-Host "Tailscale not found, skipping..."
-            if (!(Test-Path info.txt)) {
-              "ERROR|Tailscale not installed" | Out-File info.txt -NoNewline -Encoding UTF8
+        \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        
+        if (!(Test-Path \$tsPath)) {
+          Write-Host "Tailscale not installed!"
+          "ERROR|Tailscale not installed" | Out-File info.txt -NoNewline -Encoding UTF8
+          exit 0
+        }
+        
+        Write-Host "=== Starting Tailscale ==="
+        
+        # Start Tailscale with proper flags
+        # --hostname: Set the machine name in Tailscale
+        # --accept-routes: Accept routes from other nodes
+        # --accept-dns: Use Tailscale DNS
+        & \$tsPath up --hostname=gh-vps-rdp --accept-routes --accept-dns 2>&1 | Write-Host
+        
+        Start-Sleep -Seconds 10
+        
+        Write-Host "=== Waiting for Tailscale connection ==="
+        \$found = \$false
+        \$authUrlShown = \$false
+        
+        for (\$i = 0; \$i -lt 90; \$i++) {
+          Start-Sleep -Seconds 3
+          
+          # Check for IP first
+          try {
+            \$ipResult = & \$tsPath ip -4 2>&1 | Out-String
+            Write-Host "Attempt \$i - IP check: \$ipResult"
+            
+            if (\$ipResult -match '100\\.\\d+\\.\\d+\\.\\d+') {
+              \$ip = \$Matches[0]
+              Write-Host "SUCCESS! Got Tailscale IP: \$ip"
+              
+              # Verify RDP is listening
+              \$rdpCheck = Get-NetTCPConnection -LocalPort 3389 -ErrorAction SilentlyContinue
+              if (\$rdpCheck) {
+                Write-Host "RDP is listening on port 3389"
+              } else {
+                Write-Host "Warning: RDP may not be listening, restarting service..."
+                Restart-Service -Name "TermService" -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 3
+              }
+              
+              # Output the connection info (IP without port - RDP default is 3389)
+              "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
+              \$found = \$true
+              break
             }
-          } else {
-            Write-Host "Starting Tailscale..."
-            Start-Process \$tsPath -ArgumentList "up", "--hostname=gh-rdp", "--accept-routes" -WindowStyle Hidden -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 10
-            \$found = \$false
-            for (\$i = 0; \$i -lt 60; \$i++) {
-              Start-Sleep -Seconds 3
-              try {
-                \$ipResult = & \$tsPath ip -4 2>&1
-                \$ipStr = \$ipResult | Out-String
-                Write-Host "Attempt \$i - IP result: \$ipStr"
-                if (\$ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
-                  \$ip = \$Matches[0]
-                  Write-Host "Got Tailscale IP: \$ip"
-                  "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
-                  \$found = \$true
-                  break
-                }
-                \$statusResult = & \$tsPath status 2>&1 | Out-String
-                Write-Host "Status: \$statusResult"
-                if (\$statusResult -match 'https://login\\.tailscale\\.com/a/[a-zA-Z0-9]+') {
-                  \$authUrl = \$Matches[0]
-                  Write-Host "Auth URL found: \$authUrl"
-                  "WAITING_AUTH|\$authUrl" | Out-File info.txt -NoNewline -Encoding UTF8
-                  \$found = \$true
-                  break
-                }
-              } catch {
-                Write-Host "Error checking status: \$_"
+          } catch {
+            Write-Host "IP check error: \$_"
+          }
+          
+          # Check status for auth URL
+          try {
+            \$statusResult = & \$tsPath status 2>&1 | Out-String
+            
+            if (\$statusResult -match 'https://login\\.tailscale\\.com/a/[a-zA-Z0-9]+') {
+              \$authUrl = \$Matches[0]
+              Write-Host "Auth URL found: \$authUrl"
+              
+              if (!\$authUrlShown) {
+                Write-Host "WAITING_AUTH: User needs to authenticate at \$authUrl"
+                "WAITING_AUTH|\$authUrl" | Out-File info.txt -NoNewline -Encoding UTF8
+                \$authUrlShown = \$true
               }
             }
-            if (!\$found) {
-              Write-Host "Timeout waiting for Tailscale"
-              "PENDING|Waiting for Tailscale..." | Out-File info.txt -NoNewline -Encoding UTF8
-            }
+          } catch {
+            Write-Host "Status check error: \$_"
           }
-        } catch {
-          Write-Host "Tailscale start error: \$_"
-          if (!(Test-Path info.txt)) {
-            "ERROR|Tailscale start error" | Out-File info.txt -NoNewline -Encoding UTF8
+          
+          if (\$i % 10 -eq 0) {
+            Write-Host "Still waiting... (\$i iterations)"
           }
         }
+        
+        if (!\$found) {
+          Write-Host "Timeout waiting for Tailscale IP"
+          if (!\$authUrlShown) {
+            "PENDING|Waiting for Tailscale..." | Out-File info.txt -NoNewline -Encoding UTF8
+          }
+        }
+        
     - name: Upload Initial Result
       if: always()
       uses: actions/upload-artifact@v4
@@ -300,34 +369,66 @@ jobs:
         name: result
         path: info.txt
         overwrite: true
-    - name: Wait for Auth and Update
+        
+    - name: Wait for Auth and Update IP
       if: always()
       shell: pwsh
       run: |
         \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        
         if (!(Test-Path \$tsPath)) {
-          Write-Host "Tailscale not installed, exiting..."
+          Write-Host "Tailscale not installed, skipping..."
           exit 0
         }
-        Write-Host "Waiting for Tailscale authentication..."
-        for (\$i = 0; \$i -lt 120; \$i++) {
+        
+        # Check if we already have IP
+        if (Test-Path info.txt) {
+          \$content = Get-Content info.txt -Raw
+          if (\$content -match '^100\\.') {
+            Write-Host "Already have IP, skipping wait loop"
+            exit 0
+          }
+        }
+        
+        Write-Host "=== Waiting for Tailscale authentication ==="
+        
+        for (\$i = 0; \$i -lt 180; \$i++) {
           Start-Sleep -Seconds 5
+          
           try {
-            \$ipResult = & \$tsPath ip -4 2>&1
-            \$ipStr = \$ipResult | Out-String
-            if (\$ipStr -match '100\\.\\d+\\.\\d+\\.\\d+') {
+            \$ipResult = & \$tsPath ip -4 2>&1 | Out-String
+            
+            if (\$ipResult -match '100\\.\\d+\\.\\d+\\.\\d+') {
               \$ip = \$Matches[0]
-              Write-Host "Authenticated! IP: \$ip"
+              Write-Host "Authenticated! Got IP: \$ip"
+              
+              # Verify RDP
+              \$rdpCheck = Get-NetTCPConnection -LocalPort 3389 -ErrorAction SilentlyContinue
+              if (!\$rdpCheck) {
+                Write-Host "Restarting RDP service..."
+                Restart-Service -Name "TermService" -Force -ErrorAction SilentlyContinue
+                Start-Sleep -Seconds 3
+              }
+              
+              # Update info.txt with final IP
               "\${ip}:3389|__PASSWORD__" | Out-File info.txt -NoNewline -Encoding UTF8
+              Write-Host "Updated info.txt with IP: \${ip}:3389"
               break
             }
           } catch {
             Write-Host "Check error: \$_"
           }
+          
           if (\$i % 12 -eq 0) {
-            Write-Host "Still waiting... (\$i iterations)"
+            Write-Host "Still waiting for auth... (\$(\$i * 5)s elapsed)"
+            # Show status for debugging
+            try {
+              \$status = & \$tsPath status 2>&1 | Out-String
+              Write-Host "Status: \$status"
+            } catch {}
           }
         }
+        
     - name: Upload Final Result
       uses: actions/upload-artifact@v4
       if: always()
@@ -335,11 +436,34 @@ jobs:
         name: result
         path: info.txt
         overwrite: true
+        
     - name: Keep Alive
       if: always()
       shell: pwsh
       run: |
+        Write-Host "=== Session Info ==="
         Write-Host "Keeping session alive for 6 hours..."
+        Write-Host "Users available: runneradmin, codecloud"
+        Write-Host "Password: __PASSWORD__"
+        
+        # Show final status
+        \$tsPath = "C:\\Program Files\\Tailscale\\tailscale.exe"
+        if (Test-Path \$tsPath) {
+          try {
+            \$ip = & \$tsPath ip -4 2>&1 | Out-String
+            Write-Host "Tailscale IP: \$ip"
+            \$status = & \$tsPath status 2>&1 | Out-String
+            Write-Host "Tailscale Status: \$status"
+          } catch {}
+        }
+        
+        # Show RDP status
+        \$rdp = Get-NetTCPConnection -LocalPort 3389 -ErrorAction SilentlyContinue
+        if (\$rdp) {
+          Write-Host "RDP is listening on port 3389"
+        }
+        
+        # Keep alive
         Start-Sleep -Seconds 21600`
 };
 
