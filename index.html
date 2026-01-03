@@ -426,16 +426,6 @@
                   <h2 class="panel-title">Configuration</h2>
                   <p class="panel-desc">Enter your settings.</p>
                 </div>
-                <div class="form-group">
-                  <label class="label">Repository Name</label>
-                  <input type="text" id="repo-name" class="input" placeholder="my-vps-01" autocomplete="off" />
-                  <p class="input-hint" id="repo-name-hint">Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)</p>
-                </div>
-                <div class="form-group">
-                  <label class="label">🔑 GitHub Personal Access Token</label>
-                  <input type="password" id="github-token" class="input" placeholder="ghp_xxxxxxxxxxxx" />
-                  <p class="input-hint">Token sẽ được tự động lưu trên trình duyệt.</p>
-                </div>
                 <div class="form-group hidden" id="ngrok-group">
                   <label class="label">Ngrok Authtoken</label>
                   <input type="password" id="ngrok-token" class="input" placeholder="ngrok_xxxxxxxxxxxx" />
@@ -539,13 +529,6 @@
           </div>
           <div class="panel">
             <div class="panel-header">
-              <h2 class="panel-title">Account Settings</h2>
-            </div>
-            <button id="btn-forget-token" class="btn btn-secondary">🔑 Quên GitHub Token đã lưu</button>
-            <p class="specs-footnote" style="margin-top:10px;">Xoá token GitHub khỏi trình duyệt này.</p>
-          </div>
-          <div class="panel">
-            <div class="panel-header">
               <h2 class="panel-title">Application Data</h2>
             </div>
             <button id="btn-clear-data" class="btn btn-danger">🗑️ Clear All Local Data</button>
@@ -609,7 +592,6 @@
 
   const THEME_KEY = 'cc_theme';
   const NGROK_KEY = 'cc_ngrok_token';
-  const GITHUB_KEY = 'cc_github_token';
   const STORE_KEY = 'cc_vps_store';
   const STATS_KEY = 'cc_vps_stats';
   const SESSION_KEY = 'cc_active_session';
@@ -788,7 +770,6 @@
     initSpecsSelector();
     initRegionSelector();
     initDurationSlider();
-    initRepoNameValidation();
     initSettings();
     initDeploy();
     loadSavedTokens();
@@ -907,25 +888,6 @@
     durationSlider.oninput = () => { durationDisplay.textContent = durationSlider.value; checkTimeWarning(); };
   }
 
-  function isValidRepoName(name) {
-    if (!name || typeof name !== 'string') return false;
-    if (name.length < 1 || name.length > 100) return false;
-    if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(name)) return false;
-    if (/\.\.\./.test(name)) return false;
-    return true;
-  }
-
-  function initRepoNameValidation() {
-    const input = $('#repo-name');
-    const hint = $('#repo-name-hint');
-    input.addEventListener('input', () => {
-      const val = input.value.trim();
-      if (!val) { input.classList.remove('input-error'); hint.classList.remove('error'); hint.textContent = 'Chỉ dùng chữ cái, số, dấu gạch ngang (-) và gạch dưới (_)'; }
-      else if (!isValidRepoName(val)) { input.classList.add('input-error'); hint.classList.add('error'); hint.textContent = '❌ Tên không hợp lệ!'; }
-      else { input.classList.remove('input-error'); hint.classList.remove('error'); hint.textContent = '✅ Tên hợp lệ'; }
-    });
-  }
-
   function resetConnInfo() { $('#conn-info').innerHTML = '<div class="text-center">No active VPS deployment.</div>'; }
   function showProgressPanel() { $('#progress-panel').style.display = 'block'; }
   function hideProgressPanel() { $('#progress-panel').style.display = 'none'; }
@@ -987,7 +949,6 @@
     isDeploying = true;
     
     // Restore UI
-    $('#repo-name').value = session.repo;
     showProgressPanel();
     updateProgress({ progress: 50, status: 'in_progress', message: 'Resuming session...' });
     log('🔄 Resuming previous session...', 'info');
@@ -1007,7 +968,7 @@
   async function pollForLink() {
     if (!currentDeployment) return;
     try {
-      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: currentDeployment.token, repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
+      const res = await fetch('/api/find-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repoName: currentDeployment.repo, checkTailscaleAuth: currentDeployment.planId === 'win_tailscale' }) });
       const data = await res.json();
       updateProgress(data);
       if (data.tailscaleAuthUrl) { log(`🔐 Auth: ${data.tailscaleAuthUrl}`, 'pending'); saveDeploymentSession(); return; }
@@ -1032,11 +993,6 @@
     $('#btn-clear-data').onclick = () => {
       openConfirmModal('Clear Data', 'Are you sure? This will wipe all local data and log you out.', () => { localStorage.clear(); location.reload(); });
     };
-    $('#btn-forget-token').onclick = () => {
-      localStorage.removeItem(GITHUB_KEY);
-      $('#github-token').value = '';
-      showToast('Đã xoá GitHub Token!', 'success');
-    };
   }
 
   function loadSavedTokens() {
@@ -1044,12 +1000,6 @@
       const savedNgrok = localStorage.getItem(NGROK_KEY); if (savedNgrok) { $('#ngrok-token').value = savedNgrok; }
     } catch(e) {}
     $('#ngrok-token').onchange = e => { try { localStorage.setItem(NGROK_KEY, e.target.value || ''); } catch(err) {} };
-
-    // GitHub token save/forget
-    try { const savedGh = localStorage.getItem(GITHUB_KEY); if (savedGh) $('#github-token').value = savedGh; } catch(e) {}
-    $('#github-token').addEventListener('input', (e) => {
-      try { localStorage.setItem(GITHUB_KEY, e.target.value.trim()); } catch(e) {}
-    });
   }
 
   function initModals() {
@@ -1060,11 +1010,11 @@
     const executeDeploy = async () => {
       if (isDeploying) { showToast('Đang deploy, vui lòng chờ...', 'info'); return; }
       
-      const repo = $('#repo-name').value.trim(), ngrok = $('#ngrok-token').value.trim();
+      const repo = 'codecloud-' + Math.random().toString(36).substring(2, 8);
+      const ngrok = $('#ngrok-token').value.trim();
       let requestedDuration = isTailscalePlan ? 360 : parseInt($('#duration').value, 10);
       const ngrokRegion = $('#ngrok-region').value;
       
-      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
       if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi! Liên hệ admin.', 'error'); log('❌ Không đủ thời gian chơi!', 'error'); return; }
       
       let actualDuration = Math.min(requestedDuration, userTimeMinutes, MAX_VPS_DURATION);
@@ -1081,9 +1031,6 @@
       log(`⏱️ Thời gian còn lại: ${formatTime(userTimeMinutes)}`, 'info');
       
       try {
-        const userToken = document.getElementById('github-token')?.value?.trim();
-        if (!userToken) { showToast('Vui lòng nhập GitHub Token của bạn!', 'error'); btn.disabled = false; btn.innerHTML = originalText; isDeploying = false; return; }
-
         const res = await fetch('/api/vps', { 
           method: 'POST', 
           headers: { 'Content-Type': 'application/json' }, 
@@ -1094,7 +1041,6 @@
             ngrokToken: ngrok, 
             repoVisibility: selectedSpecs,
             ngrokRegion: ngrokRegion,
-            githubToken: userToken,
             username: currentUser?.username || ''
           }) 
         });
@@ -1117,10 +1063,7 @@
         else log('⚠️ Manual trigger needed', 'pending');
         log(`📂 ${data.repoUrl}`, 'info');
         
-        // Use the user's token for polling
-        const userTokenForPolling = document.getElementById('github-token')?.value?.trim() || '';
-
-        currentDeployment = { token: userTokenForPolling, repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
+        currentDeployment = { repo, vpsPassword: data.vpsPassword, repoUrl: data.repoUrl, actionsUrl: data.actionsUrl, planId: data.planId, duration: actualDuration, specs: data.specs, vpsLink: null };
         isTailscalePlan = data.planId === 'win_tailscale';
         updateConnInfo(currentDeployment);
         saveToVpsList(data, repo, actualDuration); addToStats({ repo, plan: data.planId, duration: actualDuration, specs: data.specs, created: new Date().toLocaleString() });
@@ -1142,9 +1085,7 @@
 
     $('#btn-deploy').onclick = () => {
       if (isDeploying) { showToast('Đang deploy, vui lòng chờ...', 'info'); return; }
-      const repo = $('#repo-name').value.trim(), ngrok = $('#ngrok-token').value.trim();
-      if (!repo) { showToast('Repository name required!', 'error'); return; }
-      if (!isValidRepoName(repo)) { showToast('Tên Repository không hợp lệ!', 'error'); return; }
+      const ngrok = $('#ngrok-token').value.trim();
       if (selectedPlan.id === 'win_rdp' && !ngrok) { showToast('Ngrok Token required!', 'error'); return; }
       if (userTimeMinutes < 1) { showToast('Bạn đã hết thời gian chơi!', 'error'); return; }
       $('#captcha-modal').classList.remove('hidden');
@@ -1206,14 +1147,7 @@
 
   async function executeDeleteVps(id, repo) {
     try {
-      const token = document.getElementById('github-token')?.value?.trim();
-      if (!token) { showToast('Vui lòng nhập GitHub Token của bạn để xóa VPS', 'error'); return; }
-
-      const uRes = await fetch('https://api.github.com/user', { headers: { Authorization: `Bearer ${token}` } }); 
-      const uData = await uRes.json();
-      if (!uData.login) throw new Error('Invalid Token');
-
-      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ githubToken: token, owner: uData.login, repo }) });
+      const res = await fetch('/api/delete-vps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ repo }) });
       const d = await res.json(); 
       if (!d.success) throw new Error(d.message || 'Delete failed');
       
